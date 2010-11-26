@@ -1,0 +1,653 @@
+# The tinydav WebDAV client.
+# Copyright (C) 2009  Manuel Hermann <manuel-hermann@gmx.net>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""The tinydav WebDAV client."""
+
+from __future__ import with_statement
+from contextlib import closing
+from functools import wraps
+from StringIO import StringIO
+from xml.etree.ElementTree import ElementTree, Element, SubElement, tostring
+from xml.parsers.expat import ExpatError
+import httplib
+import sys
+import urllib
+
+from tinydav import creator, util
+
+
+PYTHON2_6 = (sys.version_info >= (2, 6))
+
+MAX_TIMEOUT = 4294967295
+
+
+class HTTPError(Exception):
+    """Exception for any error that occurs."""
+
+    def __init__(self, carry):
+        """Initialize the HTTPError.
+
+        carry -- The original exception.
+
+        """
+        self.carry = carry
+
+
+class HTTPResponse(int):
+    """Result from HTTP request."""
+
+    def __new__(cls, response):
+        """Construct HTTPResponse.
+
+        response -- Response object from httplib.
+
+        """
+        return int.__new__(cls, response.status)
+
+    def __init__(self, response):
+        """Initialize the HTTPResponse.
+
+        response -- Response object from httplib.
+
+        """
+        self.response = response
+        self.headers = dict(response.getheaders())
+        self.content = response.read()
+        version = "HTTP/%s.%s" % tuple(str(response.version))
+        self.statusline = "%s %d %s"\
+                        % (version, response.status, response.reason)
+
+    def __repr__(self):
+        """Return representation string."""
+        return "<%s: %d>" % (self.__class__.__name__, self)
+
+
+class WebDAVResponse(HTTPResponse):
+    """Result from WebDAV request."""
+
+    def __init__(self, response):
+        """Initialize the WebDAVResult.
+
+        response -- Response object from httplib.
+
+        """
+        super(WebDAVResponse, self).__init__(response)
+        self._etree = ElementTree()
+        # on XML parsing error set this to the raised exception
+        self.parse_error = None
+        if self == 207:
+            try:
+                self._etree.parse(StringIO(self.content))
+            except ExpatError, e:
+                self.parse_error = e
+                # don't fail on further processing
+                self._etree.parse(StringIO("<root><empty/></root>"))
+
+    def __len__(self):
+        """Return the number of responses in a multistatus response.
+
+        When the response was no multistatus the return value is 1.
+
+        """
+        if self == 207:
+            return len(self._etree.findall("/{DAV:}response"))
+        return 1
+
+    def __iter__(self):
+        """Iterator over the response.
+
+        Yield MultiStatusResponse instances for each response in a 207
+        response.
+        Yield self otherwise.
+
+        """
+        if self == 207:
+            for response in self._etree.findall("/{DAV:}response"):
+                yield MultiStatusResponse(response)
+        else:
+            yield self
+
+
+class MultiStatusResponse(int):
+    """Wrapper for multistatus responses."""
+
+    def __new__(cls, response):
+        """Create instance with status code as int value."""
+        statusline = response.find("{DAV:}propstat/{DAV:}status").text
+        status = int(statusline.split()[1])
+        return int.__new__(cls, status)
+
+    def __init__(self, response):
+        """Initialize the MultiStatusResponse.
+
+        response -- ElementTree element: response-tag.
+
+        """
+        self.response = response
+        self._href = None
+        self._statusline = None
+        self._namespaces = None
+
+    def __repr__(self):
+        """Return representation string."""
+        return "<%s: %d>" % (self.__class__.__name__, self)
+
+    def __getitem__(self, name):
+        """Return requested property as ElementTree element.
+
+        name -- Name of the property with namespace. No namespace needed for
+                DAV properties.
+
+        """
+        # check, whether its a default DAV property name
+        if not name.startswith("{"):
+            name = "{DAV:}%s" % name
+        prop = self.response.find("{DAV:}propstat/{DAV:}prop/%s" % name)
+        if prop is None:
+            raise KeyError(name)
+        return prop
+
+    def __iter__(self):
+        """Iterator over propertynames with their namespaces."""
+        return self.iterkeys()
+
+    def keys(self):
+        """Return list of propertynames with their namespaces.
+
+        No namespaces for DAV properties.
+
+        """
+        return list(self.iterkeys())
+
+    def iterkeys(self, cut_dav_ns=True):
+        """Iterate over propertynames with their namespaces.
+
+        cut_dav_ns -- No namespaces for DAV properties when this is True.
+
+        """
+        for (tagname, value) in self.iteritems(cut_dav_ns):
+            yield tagname
+
+    def items(self):
+        """Return list of 2-tuples with propertyname and value."""
+        return list(self.iteritems())
+
+    def iteritems(self, cut_dav_ns=True):
+        """Iterate list of 2-tuples with propertyname and value.
+
+        cut_dav_ns -- No namespaces for DAV properties when this is True.
+
+        """
+        props = self.response.findall("{DAV:}propstat/{DAV:}prop/*")
+        for prop in props:
+            tagname = prop.tag
+            if cut_dav_ns and tagname.startswith("{DAV:}"):
+                tagname = tagname[6:]
+            yield (tagname, prop.text)
+
+    def get(self, key, default=None, namespace=None):
+        """Return value for requested property.
+
+        key -- Property name with namespace. Namespace may be omitted, when
+               namespace-argument is given, or Namespace is DAV:
+        default -- Return this value when key does not exist.
+        namespace -- The namespace in which the property lives in. Must be
+                     given, when the key value has no namespace defined and
+                     the namespace ist not DAV:.
+
+        """
+        if namespace:
+            key = "{%s}%s" % (namespace, key)
+        try:
+            return self[key]
+        except KeyError:
+            return default
+
+    @property
+    def statusline(self):
+        """Return the status line for this response."""
+        if self._statusline is None:
+            statustag = self.response.find("{DAV:}propstat/{DAV:}status")
+            self._statusline = statustag.text
+        return self._statusline
+
+    @property
+    def href(self):
+        """Return the href for this response."""
+        if self._href is None:
+            self._href = self.response.find("{DAV:}href").text
+        return self._href
+
+    @property
+    def namespaces(self):
+        """Return frozenset of namespaces."""
+        if self._namespaces is None:
+
+            def extract_namespace(key):
+                if not key.startswith("{"):
+                    return None
+                return key[1:].split("}")[0]
+
+            self._namespaces = frozenset(extract_namespace(key)
+                                         for key in self.iterkeys(False)
+                                         if extract_namespace(key))
+        return self._namespaces
+
+
+class HTTPClient(object):
+    """Mini HTTP client."""
+
+    ResponseType = HTTPResponse
+
+    def __init__(self, host, port, user=None, password="", protocol="http"):
+        """Initialize the WebDAV client.
+
+        host -- WebDAV server host.
+        port -- WebDAV server port.
+        user -- Login name.
+        password -- Password for login.
+        protocol -- Either "http" or "https".
+
+        """
+        assert isinstance(port, int)
+        self.host = host
+        self.port = port
+        self.protocol = protocol
+        self.headers = dict()
+        # set header for basic authentication
+        if user is not None:
+            self.setbasicauth(user, password)
+
+    def _getconnection(self):
+        """Return HTTP(S)Connection object depending on set protocol."""
+        if self.protocol == "http":
+            return httplib.HTTPConnection(self.host, self.port)
+        return httplib.HTTPSConnection(self.host, self.port)
+
+    def _request(self, method, uri, content=None, headers=None):
+        """Make request and return response.
+
+        method -- Request method.
+        uri -- URI the request is for.
+        content -- The content of the request. May be None.
+        headers -- If given, a mapping with additonal headers to send.
+
+        """
+        headers = dict() if (headers is None) else headers
+        con = self._getconnection()
+        try:
+            with closing(con):
+                con.request(method, uri, content, headers)
+                response = self.ResponseType(con.getresponse())
+        except Exception, err:
+            raise HTTPError(err)
+        return response
+
+    def _prepare(self, uri, headers, query=None):
+        """Return 2-tuple with prepared version of uri and headers.
+
+        The headers will contain the authorization headers, if given.
+
+        uri -- URI the request is for.
+        headers -- Mapping with additional headers to send.
+        query -- Mapping with key/value-pairs to be added as query to the URI.
+
+        """
+        uri = urllib.quote(uri)
+        # collect headers
+        sendheaders = dict(self.headers)
+        if headers:
+            sendheaders.update(headers)
+        # construct query string
+        if query:
+            querystr = urllib.urlencode(query)
+            uri = "%s?%s" % (uri, querystr)
+        return (uri, sendheaders)
+
+    def setbasicauth(self, user, password):
+        """Set authorization header for basic auth.
+
+        user -- Username
+        password -- Password for user.
+
+        """
+        userpw = "%s:%s" % (user, password)
+        auth = userpw.encode("base64").rstrip()
+        self.headers["Authorization"] = "Basic %s" % auth
+
+    def options(self, uri, headers=None):
+        """Make OPTIONS request and return status.
+
+        uri -- URI of the request.
+        headers -- Optional mapping with headers to send.
+
+        Raise HTTPError on HTTP errors.
+
+        """
+        (uri, headers) = self._prepare(uri, headers)
+        return self._request("OPTIONS", uri, None, headers)
+
+    def get(self, uri, headers=None, query=None):
+        """Make GET request and return status.
+
+        uri -- URI of the request.
+        headers -- Optional mapping with headers to send.
+        query -- Mapping with key/value-pairs to be added as query to the URI.
+
+        Raise HTTPError on HTTP errors.
+
+        """
+        (uri, headers) = self._prepare(uri, headers, query)
+        return self._request("GET", uri, None, headers)
+
+    def head(self, uri, headers=None, query=None):
+        """Make HEAD request and return status.
+
+        uri -- URI of the request.
+        headers -- Optional mapping with headers to send.
+        query -- Mapping with key/value-pairs to be added as query to the URI.
+
+        Raise HTTPError on HTTP errors.
+
+        """
+        (uri, headers) = self._prepare(uri, headers, query)
+        return self._request("HEAD", uri, None, headers)
+
+    def post(self, uri, content="", headers=None, query=None):
+        """Make POST request and return HTTPResponse.
+
+        uri -- Path to post data to.
+        content -- File descriptor or string with content to POST.
+        headers -- If given, must be a mapping with headers to set.
+        query -- Mapping with key/value-pairs to be added as query to the URI.
+
+        Raise HTTPError on HTTP errors.
+
+        """
+        (uri, headers) = self._prepare(uri, headers, query)
+        return self._request("POST", uri, content, headers)
+
+    def put(self, uri, fileobject, headers=None):
+        """Make PUT request and return status.
+
+        uri -- Path for PUT.
+        fileobject -- File object with content to PUT.
+        headers -- If given, must be a dict with headers to send.
+
+        Raise HTTPError on HTTP errors.
+
+        """
+        (uri, headers) = self._prepare(uri, headers)
+        # use 2.6 feature, if running under this version
+        data = fileobject if PYTHON2_6 else fileobject.read()
+        return self._request("PUT", uri, data, headers)
+
+    def delete(self, uri, headers=None):
+        """Make DELETE request and return HTTPResponse.
+
+        uri -- Path to post data to.
+        headers -- If given, must be a mapping with headers to set.
+
+        Raise HTTPError on HTTP errors.
+
+        """
+        (uri, headers) = self._prepare(uri, headers)
+        return self._request("DELETE", uri, None, headers)
+
+    def trace(self, uri, maxforwards=None, via=None, headers=None):
+        """Make TRACE request and return HTTPResponse.
+
+        uri -- Path to post data to.
+        maxforwards -- Number of maximum forwards. May be None.
+        via -- If given, an iterable containing each station in the form
+               stated in RFC2616, section 14.45.
+        headers -- If given, must be a mapping with headers to set.
+
+        Raise ValueError, if maxforward is not an int or convertable to
+        an int.
+        Raise TypeError, if via is not an iterable of string.
+        Raise HTTPError on HTTP errors.
+
+        """
+        (uri, headers) = self._prepare(uri, headers)
+        if maxforwards:
+            # check, if number
+            int(maxforwards)
+            headers["Max-Forwards"] = str(maxforwards)
+        if via:
+            headers["Via"] = ", ".join(via)
+        return self._request("TRACE", uri, None, headers)
+
+    def connect(self, uri, headers=None):
+        """Make CONNECT request and return HTTPResponse.
+
+        uri -- Path to post data to.
+        headers -- If given, must be a mapping with headers to set.
+
+        Raise HTTPError on HTTP errors.
+
+        """
+        (uri, headers) = self._prepare(uri, headers)
+        return self._request("CONNECT", uri, None, headers)
+
+
+class CoreWebDAVClient(HTTPClient):
+    """Basic WebDAVClient specified in RFC 2518."""
+
+    ResponseType = WebDAVResponse
+
+    def _preparecopymove(self, source, destination, depth, overwrite, headers):
+        """Return prepared for copy/move request version of uri and headers."""
+        if str(depth) not in ("0", "infinity"):
+            raise ValueError("depth must be either 0 or infinity")
+        headers = dict() if (headers is None) else headers
+        (source, headers) = self._prepare(source, headers)
+        # set headers that are needed for COPY or MOVE
+        headers["Destination"] = util.make_destination(self, destination)
+        if source.endswith("/"):
+            headers["Depth"] = str(depth)
+        if overwrite is not None:
+            headers["Overwrite"] = "T" if overwrite else "F"
+        return (source, headers)
+
+    def mkcol(self, uri, headers=None):
+        """Make MKCOL request and return status.
+
+        uri -- Path to create.
+        headers -- If given, must be a dict with headers to send.
+
+        Raise WebDAVError HTTP errors.
+
+        """
+        (uri, headers) = self._prepare(uri, headers)
+        return self._request("MKCOL", uri, None, headers)
+
+    def propfind(self, uri, depth=0, names=False,
+                 properties=None, include=None, namespaces=None,
+                 headers=None):
+        """Make PROPFIND request and return status.
+
+        uri -- Path for PROPFIND.
+        depth -- Depth for PROFIND request. Default is zero.
+        names -- If True, only the available namespace names are returned.
+        properties -- If given, an iterable with all requested properties is
+                      expected.
+        include -- If properties is not given, then additional properties can
+                   be requested with this argument.
+        namespaces -- Mapping with namespaces for given properties, if needed.
+        headers -- If given, must be a dict with headers to send.
+
+        Raise ValueError, if illegal depth was given.
+        Raise WebDAVError on HTTP errors.
+
+        """
+        namespaces = dict() if (namespaces is None) else namespaces
+        # check allowed values for depth
+        depth = str(depth)
+        if depth not in ("0", "1", "infinity"):
+            raise ValueError("illegal depth %s" % str(depth))
+        # check mutually exclusive arguments
+        if all([properties, include]):
+            raise AttributeError("properties and include are "
+                                 "mutually exclusive")
+        (uri, headers) = self._prepare(uri, headers)
+        # additional headers needed for PROPFIND
+        headers["Depth"] = depth
+        headers["Content-Type"] = "application/xml"
+        content = creator.create_propfind(names, properties,
+                                          include, namespaces)
+        return self._request("PROPFIND", uri, content, headers)
+
+    def proppatch(self, uri, setprops=None, delprops=None,
+                  namespaces=None, headers=None):
+        """Make PROPPATCH request and return status.
+
+        uri -- Path to resource to set properties.
+        setprops -- Mapping with properties to set.
+        delprops -- Iterable with properties to remove.
+        namespaces -- dict with namespaces: name -> URI.
+        headers -- If given, must be a dict with headers to send.
+
+        Either setprops or delprops or both of them must be given.
+
+        """
+        if not any((setprops, delprops)):
+            raise AttributeError("setprops and/or delprops must be given")
+        (uri, headers) = self._prepare(uri, headers)
+        # additional header for proppatch
+        headers["Content-Type"] = "application/xml"
+        content = creator.create_proppatch(setprops, delprops, namespaces)
+        return self._request("PROPPATCH", uri, content, headers)
+
+    def delete(self, uri, headers=None):
+        """Make DELETE request and return WebDAVResponse.
+
+        uri -- Path of resource or collection to delete.
+        headers -- If given, must be a mapping with headers to set.
+
+        Raise WebDAVError HTTP errors.
+
+        """
+        headers = dict() if (headers is None) else headers
+        # always send depth:infinity-header when deleting collections
+        if uri.endswith("/"):
+            headers["Depth"] = "infinity"
+        return super(CoreWebDAVClient, self).delete(uri, headers)
+
+    def copy(self, source, destination, depth="infinity",
+             overwrite=None, headers=None):
+        """Make COPY request and return WebDAVResponse.
+
+        source -- Path of resource to copy.
+        destination -- Path of destination to copy source to.
+        depth -- Either 0 or "infinity". Default is the latter.
+        overwrite -- If not None, then a boolean indicating whether the
+                     Overwrite header ist set to "T" (True) or "F" (False).
+        headers -- If given, must be a mapping with headers to set.
+
+        Raise WebDAVError HTTP errors.
+
+        """
+        (source, headers) = self._preparecopymove(source, destination, depth,
+                                                  overwrite, headers)
+        return self._request("COPY", source, None, headers)
+
+    def move(self, source, destination, depth="infinity",
+             overwrite=None, headers=None):
+        """Make MOVE request and return WebDAVResponse.
+
+        source -- Path of resource to move.
+        destination -- Path of destination to move source to.
+        depth -- Either 0 or "infinity". Default is the latter.
+        overwrite -- If not None, then a boolean indicating whether the
+                     Overwrite header ist set to "T" (True) or "F" (False).
+        headers -- If given, must be a mapping with headers to set.
+
+        Raise WebDAVError HTTP errors.
+
+        """
+        (source, headers) = self._preparecopymove(source, destination, depth,
+                                                  overwrite, headers)
+        return self._request("MOVE", source, None, headers)
+
+    def lock(self, uri, scope="exclusive", type_="write", owner=None,
+             timeout=None, depth=None, headers=None):
+        """Make LOCK request and return DAVLock instance.
+
+        uri -- Resource to get lock on.
+        scope -- Lock scope: One of "exclusive" (default) or "shared".
+        type_ -- Lock type: "write" (default) only. Any other value allowed by
+                 this library.
+        owner -- Content of owner element. May be None, a string or an
+                 ElementTree element.
+        timeout -- Value for the timeout header. Either "infinite" or a number
+                   representing the seconds (not greater than 2^32 - 1).
+
+        """
+        (uri, headers) = self._prepare(uri, headers)
+        # implement timeout constraints
+        if timeout is not None:
+            try:
+                timeout = int(timeout)
+            except ValueError: # no number
+                if timeout.lower() == "infinite":
+                    value = "Infinite"
+                else:
+                    raise ValueError("either number of seconds or 'infinite'")
+            else:
+                if timeout > MAX_TIMEOUT:
+                    raise ValueError("timeout too big")
+                value = "Second-%d" % int(timeout)
+            headers["Timeout"] = value
+        # implement depth constaints
+        if depth is not None:
+            depth = str(depth)
+            if depth not in ("0", "infinity"):
+                raise ValueError("illegal depth %s" % str(depth))
+            headers["Depth"] = depth
+        content = creator.create_lock(scope, type_, owner)
+        return self._request("LOCK", uri, content, headers)
+
+
+class ExtendedWebDAVClient(CoreWebDAVClient):
+    """WebDAV client with versioning extensions (RFC 3253)."""
+    def report(self, uri, depth=0, properties=None,
+               elements=None, namespaces=None, headers=None):
+        """Make a REPORT request and return status.
+
+        uri -- Resource or collection to get report for.
+        depth -- Either 0 or 1 or "infinity". Default is zero.
+        properties -- If given, an iterable with all requested properties is
+                      expected.
+        elements -- An iterable with additional XML elements.
+        namespaces -- Mapping with namespaces for given properties, if needed.
+        headers -- If given, must be a mapping with headers to set.
+
+        Raise WebDAVError HTTP errors.
+        """
+        # check allowed values for depth
+        depth = str(depth)
+        if depth not in ("0", "1", "infinity"):
+            raise ValueError("illegal depth %s" % str(depth))
+        (uri, headers) = self._prepare(uri, headers)
+        content = creator.create_report(properties, elements, namespaces)
+        # additional headers needed for REPORT
+        headers["Depth"] = depth
+        headers["Content-Type"] = "application/xml"
+        return self._request("REPORT", uri, content, headers)
+
+
+class WebDAVClient(ExtendedWebDAVClient):
+    """Mini WebDAV client."""

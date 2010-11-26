@@ -1,0 +1,21 @@
+===============================
+Tinydav - WebDAV client libaray
+===============================
+
+-------------
+Version 0.5.1
+-------------
+FEATURES
+* Support of all WebDAV methods.
+* Support for Versioning Extensions to WebDAV (RFC 3253): REPORT method
+
+FIXES
+* Cope with malformed XML in multistatus responses.
+
+
+------------------------------
+Version 0.5.0 -- first release
+------------------------------
+FEATURES
+* Support of all WebDAV methods.
+

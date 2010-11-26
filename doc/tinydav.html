@@ -1,0 +1,1293 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: package tinydav</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>tinydav</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/hermann/Entwürfe/Archiv/externals/tinydav/lib/tinydav/__init__.py">/home/hermann/Entwürfe/Archiv/externals/tinydav/lib/tinydav/__init__.py</a></font></td></tr></table>
+    <p><tt>The&nbsp;tinydav&nbsp;WebDAV&nbsp;client.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Package Contents</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="tinydav.creator.html">creator</a><br>
+</td><td width="25%" valign=top><a href="tinydav.util.html">util</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#int">__builtin__.int</a>(<a href="__builtin__.html#object">__builtin__.object</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="tinydav.html#HTTPResponse">HTTPResponse</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="tinydav.html#WebDAVResponse">WebDAVResponse</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="tinydav.html#MultiStatusResponse">MultiStatusResponse</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="tinydav.html#HTTPClient">HTTPClient</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="tinydav.html#CoreWebDAVClient">CoreWebDAVClient</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="tinydav.html#ExtendedWebDAVClient">ExtendedWebDAVClient</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="tinydav.html#WebDAVClient">WebDAVClient</a>
+</font></dt></dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="exceptions.html#Exception">exceptions.Exception</a>(<a href="exceptions.html#BaseException">exceptions.BaseException</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="tinydav.html#HTTPError">HTTPError</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="CoreWebDAVClient">class <strong>CoreWebDAVClient</strong></a>(<a href="tinydav.html#HTTPClient">HTTPClient</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Basic&nbsp;<a href="#WebDAVClient">WebDAVClient</a>&nbsp;specified&nbsp;in&nbsp;<a href="http://www.rfc-editor.org/rfc/rfc2518.txt">RFC&nbsp;2518</a>.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="tinydav.html#CoreWebDAVClient">CoreWebDAVClient</a></dd>
+<dd><a href="tinydav.html#HTTPClient">HTTPClient</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="CoreWebDAVClient-copy"><strong>copy</strong></a>(self, source, destination, depth<font color="#909090">='infinity'</font>, overwrite<font color="#909090">=None</font>, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;COPY&nbsp;request&nbsp;and&nbsp;return&nbsp;<a href="#WebDAVResponse">WebDAVResponse</a>.<br>
+&nbsp;<br>
+source&nbsp;--&nbsp;Path&nbsp;of&nbsp;resource&nbsp;to&nbsp;copy.<br>
+destination&nbsp;--&nbsp;Path&nbsp;of&nbsp;destination&nbsp;to&nbsp;copy&nbsp;source&nbsp;to.<br>
+depth&nbsp;--&nbsp;Either&nbsp;0&nbsp;or&nbsp;"infinity".&nbsp;Default&nbsp;is&nbsp;the&nbsp;latter.<br>
+overwrite&nbsp;--&nbsp;If&nbsp;not&nbsp;None,&nbsp;then&nbsp;a&nbsp;boolean&nbsp;indicating&nbsp;whether&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Overwrite&nbsp;header&nbsp;ist&nbsp;set&nbsp;to&nbsp;"T"&nbsp;(True)&nbsp;or&nbsp;"F"&nbsp;(False).<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;set.<br>
+&nbsp;<br>
+Raise&nbsp;WebDAVError&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="CoreWebDAVClient-delete"><strong>delete</strong></a>(self, uri, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;DELETE&nbsp;request&nbsp;and&nbsp;return&nbsp;<a href="#WebDAVResponse">WebDAVResponse</a>.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;of&nbsp;resource&nbsp;or&nbsp;collection&nbsp;to&nbsp;delete.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;set.<br>
+&nbsp;<br>
+Raise&nbsp;WebDAVError&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="CoreWebDAVClient-lock"><strong>lock</strong></a>(self, uri, scope<font color="#909090">='exclusive'</font>, type_<font color="#909090">='write'</font>, owner<font color="#909090">=None</font>, timeout<font color="#909090">=None</font>, depth<font color="#909090">=None</font>, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;LOCK&nbsp;request&nbsp;and&nbsp;return&nbsp;DAVLock&nbsp;instance.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Resource&nbsp;to&nbsp;get&nbsp;lock&nbsp;on.<br>
+scope&nbsp;--&nbsp;Lock&nbsp;scope:&nbsp;One&nbsp;of&nbsp;"exclusive"&nbsp;(default)&nbsp;or&nbsp;"shared".<br>
+type_&nbsp;--&nbsp;Lock&nbsp;type:&nbsp;"write"&nbsp;(default)&nbsp;only.&nbsp;Any&nbsp;other&nbsp;value&nbsp;allowed&nbsp;by<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this&nbsp;library.<br>
+owner&nbsp;--&nbsp;Content&nbsp;of&nbsp;owner&nbsp;element.&nbsp;May&nbsp;be&nbsp;None,&nbsp;a&nbsp;string&nbsp;or&nbsp;an<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ElementTree&nbsp;element.<br>
+timeout&nbsp;--&nbsp;Value&nbsp;for&nbsp;the&nbsp;timeout&nbsp;header.&nbsp;Either&nbsp;"infinite"&nbsp;or&nbsp;a&nbsp;number<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;representing&nbsp;the&nbsp;seconds&nbsp;(not&nbsp;greater&nbsp;than&nbsp;2^32&nbsp;-&nbsp;1).</tt></dd></dl>
+
+<dl><dt><a name="CoreWebDAVClient-mkcol"><strong>mkcol</strong></a>(self, uri, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;MKCOL&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;to&nbsp;create.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;dict&nbsp;with&nbsp;headers&nbsp;to&nbsp;send.<br>
+&nbsp;<br>
+Raise&nbsp;WebDAVError&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="CoreWebDAVClient-move"><strong>move</strong></a>(self, source, destination, depth<font color="#909090">='infinity'</font>, overwrite<font color="#909090">=None</font>, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;MOVE&nbsp;request&nbsp;and&nbsp;return&nbsp;<a href="#WebDAVResponse">WebDAVResponse</a>.<br>
+&nbsp;<br>
+source&nbsp;--&nbsp;Path&nbsp;of&nbsp;resource&nbsp;to&nbsp;move.<br>
+destination&nbsp;--&nbsp;Path&nbsp;of&nbsp;destination&nbsp;to&nbsp;move&nbsp;source&nbsp;to.<br>
+depth&nbsp;--&nbsp;Either&nbsp;0&nbsp;or&nbsp;"infinity".&nbsp;Default&nbsp;is&nbsp;the&nbsp;latter.<br>
+overwrite&nbsp;--&nbsp;If&nbsp;not&nbsp;None,&nbsp;then&nbsp;a&nbsp;boolean&nbsp;indicating&nbsp;whether&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Overwrite&nbsp;header&nbsp;ist&nbsp;set&nbsp;to&nbsp;"T"&nbsp;(True)&nbsp;or&nbsp;"F"&nbsp;(False).<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;set.<br>
+&nbsp;<br>
+Raise&nbsp;WebDAVError&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="CoreWebDAVClient-propfind"><strong>propfind</strong></a>(self, uri, depth<font color="#909090">=0</font>, names<font color="#909090">=False</font>, properties<font color="#909090">=None</font>, include<font color="#909090">=None</font>, namespaces<font color="#909090">=None</font>, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;PROPFIND&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;for&nbsp;PROPFIND.<br>
+depth&nbsp;--&nbsp;Depth&nbsp;for&nbsp;PROFIND&nbsp;request.&nbsp;Default&nbsp;is&nbsp;zero.<br>
+names&nbsp;--&nbsp;If&nbsp;True,&nbsp;only&nbsp;the&nbsp;available&nbsp;namespace&nbsp;names&nbsp;are&nbsp;returned.<br>
+properties&nbsp;--&nbsp;If&nbsp;given,&nbsp;an&nbsp;iterable&nbsp;with&nbsp;all&nbsp;requested&nbsp;properties&nbsp;is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;expected.<br>
+include&nbsp;--&nbsp;If&nbsp;properties&nbsp;is&nbsp;not&nbsp;given,&nbsp;then&nbsp;additional&nbsp;properties&nbsp;can<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;be&nbsp;requested&nbsp;with&nbsp;this&nbsp;argument.<br>
+namespaces&nbsp;--&nbsp;Mapping&nbsp;with&nbsp;namespaces&nbsp;for&nbsp;given&nbsp;properties,&nbsp;if&nbsp;needed.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;dict&nbsp;with&nbsp;headers&nbsp;to&nbsp;send.<br>
+&nbsp;<br>
+Raise&nbsp;ValueError,&nbsp;if&nbsp;illegal&nbsp;depth&nbsp;was&nbsp;given.<br>
+Raise&nbsp;WebDAVError&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="CoreWebDAVClient-proppatch"><strong>proppatch</strong></a>(self, uri, setprops<font color="#909090">=None</font>, delprops<font color="#909090">=None</font>, namespaces<font color="#909090">=None</font>, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;PROPPATCH&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;to&nbsp;resource&nbsp;to&nbsp;set&nbsp;properties.<br>
+setprops&nbsp;--&nbsp;Mapping&nbsp;with&nbsp;properties&nbsp;to&nbsp;set.<br>
+delprops&nbsp;--&nbsp;Iterable&nbsp;with&nbsp;properties&nbsp;to&nbsp;remove.<br>
+namespaces&nbsp;--&nbsp;dict&nbsp;with&nbsp;namespaces:&nbsp;name&nbsp;-&gt;&nbsp;URI.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;dict&nbsp;with&nbsp;headers&nbsp;to&nbsp;send.<br>
+&nbsp;<br>
+Either&nbsp;setprops&nbsp;or&nbsp;delprops&nbsp;or&nbsp;both&nbsp;of&nbsp;them&nbsp;must&nbsp;be&nbsp;given.</tt></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>ResponseType</strong> = &lt;class 'tinydav.WebDAVResponse'&gt;<dd><tt>Result&nbsp;from&nbsp;WebDAV&nbsp;request.</tt></dl>
+
+<hr>
+Methods inherited from <a href="tinydav.html#HTTPClient">HTTPClient</a>:<br>
+<dl><dt><a name="CoreWebDAVClient-__init__"><strong>__init__</strong></a>(self, host, port, user<font color="#909090">=None</font>, password<font color="#909090">=''</font>, protocol<font color="#909090">='http'</font>)</dt><dd><tt>Initialize&nbsp;the&nbsp;WebDAV&nbsp;client.<br>
+&nbsp;<br>
+host&nbsp;--&nbsp;WebDAV&nbsp;server&nbsp;host.<br>
+port&nbsp;--&nbsp;WebDAV&nbsp;server&nbsp;port.<br>
+user&nbsp;--&nbsp;Login&nbsp;name.<br>
+password&nbsp;--&nbsp;Password&nbsp;for&nbsp;login.<br>
+protocol&nbsp;--&nbsp;Either&nbsp;"http"&nbsp;or&nbsp;"https".</tt></dd></dl>
+
+<dl><dt><a name="CoreWebDAVClient-connect"><strong>connect</strong></a>(self, uri, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;CONNECT&nbsp;request&nbsp;and&nbsp;return&nbsp;<a href="#HTTPResponse">HTTPResponse</a>.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;to&nbsp;post&nbsp;data&nbsp;to.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;set.<br>
+&nbsp;<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="CoreWebDAVClient-get"><strong>get</strong></a>(self, uri, headers<font color="#909090">=None</font>, query<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;GET&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;URI&nbsp;of&nbsp;the&nbsp;request.<br>
+headers&nbsp;--&nbsp;Optional&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;send.<br>
+query&nbsp;--&nbsp;Mapping&nbsp;with&nbsp;key/value-pairs&nbsp;to&nbsp;be&nbsp;added&nbsp;as&nbsp;query&nbsp;to&nbsp;the&nbsp;URI.<br>
+&nbsp;<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="CoreWebDAVClient-head"><strong>head</strong></a>(self, uri, headers<font color="#909090">=None</font>, query<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;HEAD&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;URI&nbsp;of&nbsp;the&nbsp;request.<br>
+headers&nbsp;--&nbsp;Optional&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;send.<br>
+query&nbsp;--&nbsp;Mapping&nbsp;with&nbsp;key/value-pairs&nbsp;to&nbsp;be&nbsp;added&nbsp;as&nbsp;query&nbsp;to&nbsp;the&nbsp;URI.<br>
+&nbsp;<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="CoreWebDAVClient-options"><strong>options</strong></a>(self, uri, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;OPTIONS&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;URI&nbsp;of&nbsp;the&nbsp;request.<br>
+headers&nbsp;--&nbsp;Optional&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;send.<br>
+&nbsp;<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="CoreWebDAVClient-post"><strong>post</strong></a>(self, uri, content<font color="#909090">=''</font>, headers<font color="#909090">=None</font>, query<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;POST&nbsp;request&nbsp;and&nbsp;return&nbsp;<a href="#HTTPResponse">HTTPResponse</a>.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;to&nbsp;post&nbsp;data&nbsp;to.<br>
+content&nbsp;--&nbsp;File&nbsp;descriptor&nbsp;or&nbsp;string&nbsp;with&nbsp;content&nbsp;to&nbsp;POST.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;set.<br>
+query&nbsp;--&nbsp;Mapping&nbsp;with&nbsp;key/value-pairs&nbsp;to&nbsp;be&nbsp;added&nbsp;as&nbsp;query&nbsp;to&nbsp;the&nbsp;URI.<br>
+&nbsp;<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="CoreWebDAVClient-put"><strong>put</strong></a>(self, uri, fileobject, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;PUT&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;for&nbsp;PUT.<br>
+fileobject&nbsp;--&nbsp;File&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;content&nbsp;to&nbsp;PUT.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;dict&nbsp;with&nbsp;headers&nbsp;to&nbsp;send.<br>
+&nbsp;<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="CoreWebDAVClient-setbasicauth"><strong>setbasicauth</strong></a>(self, user, password)</dt><dd><tt>Set&nbsp;authorization&nbsp;header&nbsp;for&nbsp;basic&nbsp;auth.<br>
+&nbsp;<br>
+user&nbsp;--&nbsp;Username<br>
+password&nbsp;--&nbsp;Password&nbsp;for&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="CoreWebDAVClient-trace"><strong>trace</strong></a>(self, uri, maxforwards<font color="#909090">=None</font>, via<font color="#909090">=None</font>, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;TRACE&nbsp;request&nbsp;and&nbsp;return&nbsp;<a href="#HTTPResponse">HTTPResponse</a>.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;to&nbsp;post&nbsp;data&nbsp;to.<br>
+maxforwards&nbsp;--&nbsp;Number&nbsp;of&nbsp;maximum&nbsp;forwards.&nbsp;May&nbsp;be&nbsp;None.<br>
+via&nbsp;--&nbsp;If&nbsp;given,&nbsp;an&nbsp;iterable&nbsp;containing&nbsp;each&nbsp;station&nbsp;in&nbsp;the&nbsp;form<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stated&nbsp;in&nbsp;<a href="http://www.rfc-editor.org/rfc/rfc2616.txt">RFC2616</a>,&nbsp;section&nbsp;14.45.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;set.<br>
+&nbsp;<br>
+Raise&nbsp;ValueError,&nbsp;if&nbsp;maxforward&nbsp;is&nbsp;not&nbsp;an&nbsp;<a href="__builtin__.html#int">int</a>&nbsp;or&nbsp;convertable&nbsp;to<br>
+an&nbsp;<a href="__builtin__.html#int">int</a>.<br>
+Raise&nbsp;TypeError,&nbsp;if&nbsp;via&nbsp;is&nbsp;not&nbsp;an&nbsp;iterable&nbsp;of&nbsp;string.<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="tinydav.html#HTTPClient">HTTPClient</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ExtendedWebDAVClient">class <strong>ExtendedWebDAVClient</strong></a>(<a href="tinydav.html#CoreWebDAVClient">CoreWebDAVClient</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>WebDAV&nbsp;client&nbsp;with&nbsp;versioning&nbsp;extensions&nbsp;(<a href="http://www.rfc-editor.org/rfc/rfc3253.txt">RFC&nbsp;3253</a>).<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="tinydav.html#ExtendedWebDAVClient">ExtendedWebDAVClient</a></dd>
+<dd><a href="tinydav.html#CoreWebDAVClient">CoreWebDAVClient</a></dd>
+<dd><a href="tinydav.html#HTTPClient">HTTPClient</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="ExtendedWebDAVClient-report"><strong>report</strong></a>(self, uri, depth<font color="#909090">=0</font>, properties<font color="#909090">=None</font>, elements<font color="#909090">=None</font>, namespaces<font color="#909090">=None</font>, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;a&nbsp;REPORT&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Resource&nbsp;or&nbsp;collection&nbsp;to&nbsp;get&nbsp;report&nbsp;for.<br>
+depth&nbsp;--&nbsp;Either&nbsp;0&nbsp;or&nbsp;1&nbsp;or&nbsp;"infinity".&nbsp;Default&nbsp;is&nbsp;zero.<br>
+properties&nbsp;--&nbsp;If&nbsp;given,&nbsp;an&nbsp;iterable&nbsp;with&nbsp;all&nbsp;requested&nbsp;properties&nbsp;is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;expected.<br>
+elements&nbsp;--&nbsp;An&nbsp;iterable&nbsp;with&nbsp;additional&nbsp;XML&nbsp;elements.<br>
+namespaces&nbsp;--&nbsp;Mapping&nbsp;with&nbsp;namespaces&nbsp;for&nbsp;given&nbsp;properties,&nbsp;if&nbsp;needed.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;set.<br>
+&nbsp;<br>
+Raise&nbsp;WebDAVError&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="tinydav.html#CoreWebDAVClient">CoreWebDAVClient</a>:<br>
+<dl><dt><a name="ExtendedWebDAVClient-copy"><strong>copy</strong></a>(self, source, destination, depth<font color="#909090">='infinity'</font>, overwrite<font color="#909090">=None</font>, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;COPY&nbsp;request&nbsp;and&nbsp;return&nbsp;<a href="#WebDAVResponse">WebDAVResponse</a>.<br>
+&nbsp;<br>
+source&nbsp;--&nbsp;Path&nbsp;of&nbsp;resource&nbsp;to&nbsp;copy.<br>
+destination&nbsp;--&nbsp;Path&nbsp;of&nbsp;destination&nbsp;to&nbsp;copy&nbsp;source&nbsp;to.<br>
+depth&nbsp;--&nbsp;Either&nbsp;0&nbsp;or&nbsp;"infinity".&nbsp;Default&nbsp;is&nbsp;the&nbsp;latter.<br>
+overwrite&nbsp;--&nbsp;If&nbsp;not&nbsp;None,&nbsp;then&nbsp;a&nbsp;boolean&nbsp;indicating&nbsp;whether&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Overwrite&nbsp;header&nbsp;ist&nbsp;set&nbsp;to&nbsp;"T"&nbsp;(True)&nbsp;or&nbsp;"F"&nbsp;(False).<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;set.<br>
+&nbsp;<br>
+Raise&nbsp;WebDAVError&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="ExtendedWebDAVClient-delete"><strong>delete</strong></a>(self, uri, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;DELETE&nbsp;request&nbsp;and&nbsp;return&nbsp;<a href="#WebDAVResponse">WebDAVResponse</a>.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;of&nbsp;resource&nbsp;or&nbsp;collection&nbsp;to&nbsp;delete.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;set.<br>
+&nbsp;<br>
+Raise&nbsp;WebDAVError&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="ExtendedWebDAVClient-lock"><strong>lock</strong></a>(self, uri, scope<font color="#909090">='exclusive'</font>, type_<font color="#909090">='write'</font>, owner<font color="#909090">=None</font>, timeout<font color="#909090">=None</font>, depth<font color="#909090">=None</font>, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;LOCK&nbsp;request&nbsp;and&nbsp;return&nbsp;DAVLock&nbsp;instance.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Resource&nbsp;to&nbsp;get&nbsp;lock&nbsp;on.<br>
+scope&nbsp;--&nbsp;Lock&nbsp;scope:&nbsp;One&nbsp;of&nbsp;"exclusive"&nbsp;(default)&nbsp;or&nbsp;"shared".<br>
+type_&nbsp;--&nbsp;Lock&nbsp;type:&nbsp;"write"&nbsp;(default)&nbsp;only.&nbsp;Any&nbsp;other&nbsp;value&nbsp;allowed&nbsp;by<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this&nbsp;library.<br>
+owner&nbsp;--&nbsp;Content&nbsp;of&nbsp;owner&nbsp;element.&nbsp;May&nbsp;be&nbsp;None,&nbsp;a&nbsp;string&nbsp;or&nbsp;an<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ElementTree&nbsp;element.<br>
+timeout&nbsp;--&nbsp;Value&nbsp;for&nbsp;the&nbsp;timeout&nbsp;header.&nbsp;Either&nbsp;"infinite"&nbsp;or&nbsp;a&nbsp;number<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;representing&nbsp;the&nbsp;seconds&nbsp;(not&nbsp;greater&nbsp;than&nbsp;2^32&nbsp;-&nbsp;1).</tt></dd></dl>
+
+<dl><dt><a name="ExtendedWebDAVClient-mkcol"><strong>mkcol</strong></a>(self, uri, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;MKCOL&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;to&nbsp;create.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;dict&nbsp;with&nbsp;headers&nbsp;to&nbsp;send.<br>
+&nbsp;<br>
+Raise&nbsp;WebDAVError&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="ExtendedWebDAVClient-move"><strong>move</strong></a>(self, source, destination, depth<font color="#909090">='infinity'</font>, overwrite<font color="#909090">=None</font>, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;MOVE&nbsp;request&nbsp;and&nbsp;return&nbsp;<a href="#WebDAVResponse">WebDAVResponse</a>.<br>
+&nbsp;<br>
+source&nbsp;--&nbsp;Path&nbsp;of&nbsp;resource&nbsp;to&nbsp;move.<br>
+destination&nbsp;--&nbsp;Path&nbsp;of&nbsp;destination&nbsp;to&nbsp;move&nbsp;source&nbsp;to.<br>
+depth&nbsp;--&nbsp;Either&nbsp;0&nbsp;or&nbsp;"infinity".&nbsp;Default&nbsp;is&nbsp;the&nbsp;latter.<br>
+overwrite&nbsp;--&nbsp;If&nbsp;not&nbsp;None,&nbsp;then&nbsp;a&nbsp;boolean&nbsp;indicating&nbsp;whether&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Overwrite&nbsp;header&nbsp;ist&nbsp;set&nbsp;to&nbsp;"T"&nbsp;(True)&nbsp;or&nbsp;"F"&nbsp;(False).<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;set.<br>
+&nbsp;<br>
+Raise&nbsp;WebDAVError&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="ExtendedWebDAVClient-propfind"><strong>propfind</strong></a>(self, uri, depth<font color="#909090">=0</font>, names<font color="#909090">=False</font>, properties<font color="#909090">=None</font>, include<font color="#909090">=None</font>, namespaces<font color="#909090">=None</font>, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;PROPFIND&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;for&nbsp;PROPFIND.<br>
+depth&nbsp;--&nbsp;Depth&nbsp;for&nbsp;PROFIND&nbsp;request.&nbsp;Default&nbsp;is&nbsp;zero.<br>
+names&nbsp;--&nbsp;If&nbsp;True,&nbsp;only&nbsp;the&nbsp;available&nbsp;namespace&nbsp;names&nbsp;are&nbsp;returned.<br>
+properties&nbsp;--&nbsp;If&nbsp;given,&nbsp;an&nbsp;iterable&nbsp;with&nbsp;all&nbsp;requested&nbsp;properties&nbsp;is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;expected.<br>
+include&nbsp;--&nbsp;If&nbsp;properties&nbsp;is&nbsp;not&nbsp;given,&nbsp;then&nbsp;additional&nbsp;properties&nbsp;can<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;be&nbsp;requested&nbsp;with&nbsp;this&nbsp;argument.<br>
+namespaces&nbsp;--&nbsp;Mapping&nbsp;with&nbsp;namespaces&nbsp;for&nbsp;given&nbsp;properties,&nbsp;if&nbsp;needed.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;dict&nbsp;with&nbsp;headers&nbsp;to&nbsp;send.<br>
+&nbsp;<br>
+Raise&nbsp;ValueError,&nbsp;if&nbsp;illegal&nbsp;depth&nbsp;was&nbsp;given.<br>
+Raise&nbsp;WebDAVError&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="ExtendedWebDAVClient-proppatch"><strong>proppatch</strong></a>(self, uri, setprops<font color="#909090">=None</font>, delprops<font color="#909090">=None</font>, namespaces<font color="#909090">=None</font>, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;PROPPATCH&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;to&nbsp;resource&nbsp;to&nbsp;set&nbsp;properties.<br>
+setprops&nbsp;--&nbsp;Mapping&nbsp;with&nbsp;properties&nbsp;to&nbsp;set.<br>
+delprops&nbsp;--&nbsp;Iterable&nbsp;with&nbsp;properties&nbsp;to&nbsp;remove.<br>
+namespaces&nbsp;--&nbsp;dict&nbsp;with&nbsp;namespaces:&nbsp;name&nbsp;-&gt;&nbsp;URI.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;dict&nbsp;with&nbsp;headers&nbsp;to&nbsp;send.<br>
+&nbsp;<br>
+Either&nbsp;setprops&nbsp;or&nbsp;delprops&nbsp;or&nbsp;both&nbsp;of&nbsp;them&nbsp;must&nbsp;be&nbsp;given.</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="tinydav.html#CoreWebDAVClient">CoreWebDAVClient</a>:<br>
+<dl><dt><strong>ResponseType</strong> = &lt;class 'tinydav.WebDAVResponse'&gt;<dd><tt>Result&nbsp;from&nbsp;WebDAV&nbsp;request.</tt></dl>
+
+<hr>
+Methods inherited from <a href="tinydav.html#HTTPClient">HTTPClient</a>:<br>
+<dl><dt><a name="ExtendedWebDAVClient-__init__"><strong>__init__</strong></a>(self, host, port, user<font color="#909090">=None</font>, password<font color="#909090">=''</font>, protocol<font color="#909090">='http'</font>)</dt><dd><tt>Initialize&nbsp;the&nbsp;WebDAV&nbsp;client.<br>
+&nbsp;<br>
+host&nbsp;--&nbsp;WebDAV&nbsp;server&nbsp;host.<br>
+port&nbsp;--&nbsp;WebDAV&nbsp;server&nbsp;port.<br>
+user&nbsp;--&nbsp;Login&nbsp;name.<br>
+password&nbsp;--&nbsp;Password&nbsp;for&nbsp;login.<br>
+protocol&nbsp;--&nbsp;Either&nbsp;"http"&nbsp;or&nbsp;"https".</tt></dd></dl>
+
+<dl><dt><a name="ExtendedWebDAVClient-connect"><strong>connect</strong></a>(self, uri, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;CONNECT&nbsp;request&nbsp;and&nbsp;return&nbsp;<a href="#HTTPResponse">HTTPResponse</a>.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;to&nbsp;post&nbsp;data&nbsp;to.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;set.<br>
+&nbsp;<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="ExtendedWebDAVClient-get"><strong>get</strong></a>(self, uri, headers<font color="#909090">=None</font>, query<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;GET&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;URI&nbsp;of&nbsp;the&nbsp;request.<br>
+headers&nbsp;--&nbsp;Optional&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;send.<br>
+query&nbsp;--&nbsp;Mapping&nbsp;with&nbsp;key/value-pairs&nbsp;to&nbsp;be&nbsp;added&nbsp;as&nbsp;query&nbsp;to&nbsp;the&nbsp;URI.<br>
+&nbsp;<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="ExtendedWebDAVClient-head"><strong>head</strong></a>(self, uri, headers<font color="#909090">=None</font>, query<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;HEAD&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;URI&nbsp;of&nbsp;the&nbsp;request.<br>
+headers&nbsp;--&nbsp;Optional&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;send.<br>
+query&nbsp;--&nbsp;Mapping&nbsp;with&nbsp;key/value-pairs&nbsp;to&nbsp;be&nbsp;added&nbsp;as&nbsp;query&nbsp;to&nbsp;the&nbsp;URI.<br>
+&nbsp;<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="ExtendedWebDAVClient-options"><strong>options</strong></a>(self, uri, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;OPTIONS&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;URI&nbsp;of&nbsp;the&nbsp;request.<br>
+headers&nbsp;--&nbsp;Optional&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;send.<br>
+&nbsp;<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="ExtendedWebDAVClient-post"><strong>post</strong></a>(self, uri, content<font color="#909090">=''</font>, headers<font color="#909090">=None</font>, query<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;POST&nbsp;request&nbsp;and&nbsp;return&nbsp;<a href="#HTTPResponse">HTTPResponse</a>.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;to&nbsp;post&nbsp;data&nbsp;to.<br>
+content&nbsp;--&nbsp;File&nbsp;descriptor&nbsp;or&nbsp;string&nbsp;with&nbsp;content&nbsp;to&nbsp;POST.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;set.<br>
+query&nbsp;--&nbsp;Mapping&nbsp;with&nbsp;key/value-pairs&nbsp;to&nbsp;be&nbsp;added&nbsp;as&nbsp;query&nbsp;to&nbsp;the&nbsp;URI.<br>
+&nbsp;<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="ExtendedWebDAVClient-put"><strong>put</strong></a>(self, uri, fileobject, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;PUT&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;for&nbsp;PUT.<br>
+fileobject&nbsp;--&nbsp;File&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;content&nbsp;to&nbsp;PUT.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;dict&nbsp;with&nbsp;headers&nbsp;to&nbsp;send.<br>
+&nbsp;<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="ExtendedWebDAVClient-setbasicauth"><strong>setbasicauth</strong></a>(self, user, password)</dt><dd><tt>Set&nbsp;authorization&nbsp;header&nbsp;for&nbsp;basic&nbsp;auth.<br>
+&nbsp;<br>
+user&nbsp;--&nbsp;Username<br>
+password&nbsp;--&nbsp;Password&nbsp;for&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="ExtendedWebDAVClient-trace"><strong>trace</strong></a>(self, uri, maxforwards<font color="#909090">=None</font>, via<font color="#909090">=None</font>, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;TRACE&nbsp;request&nbsp;and&nbsp;return&nbsp;<a href="#HTTPResponse">HTTPResponse</a>.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;to&nbsp;post&nbsp;data&nbsp;to.<br>
+maxforwards&nbsp;--&nbsp;Number&nbsp;of&nbsp;maximum&nbsp;forwards.&nbsp;May&nbsp;be&nbsp;None.<br>
+via&nbsp;--&nbsp;If&nbsp;given,&nbsp;an&nbsp;iterable&nbsp;containing&nbsp;each&nbsp;station&nbsp;in&nbsp;the&nbsp;form<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stated&nbsp;in&nbsp;<a href="http://www.rfc-editor.org/rfc/rfc2616.txt">RFC2616</a>,&nbsp;section&nbsp;14.45.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;set.<br>
+&nbsp;<br>
+Raise&nbsp;ValueError,&nbsp;if&nbsp;maxforward&nbsp;is&nbsp;not&nbsp;an&nbsp;<a href="__builtin__.html#int">int</a>&nbsp;or&nbsp;convertable&nbsp;to<br>
+an&nbsp;<a href="__builtin__.html#int">int</a>.<br>
+Raise&nbsp;TypeError,&nbsp;if&nbsp;via&nbsp;is&nbsp;not&nbsp;an&nbsp;iterable&nbsp;of&nbsp;string.<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="tinydav.html#HTTPClient">HTTPClient</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTTPClient">class <strong>HTTPClient</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Mini&nbsp;HTTP&nbsp;client.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="HTTPClient-__init__"><strong>__init__</strong></a>(self, host, port, user<font color="#909090">=None</font>, password<font color="#909090">=''</font>, protocol<font color="#909090">='http'</font>)</dt><dd><tt>Initialize&nbsp;the&nbsp;WebDAV&nbsp;client.<br>
+&nbsp;<br>
+host&nbsp;--&nbsp;WebDAV&nbsp;server&nbsp;host.<br>
+port&nbsp;--&nbsp;WebDAV&nbsp;server&nbsp;port.<br>
+user&nbsp;--&nbsp;Login&nbsp;name.<br>
+password&nbsp;--&nbsp;Password&nbsp;for&nbsp;login.<br>
+protocol&nbsp;--&nbsp;Either&nbsp;"http"&nbsp;or&nbsp;"https".</tt></dd></dl>
+
+<dl><dt><a name="HTTPClient-connect"><strong>connect</strong></a>(self, uri, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;CONNECT&nbsp;request&nbsp;and&nbsp;return&nbsp;<a href="#HTTPResponse">HTTPResponse</a>.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;to&nbsp;post&nbsp;data&nbsp;to.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;set.<br>
+&nbsp;<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="HTTPClient-delete"><strong>delete</strong></a>(self, uri, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;DELETE&nbsp;request&nbsp;and&nbsp;return&nbsp;<a href="#HTTPResponse">HTTPResponse</a>.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;to&nbsp;post&nbsp;data&nbsp;to.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;set.<br>
+&nbsp;<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="HTTPClient-get"><strong>get</strong></a>(self, uri, headers<font color="#909090">=None</font>, query<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;GET&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;URI&nbsp;of&nbsp;the&nbsp;request.<br>
+headers&nbsp;--&nbsp;Optional&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;send.<br>
+query&nbsp;--&nbsp;Mapping&nbsp;with&nbsp;key/value-pairs&nbsp;to&nbsp;be&nbsp;added&nbsp;as&nbsp;query&nbsp;to&nbsp;the&nbsp;URI.<br>
+&nbsp;<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="HTTPClient-head"><strong>head</strong></a>(self, uri, headers<font color="#909090">=None</font>, query<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;HEAD&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;URI&nbsp;of&nbsp;the&nbsp;request.<br>
+headers&nbsp;--&nbsp;Optional&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;send.<br>
+query&nbsp;--&nbsp;Mapping&nbsp;with&nbsp;key/value-pairs&nbsp;to&nbsp;be&nbsp;added&nbsp;as&nbsp;query&nbsp;to&nbsp;the&nbsp;URI.<br>
+&nbsp;<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="HTTPClient-options"><strong>options</strong></a>(self, uri, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;OPTIONS&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;URI&nbsp;of&nbsp;the&nbsp;request.<br>
+headers&nbsp;--&nbsp;Optional&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;send.<br>
+&nbsp;<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="HTTPClient-post"><strong>post</strong></a>(self, uri, content<font color="#909090">=''</font>, headers<font color="#909090">=None</font>, query<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;POST&nbsp;request&nbsp;and&nbsp;return&nbsp;<a href="#HTTPResponse">HTTPResponse</a>.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;to&nbsp;post&nbsp;data&nbsp;to.<br>
+content&nbsp;--&nbsp;File&nbsp;descriptor&nbsp;or&nbsp;string&nbsp;with&nbsp;content&nbsp;to&nbsp;POST.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;set.<br>
+query&nbsp;--&nbsp;Mapping&nbsp;with&nbsp;key/value-pairs&nbsp;to&nbsp;be&nbsp;added&nbsp;as&nbsp;query&nbsp;to&nbsp;the&nbsp;URI.<br>
+&nbsp;<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="HTTPClient-put"><strong>put</strong></a>(self, uri, fileobject, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;PUT&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;for&nbsp;PUT.<br>
+fileobject&nbsp;--&nbsp;File&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;content&nbsp;to&nbsp;PUT.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;dict&nbsp;with&nbsp;headers&nbsp;to&nbsp;send.<br>
+&nbsp;<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="HTTPClient-setbasicauth"><strong>setbasicauth</strong></a>(self, user, password)</dt><dd><tt>Set&nbsp;authorization&nbsp;header&nbsp;for&nbsp;basic&nbsp;auth.<br>
+&nbsp;<br>
+user&nbsp;--&nbsp;Username<br>
+password&nbsp;--&nbsp;Password&nbsp;for&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="HTTPClient-trace"><strong>trace</strong></a>(self, uri, maxforwards<font color="#909090">=None</font>, via<font color="#909090">=None</font>, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;TRACE&nbsp;request&nbsp;and&nbsp;return&nbsp;<a href="#HTTPResponse">HTTPResponse</a>.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;to&nbsp;post&nbsp;data&nbsp;to.<br>
+maxforwards&nbsp;--&nbsp;Number&nbsp;of&nbsp;maximum&nbsp;forwards.&nbsp;May&nbsp;be&nbsp;None.<br>
+via&nbsp;--&nbsp;If&nbsp;given,&nbsp;an&nbsp;iterable&nbsp;containing&nbsp;each&nbsp;station&nbsp;in&nbsp;the&nbsp;form<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stated&nbsp;in&nbsp;<a href="http://www.rfc-editor.org/rfc/rfc2616.txt">RFC2616</a>,&nbsp;section&nbsp;14.45.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;set.<br>
+&nbsp;<br>
+Raise&nbsp;ValueError,&nbsp;if&nbsp;maxforward&nbsp;is&nbsp;not&nbsp;an&nbsp;<a href="__builtin__.html#int">int</a>&nbsp;or&nbsp;convertable&nbsp;to<br>
+an&nbsp;<a href="__builtin__.html#int">int</a>.<br>
+Raise&nbsp;TypeError,&nbsp;if&nbsp;via&nbsp;is&nbsp;not&nbsp;an&nbsp;iterable&nbsp;of&nbsp;string.<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>ResponseType</strong> = &lt;class 'tinydav.HTTPResponse'&gt;<dd><tt>Result&nbsp;from&nbsp;HTTP&nbsp;request.</tt></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTTPError">class <strong>HTTPError</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="exceptions.html#Exception">Exception</a>&nbsp;for&nbsp;any&nbsp;error&nbsp;that&nbsp;occurs.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="tinydav.html#HTTPError">HTTPError</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="HTTPError-__init__"><strong>__init__</strong></a>(self, carry)</dt><dd><tt>Initialize&nbsp;the&nbsp;<a href="#HTTPError">HTTPError</a>.<br>
+&nbsp;<br>
+carry&nbsp;--&nbsp;The&nbsp;original&nbsp;exception.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#HTTPError-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
+
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="HTTPError-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPError-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPError-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPError-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPError-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPError-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="HTTPError-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPError-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
+
+<dl><dt><a name="HTTPError-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPError-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPError-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPError-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPError-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
+
+<dl><dt><a name="HTTPError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPError-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPError-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPError-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HTTPResponse">class <strong>HTTPResponse</strong></a>(<a href="__builtin__.html#int">__builtin__.int</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Result&nbsp;from&nbsp;HTTP&nbsp;request.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="tinydav.html#HTTPResponse">HTTPResponse</a></dd>
+<dd><a href="__builtin__.html#int">__builtin__.int</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="HTTPResponse-__init__"><strong>__init__</strong></a>(self, response)</dt><dd><tt>Initialize&nbsp;the&nbsp;<a href="#HTTPResponse">HTTPResponse</a>.<br>
+&nbsp;<br>
+response&nbsp;--&nbsp;Response&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;from&nbsp;httplib.</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;representation&nbsp;string.</tt></dd></dl>
+
+<hr>
+Static methods defined here:<br>
+<dl><dt><a name="HTTPResponse-__new__"><strong>__new__</strong></a>(cls, response)</dt><dd><tt>Construct&nbsp;<a href="#HTTPResponse">HTTPResponse</a>.<br>
+&nbsp;<br>
+response&nbsp;--&nbsp;Response&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;from&nbsp;httplib.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="__builtin__.html#int">__builtin__.int</a>:<br>
+<dl><dt><a name="HTTPResponse-__abs__"><strong>__abs__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__abs__">__abs__</a>()&nbsp;&lt;==&gt;&nbsp;abs(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__add__"><strong>__add__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__add__">__add__</a>(y)&nbsp;&lt;==&gt;&nbsp;x+y</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__and__"><strong>__and__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__and__">__and__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&amp;y</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__cmp__"><strong>__cmp__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__cmp__">__cmp__</a>(y)&nbsp;&lt;==&gt;&nbsp;cmp(x,y)</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__coerce__"><strong>__coerce__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__coerce__">__coerce__</a>(y)&nbsp;&lt;==&gt;&nbsp;coerce(x,&nbsp;y)</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__div__"><strong>__div__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__div__">__div__</a>(y)&nbsp;&lt;==&gt;&nbsp;x/y</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__divmod__"><strong>__divmod__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__divmod__">__divmod__</a>(y)&nbsp;&lt;==&gt;&nbsp;divmod(x,&nbsp;y)</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__float__"><strong>__float__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__float__">__float__</a>()&nbsp;&lt;==&gt;&nbsp;float(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__floordiv__"><strong>__floordiv__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__floordiv__">__floordiv__</a>(y)&nbsp;&lt;==&gt;&nbsp;x//y</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__format__"><strong>__format__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPResponse-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__getnewargs__"><strong>__getnewargs__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HTTPResponse-__hash__"><strong>__hash__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__hash__">__hash__</a>()&nbsp;&lt;==&gt;&nbsp;hash(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__hex__"><strong>__hex__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__hex__">__hex__</a>()&nbsp;&lt;==&gt;&nbsp;hex(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__index__"><strong>__index__</strong></a>(...)</dt><dd><tt>x[y:z]&nbsp;&lt;==&gt;&nbsp;x[y.<a href="#HTTPResponse-__index__">__index__</a>():z.<a href="#HTTPResponse-__index__">__index__</a>()]</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__int__"><strong>__int__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__int__">__int__</a>()&nbsp;&lt;==&gt;&nbsp;<a href="__builtin__.html#int">int</a>(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__invert__"><strong>__invert__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__invert__">__invert__</a>()&nbsp;&lt;==&gt;&nbsp;~x</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__long__"><strong>__long__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__long__">__long__</a>()&nbsp;&lt;==&gt;&nbsp;long(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__lshift__"><strong>__lshift__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__lshift__">__lshift__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&lt;&lt;y</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__mod__"><strong>__mod__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__mod__">__mod__</a>(y)&nbsp;&lt;==&gt;&nbsp;x%y</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__mul__"><strong>__mul__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__mul__">__mul__</a>(y)&nbsp;&lt;==&gt;&nbsp;x*y</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__neg__"><strong>__neg__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__neg__">__neg__</a>()&nbsp;&lt;==&gt;&nbsp;-x</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__nonzero__"><strong>__nonzero__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__nonzero__">__nonzero__</a>()&nbsp;&lt;==&gt;&nbsp;x&nbsp;!=&nbsp;0</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__oct__"><strong>__oct__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__oct__">__oct__</a>()&nbsp;&lt;==&gt;&nbsp;oct(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__or__"><strong>__or__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__or__">__or__</a>(y)&nbsp;&lt;==&gt;&nbsp;x|y</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__pos__"><strong>__pos__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__pos__">__pos__</a>()&nbsp;&lt;==&gt;&nbsp;+x</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__pow__"><strong>__pow__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__pow__">__pow__</a>(y[,&nbsp;z])&nbsp;&lt;==&gt;&nbsp;pow(x,&nbsp;y[,&nbsp;z])</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__radd__"><strong>__radd__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__radd__">__radd__</a>(y)&nbsp;&lt;==&gt;&nbsp;y+x</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__rand__"><strong>__rand__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__rand__">__rand__</a>(y)&nbsp;&lt;==&gt;&nbsp;y&amp;x</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__rdiv__"><strong>__rdiv__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__rdiv__">__rdiv__</a>(y)&nbsp;&lt;==&gt;&nbsp;y/x</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__rdivmod__"><strong>__rdivmod__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__rdivmod__">__rdivmod__</a>(y)&nbsp;&lt;==&gt;&nbsp;divmod(y,&nbsp;x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__rfloordiv__"><strong>__rfloordiv__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__rfloordiv__">__rfloordiv__</a>(y)&nbsp;&lt;==&gt;&nbsp;y//x</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__rlshift__"><strong>__rlshift__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__rlshift__">__rlshift__</a>(y)&nbsp;&lt;==&gt;&nbsp;y&lt;&lt;x</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__rmod__"><strong>__rmod__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__rmod__">__rmod__</a>(y)&nbsp;&lt;==&gt;&nbsp;y%x</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__rmul__"><strong>__rmul__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__rmul__">__rmul__</a>(y)&nbsp;&lt;==&gt;&nbsp;y*x</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__ror__"><strong>__ror__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__ror__">__ror__</a>(y)&nbsp;&lt;==&gt;&nbsp;y|x</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__rpow__"><strong>__rpow__</strong></a>(...)</dt><dd><tt>y.<a href="#HTTPResponse-__rpow__">__rpow__</a>(x[,&nbsp;z])&nbsp;&lt;==&gt;&nbsp;pow(x,&nbsp;y[,&nbsp;z])</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__rrshift__"><strong>__rrshift__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__rrshift__">__rrshift__</a>(y)&nbsp;&lt;==&gt;&nbsp;y&gt;&gt;x</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__rshift__"><strong>__rshift__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__rshift__">__rshift__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&gt;&gt;y</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__rsub__"><strong>__rsub__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__rsub__">__rsub__</a>(y)&nbsp;&lt;==&gt;&nbsp;y-x</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__rtruediv__"><strong>__rtruediv__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__rtruediv__">__rtruediv__</a>(y)&nbsp;&lt;==&gt;&nbsp;y/x</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__rxor__"><strong>__rxor__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__rxor__">__rxor__</a>(y)&nbsp;&lt;==&gt;&nbsp;y^x</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__sub__"><strong>__sub__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__sub__">__sub__</a>(y)&nbsp;&lt;==&gt;&nbsp;x-y</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__truediv__"><strong>__truediv__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__truediv__">__truediv__</a>(y)&nbsp;&lt;==&gt;&nbsp;x/y</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__trunc__"><strong>__trunc__</strong></a>(...)</dt><dd><tt>Truncating&nbsp;an&nbsp;Integral&nbsp;returns&nbsp;itself.</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-__xor__"><strong>__xor__</strong></a>(...)</dt><dd><tt>x.<a href="#HTTPResponse-__xor__">__xor__</a>(y)&nbsp;&lt;==&gt;&nbsp;x^y</tt></dd></dl>
+
+<dl><dt><a name="HTTPResponse-conjugate"><strong>conjugate</strong></a>(...)</dt><dd><tt>Returns&nbsp;self,&nbsp;the&nbsp;complex&nbsp;conjugate&nbsp;of&nbsp;any&nbsp;<a href="__builtin__.html#int">int</a>.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="__builtin__.html#int">__builtin__.int</a>:<br>
+<dl><dt><strong>denominator</strong></dt>
+<dd><tt>the&nbsp;denominator&nbsp;of&nbsp;a&nbsp;rational&nbsp;number&nbsp;in&nbsp;lowest&nbsp;terms</tt></dd>
+</dl>
+<dl><dt><strong>imag</strong></dt>
+<dd><tt>the&nbsp;imaginary&nbsp;part&nbsp;of&nbsp;a&nbsp;complex&nbsp;number</tt></dd>
+</dl>
+<dl><dt><strong>numerator</strong></dt>
+<dd><tt>the&nbsp;numerator&nbsp;of&nbsp;a&nbsp;rational&nbsp;number&nbsp;in&nbsp;lowest&nbsp;terms</tt></dd>
+</dl>
+<dl><dt><strong>real</strong></dt>
+<dd><tt>the&nbsp;real&nbsp;part&nbsp;of&nbsp;a&nbsp;complex&nbsp;number</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="MultiStatusResponse">class <strong>MultiStatusResponse</strong></a>(<a href="__builtin__.html#int">__builtin__.int</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Wrapper&nbsp;for&nbsp;multistatus&nbsp;responses.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="tinydav.html#MultiStatusResponse">MultiStatusResponse</a></dd>
+<dd><a href="__builtin__.html#int">__builtin__.int</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="MultiStatusResponse-__getitem__"><strong>__getitem__</strong></a>(self, name)</dt><dd><tt>Return&nbsp;requested&nbsp;property&nbsp;as&nbsp;ElementTree&nbsp;element.<br>
+&nbsp;<br>
+name&nbsp;--&nbsp;Name&nbsp;of&nbsp;the&nbsp;property&nbsp;with&nbsp;namespace.&nbsp;No&nbsp;namespace&nbsp;needed&nbsp;for<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DAV&nbsp;properties.</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__init__"><strong>__init__</strong></a>(self, response)</dt><dd><tt>Initialize&nbsp;the&nbsp;<a href="#MultiStatusResponse">MultiStatusResponse</a>.<br>
+&nbsp;<br>
+response&nbsp;--&nbsp;ElementTree&nbsp;element:&nbsp;response-tag.</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__iter__"><strong>__iter__</strong></a>(self)</dt><dd><tt>Iterator&nbsp;over&nbsp;propertynames&nbsp;with&nbsp;their&nbsp;namespaces.</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;representation&nbsp;string.</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-get"><strong>get</strong></a>(self, key, default<font color="#909090">=None</font>, namespace<font color="#909090">=None</font>)</dt><dd><tt>Return&nbsp;value&nbsp;for&nbsp;requested&nbsp;property.<br>
+&nbsp;<br>
+key&nbsp;--&nbsp;Property&nbsp;name&nbsp;with&nbsp;namespace.&nbsp;Namespace&nbsp;may&nbsp;be&nbsp;omitted,&nbsp;when<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;namespace-argument&nbsp;is&nbsp;given,&nbsp;or&nbsp;Namespace&nbsp;is&nbsp;DAV:<br>
+default&nbsp;--&nbsp;Return&nbsp;this&nbsp;value&nbsp;when&nbsp;key&nbsp;does&nbsp;not&nbsp;exist.<br>
+namespace&nbsp;--&nbsp;The&nbsp;namespace&nbsp;in&nbsp;which&nbsp;the&nbsp;property&nbsp;lives&nbsp;in.&nbsp;Must&nbsp;be<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;given,&nbsp;when&nbsp;the&nbsp;key&nbsp;value&nbsp;has&nbsp;no&nbsp;namespace&nbsp;defined&nbsp;and<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;namespace&nbsp;ist&nbsp;not&nbsp;DAV:.</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-items"><strong>items</strong></a>(self)</dt><dd><tt>Return&nbsp;list&nbsp;of&nbsp;2-tuples&nbsp;with&nbsp;propertyname&nbsp;and&nbsp;value.</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-iteritems"><strong>iteritems</strong></a>(self, cut_dav_ns<font color="#909090">=True</font>)</dt><dd><tt>Iterate&nbsp;list&nbsp;of&nbsp;2-tuples&nbsp;with&nbsp;propertyname&nbsp;and&nbsp;value.<br>
+&nbsp;<br>
+cut_dav_ns&nbsp;--&nbsp;No&nbsp;namespaces&nbsp;for&nbsp;DAV&nbsp;properties&nbsp;when&nbsp;this&nbsp;is&nbsp;True.</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-iterkeys"><strong>iterkeys</strong></a>(self, cut_dav_ns<font color="#909090">=True</font>)</dt><dd><tt>Iterate&nbsp;over&nbsp;propertynames&nbsp;with&nbsp;their&nbsp;namespaces.<br>
+&nbsp;<br>
+cut_dav_ns&nbsp;--&nbsp;No&nbsp;namespaces&nbsp;for&nbsp;DAV&nbsp;properties&nbsp;when&nbsp;this&nbsp;is&nbsp;True.</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-keys"><strong>keys</strong></a>(self)</dt><dd><tt>Return&nbsp;list&nbsp;of&nbsp;propertynames&nbsp;with&nbsp;their&nbsp;namespaces.<br>
+&nbsp;<br>
+No&nbsp;namespaces&nbsp;for&nbsp;DAV&nbsp;properties.</tt></dd></dl>
+
+<hr>
+Static methods defined here:<br>
+<dl><dt><a name="MultiStatusResponse-__new__"><strong>__new__</strong></a>(cls, response)</dt><dd><tt>Create&nbsp;instance&nbsp;with&nbsp;status&nbsp;code&nbsp;as&nbsp;<a href="__builtin__.html#int">int</a>&nbsp;value.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>href</strong></dt>
+<dd><tt>Return&nbsp;the&nbsp;href&nbsp;for&nbsp;this&nbsp;response.</tt></dd>
+</dl>
+<dl><dt><strong>namespaces</strong></dt>
+<dd><tt>Return&nbsp;frozenset&nbsp;of&nbsp;namespaces.</tt></dd>
+</dl>
+<dl><dt><strong>statusline</strong></dt>
+<dd><tt>Return&nbsp;the&nbsp;status&nbsp;line&nbsp;for&nbsp;this&nbsp;response.</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="__builtin__.html#int">__builtin__.int</a>:<br>
+<dl><dt><a name="MultiStatusResponse-__abs__"><strong>__abs__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__abs__">__abs__</a>()&nbsp;&lt;==&gt;&nbsp;abs(x)</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__add__"><strong>__add__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__add__">__add__</a>(y)&nbsp;&lt;==&gt;&nbsp;x+y</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__and__"><strong>__and__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__and__">__and__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&amp;y</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__cmp__"><strong>__cmp__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__cmp__">__cmp__</a>(y)&nbsp;&lt;==&gt;&nbsp;cmp(x,y)</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__coerce__"><strong>__coerce__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__coerce__">__coerce__</a>(y)&nbsp;&lt;==&gt;&nbsp;coerce(x,&nbsp;y)</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__div__"><strong>__div__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__div__">__div__</a>(y)&nbsp;&lt;==&gt;&nbsp;x/y</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__divmod__"><strong>__divmod__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__divmod__">__divmod__</a>(y)&nbsp;&lt;==&gt;&nbsp;divmod(x,&nbsp;y)</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__float__"><strong>__float__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__float__">__float__</a>()&nbsp;&lt;==&gt;&nbsp;float(x)</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__floordiv__"><strong>__floordiv__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__floordiv__">__floordiv__</a>(y)&nbsp;&lt;==&gt;&nbsp;x//y</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__format__"><strong>__format__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="MultiStatusResponse-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__getnewargs__"><strong>__getnewargs__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="MultiStatusResponse-__hash__"><strong>__hash__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__hash__">__hash__</a>()&nbsp;&lt;==&gt;&nbsp;hash(x)</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__hex__"><strong>__hex__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__hex__">__hex__</a>()&nbsp;&lt;==&gt;&nbsp;hex(x)</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__index__"><strong>__index__</strong></a>(...)</dt><dd><tt>x[y:z]&nbsp;&lt;==&gt;&nbsp;x[y.<a href="#MultiStatusResponse-__index__">__index__</a>():z.<a href="#MultiStatusResponse-__index__">__index__</a>()]</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__int__"><strong>__int__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__int__">__int__</a>()&nbsp;&lt;==&gt;&nbsp;<a href="__builtin__.html#int">int</a>(x)</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__invert__"><strong>__invert__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__invert__">__invert__</a>()&nbsp;&lt;==&gt;&nbsp;~x</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__long__"><strong>__long__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__long__">__long__</a>()&nbsp;&lt;==&gt;&nbsp;long(x)</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__lshift__"><strong>__lshift__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__lshift__">__lshift__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&lt;&lt;y</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__mod__"><strong>__mod__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__mod__">__mod__</a>(y)&nbsp;&lt;==&gt;&nbsp;x%y</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__mul__"><strong>__mul__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__mul__">__mul__</a>(y)&nbsp;&lt;==&gt;&nbsp;x*y</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__neg__"><strong>__neg__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__neg__">__neg__</a>()&nbsp;&lt;==&gt;&nbsp;-x</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__nonzero__"><strong>__nonzero__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__nonzero__">__nonzero__</a>()&nbsp;&lt;==&gt;&nbsp;x&nbsp;!=&nbsp;0</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__oct__"><strong>__oct__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__oct__">__oct__</a>()&nbsp;&lt;==&gt;&nbsp;oct(x)</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__or__"><strong>__or__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__or__">__or__</a>(y)&nbsp;&lt;==&gt;&nbsp;x|y</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__pos__"><strong>__pos__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__pos__">__pos__</a>()&nbsp;&lt;==&gt;&nbsp;+x</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__pow__"><strong>__pow__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__pow__">__pow__</a>(y[,&nbsp;z])&nbsp;&lt;==&gt;&nbsp;pow(x,&nbsp;y[,&nbsp;z])</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__radd__"><strong>__radd__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__radd__">__radd__</a>(y)&nbsp;&lt;==&gt;&nbsp;y+x</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__rand__"><strong>__rand__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__rand__">__rand__</a>(y)&nbsp;&lt;==&gt;&nbsp;y&amp;x</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__rdiv__"><strong>__rdiv__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__rdiv__">__rdiv__</a>(y)&nbsp;&lt;==&gt;&nbsp;y/x</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__rdivmod__"><strong>__rdivmod__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__rdivmod__">__rdivmod__</a>(y)&nbsp;&lt;==&gt;&nbsp;divmod(y,&nbsp;x)</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__rfloordiv__"><strong>__rfloordiv__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__rfloordiv__">__rfloordiv__</a>(y)&nbsp;&lt;==&gt;&nbsp;y//x</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__rlshift__"><strong>__rlshift__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__rlshift__">__rlshift__</a>(y)&nbsp;&lt;==&gt;&nbsp;y&lt;&lt;x</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__rmod__"><strong>__rmod__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__rmod__">__rmod__</a>(y)&nbsp;&lt;==&gt;&nbsp;y%x</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__rmul__"><strong>__rmul__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__rmul__">__rmul__</a>(y)&nbsp;&lt;==&gt;&nbsp;y*x</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__ror__"><strong>__ror__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__ror__">__ror__</a>(y)&nbsp;&lt;==&gt;&nbsp;y|x</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__rpow__"><strong>__rpow__</strong></a>(...)</dt><dd><tt>y.<a href="#MultiStatusResponse-__rpow__">__rpow__</a>(x[,&nbsp;z])&nbsp;&lt;==&gt;&nbsp;pow(x,&nbsp;y[,&nbsp;z])</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__rrshift__"><strong>__rrshift__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__rrshift__">__rrshift__</a>(y)&nbsp;&lt;==&gt;&nbsp;y&gt;&gt;x</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__rshift__"><strong>__rshift__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__rshift__">__rshift__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&gt;&gt;y</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__rsub__"><strong>__rsub__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__rsub__">__rsub__</a>(y)&nbsp;&lt;==&gt;&nbsp;y-x</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__rtruediv__"><strong>__rtruediv__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__rtruediv__">__rtruediv__</a>(y)&nbsp;&lt;==&gt;&nbsp;y/x</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__rxor__"><strong>__rxor__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__rxor__">__rxor__</a>(y)&nbsp;&lt;==&gt;&nbsp;y^x</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__sub__"><strong>__sub__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__sub__">__sub__</a>(y)&nbsp;&lt;==&gt;&nbsp;x-y</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__truediv__"><strong>__truediv__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__truediv__">__truediv__</a>(y)&nbsp;&lt;==&gt;&nbsp;x/y</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__trunc__"><strong>__trunc__</strong></a>(...)</dt><dd><tt>Truncating&nbsp;an&nbsp;Integral&nbsp;returns&nbsp;itself.</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-__xor__"><strong>__xor__</strong></a>(...)</dt><dd><tt>x.<a href="#MultiStatusResponse-__xor__">__xor__</a>(y)&nbsp;&lt;==&gt;&nbsp;x^y</tt></dd></dl>
+
+<dl><dt><a name="MultiStatusResponse-conjugate"><strong>conjugate</strong></a>(...)</dt><dd><tt>Returns&nbsp;self,&nbsp;the&nbsp;complex&nbsp;conjugate&nbsp;of&nbsp;any&nbsp;<a href="__builtin__.html#int">int</a>.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="__builtin__.html#int">__builtin__.int</a>:<br>
+<dl><dt><strong>denominator</strong></dt>
+<dd><tt>the&nbsp;denominator&nbsp;of&nbsp;a&nbsp;rational&nbsp;number&nbsp;in&nbsp;lowest&nbsp;terms</tt></dd>
+</dl>
+<dl><dt><strong>imag</strong></dt>
+<dd><tt>the&nbsp;imaginary&nbsp;part&nbsp;of&nbsp;a&nbsp;complex&nbsp;number</tt></dd>
+</dl>
+<dl><dt><strong>numerator</strong></dt>
+<dd><tt>the&nbsp;numerator&nbsp;of&nbsp;a&nbsp;rational&nbsp;number&nbsp;in&nbsp;lowest&nbsp;terms</tt></dd>
+</dl>
+<dl><dt><strong>real</strong></dt>
+<dd><tt>the&nbsp;real&nbsp;part&nbsp;of&nbsp;a&nbsp;complex&nbsp;number</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="WebDAVClient">class <strong>WebDAVClient</strong></a>(<a href="tinydav.html#ExtendedWebDAVClient">ExtendedWebDAVClient</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Mini&nbsp;WebDAV&nbsp;client.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="tinydav.html#WebDAVClient">WebDAVClient</a></dd>
+<dd><a href="tinydav.html#ExtendedWebDAVClient">ExtendedWebDAVClient</a></dd>
+<dd><a href="tinydav.html#CoreWebDAVClient">CoreWebDAVClient</a></dd>
+<dd><a href="tinydav.html#HTTPClient">HTTPClient</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods inherited from <a href="tinydav.html#ExtendedWebDAVClient">ExtendedWebDAVClient</a>:<br>
+<dl><dt><a name="WebDAVClient-report"><strong>report</strong></a>(self, uri, depth<font color="#909090">=0</font>, properties<font color="#909090">=None</font>, elements<font color="#909090">=None</font>, namespaces<font color="#909090">=None</font>, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;a&nbsp;REPORT&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Resource&nbsp;or&nbsp;collection&nbsp;to&nbsp;get&nbsp;report&nbsp;for.<br>
+depth&nbsp;--&nbsp;Either&nbsp;0&nbsp;or&nbsp;1&nbsp;or&nbsp;"infinity".&nbsp;Default&nbsp;is&nbsp;zero.<br>
+properties&nbsp;--&nbsp;If&nbsp;given,&nbsp;an&nbsp;iterable&nbsp;with&nbsp;all&nbsp;requested&nbsp;properties&nbsp;is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;expected.<br>
+elements&nbsp;--&nbsp;An&nbsp;iterable&nbsp;with&nbsp;additional&nbsp;XML&nbsp;elements.<br>
+namespaces&nbsp;--&nbsp;Mapping&nbsp;with&nbsp;namespaces&nbsp;for&nbsp;given&nbsp;properties,&nbsp;if&nbsp;needed.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;set.<br>
+&nbsp;<br>
+Raise&nbsp;WebDAVError&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="tinydav.html#CoreWebDAVClient">CoreWebDAVClient</a>:<br>
+<dl><dt><a name="WebDAVClient-copy"><strong>copy</strong></a>(self, source, destination, depth<font color="#909090">='infinity'</font>, overwrite<font color="#909090">=None</font>, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;COPY&nbsp;request&nbsp;and&nbsp;return&nbsp;<a href="#WebDAVResponse">WebDAVResponse</a>.<br>
+&nbsp;<br>
+source&nbsp;--&nbsp;Path&nbsp;of&nbsp;resource&nbsp;to&nbsp;copy.<br>
+destination&nbsp;--&nbsp;Path&nbsp;of&nbsp;destination&nbsp;to&nbsp;copy&nbsp;source&nbsp;to.<br>
+depth&nbsp;--&nbsp;Either&nbsp;0&nbsp;or&nbsp;"infinity".&nbsp;Default&nbsp;is&nbsp;the&nbsp;latter.<br>
+overwrite&nbsp;--&nbsp;If&nbsp;not&nbsp;None,&nbsp;then&nbsp;a&nbsp;boolean&nbsp;indicating&nbsp;whether&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Overwrite&nbsp;header&nbsp;ist&nbsp;set&nbsp;to&nbsp;"T"&nbsp;(True)&nbsp;or&nbsp;"F"&nbsp;(False).<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;set.<br>
+&nbsp;<br>
+Raise&nbsp;WebDAVError&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="WebDAVClient-delete"><strong>delete</strong></a>(self, uri, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;DELETE&nbsp;request&nbsp;and&nbsp;return&nbsp;<a href="#WebDAVResponse">WebDAVResponse</a>.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;of&nbsp;resource&nbsp;or&nbsp;collection&nbsp;to&nbsp;delete.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;set.<br>
+&nbsp;<br>
+Raise&nbsp;WebDAVError&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="WebDAVClient-lock"><strong>lock</strong></a>(self, uri, scope<font color="#909090">='exclusive'</font>, type_<font color="#909090">='write'</font>, owner<font color="#909090">=None</font>, timeout<font color="#909090">=None</font>, depth<font color="#909090">=None</font>, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;LOCK&nbsp;request&nbsp;and&nbsp;return&nbsp;DAVLock&nbsp;instance.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Resource&nbsp;to&nbsp;get&nbsp;lock&nbsp;on.<br>
+scope&nbsp;--&nbsp;Lock&nbsp;scope:&nbsp;One&nbsp;of&nbsp;"exclusive"&nbsp;(default)&nbsp;or&nbsp;"shared".<br>
+type_&nbsp;--&nbsp;Lock&nbsp;type:&nbsp;"write"&nbsp;(default)&nbsp;only.&nbsp;Any&nbsp;other&nbsp;value&nbsp;allowed&nbsp;by<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this&nbsp;library.<br>
+owner&nbsp;--&nbsp;Content&nbsp;of&nbsp;owner&nbsp;element.&nbsp;May&nbsp;be&nbsp;None,&nbsp;a&nbsp;string&nbsp;or&nbsp;an<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ElementTree&nbsp;element.<br>
+timeout&nbsp;--&nbsp;Value&nbsp;for&nbsp;the&nbsp;timeout&nbsp;header.&nbsp;Either&nbsp;"infinite"&nbsp;or&nbsp;a&nbsp;number<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;representing&nbsp;the&nbsp;seconds&nbsp;(not&nbsp;greater&nbsp;than&nbsp;2^32&nbsp;-&nbsp;1).</tt></dd></dl>
+
+<dl><dt><a name="WebDAVClient-mkcol"><strong>mkcol</strong></a>(self, uri, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;MKCOL&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;to&nbsp;create.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;dict&nbsp;with&nbsp;headers&nbsp;to&nbsp;send.<br>
+&nbsp;<br>
+Raise&nbsp;WebDAVError&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="WebDAVClient-move"><strong>move</strong></a>(self, source, destination, depth<font color="#909090">='infinity'</font>, overwrite<font color="#909090">=None</font>, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;MOVE&nbsp;request&nbsp;and&nbsp;return&nbsp;<a href="#WebDAVResponse">WebDAVResponse</a>.<br>
+&nbsp;<br>
+source&nbsp;--&nbsp;Path&nbsp;of&nbsp;resource&nbsp;to&nbsp;move.<br>
+destination&nbsp;--&nbsp;Path&nbsp;of&nbsp;destination&nbsp;to&nbsp;move&nbsp;source&nbsp;to.<br>
+depth&nbsp;--&nbsp;Either&nbsp;0&nbsp;or&nbsp;"infinity".&nbsp;Default&nbsp;is&nbsp;the&nbsp;latter.<br>
+overwrite&nbsp;--&nbsp;If&nbsp;not&nbsp;None,&nbsp;then&nbsp;a&nbsp;boolean&nbsp;indicating&nbsp;whether&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Overwrite&nbsp;header&nbsp;ist&nbsp;set&nbsp;to&nbsp;"T"&nbsp;(True)&nbsp;or&nbsp;"F"&nbsp;(False).<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;set.<br>
+&nbsp;<br>
+Raise&nbsp;WebDAVError&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="WebDAVClient-propfind"><strong>propfind</strong></a>(self, uri, depth<font color="#909090">=0</font>, names<font color="#909090">=False</font>, properties<font color="#909090">=None</font>, include<font color="#909090">=None</font>, namespaces<font color="#909090">=None</font>, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;PROPFIND&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;for&nbsp;PROPFIND.<br>
+depth&nbsp;--&nbsp;Depth&nbsp;for&nbsp;PROFIND&nbsp;request.&nbsp;Default&nbsp;is&nbsp;zero.<br>
+names&nbsp;--&nbsp;If&nbsp;True,&nbsp;only&nbsp;the&nbsp;available&nbsp;namespace&nbsp;names&nbsp;are&nbsp;returned.<br>
+properties&nbsp;--&nbsp;If&nbsp;given,&nbsp;an&nbsp;iterable&nbsp;with&nbsp;all&nbsp;requested&nbsp;properties&nbsp;is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;expected.<br>
+include&nbsp;--&nbsp;If&nbsp;properties&nbsp;is&nbsp;not&nbsp;given,&nbsp;then&nbsp;additional&nbsp;properties&nbsp;can<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;be&nbsp;requested&nbsp;with&nbsp;this&nbsp;argument.<br>
+namespaces&nbsp;--&nbsp;Mapping&nbsp;with&nbsp;namespaces&nbsp;for&nbsp;given&nbsp;properties,&nbsp;if&nbsp;needed.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;dict&nbsp;with&nbsp;headers&nbsp;to&nbsp;send.<br>
+&nbsp;<br>
+Raise&nbsp;ValueError,&nbsp;if&nbsp;illegal&nbsp;depth&nbsp;was&nbsp;given.<br>
+Raise&nbsp;WebDAVError&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="WebDAVClient-proppatch"><strong>proppatch</strong></a>(self, uri, setprops<font color="#909090">=None</font>, delprops<font color="#909090">=None</font>, namespaces<font color="#909090">=None</font>, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;PROPPATCH&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;to&nbsp;resource&nbsp;to&nbsp;set&nbsp;properties.<br>
+setprops&nbsp;--&nbsp;Mapping&nbsp;with&nbsp;properties&nbsp;to&nbsp;set.<br>
+delprops&nbsp;--&nbsp;Iterable&nbsp;with&nbsp;properties&nbsp;to&nbsp;remove.<br>
+namespaces&nbsp;--&nbsp;dict&nbsp;with&nbsp;namespaces:&nbsp;name&nbsp;-&gt;&nbsp;URI.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;dict&nbsp;with&nbsp;headers&nbsp;to&nbsp;send.<br>
+&nbsp;<br>
+Either&nbsp;setprops&nbsp;or&nbsp;delprops&nbsp;or&nbsp;both&nbsp;of&nbsp;them&nbsp;must&nbsp;be&nbsp;given.</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="tinydav.html#CoreWebDAVClient">CoreWebDAVClient</a>:<br>
+<dl><dt><strong>ResponseType</strong> = &lt;class 'tinydav.WebDAVResponse'&gt;<dd><tt>Result&nbsp;from&nbsp;WebDAV&nbsp;request.</tt></dl>
+
+<hr>
+Methods inherited from <a href="tinydav.html#HTTPClient">HTTPClient</a>:<br>
+<dl><dt><a name="WebDAVClient-__init__"><strong>__init__</strong></a>(self, host, port, user<font color="#909090">=None</font>, password<font color="#909090">=''</font>, protocol<font color="#909090">='http'</font>)</dt><dd><tt>Initialize&nbsp;the&nbsp;WebDAV&nbsp;client.<br>
+&nbsp;<br>
+host&nbsp;--&nbsp;WebDAV&nbsp;server&nbsp;host.<br>
+port&nbsp;--&nbsp;WebDAV&nbsp;server&nbsp;port.<br>
+user&nbsp;--&nbsp;Login&nbsp;name.<br>
+password&nbsp;--&nbsp;Password&nbsp;for&nbsp;login.<br>
+protocol&nbsp;--&nbsp;Either&nbsp;"http"&nbsp;or&nbsp;"https".</tt></dd></dl>
+
+<dl><dt><a name="WebDAVClient-connect"><strong>connect</strong></a>(self, uri, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;CONNECT&nbsp;request&nbsp;and&nbsp;return&nbsp;<a href="#HTTPResponse">HTTPResponse</a>.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;to&nbsp;post&nbsp;data&nbsp;to.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;set.<br>
+&nbsp;<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="WebDAVClient-get"><strong>get</strong></a>(self, uri, headers<font color="#909090">=None</font>, query<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;GET&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;URI&nbsp;of&nbsp;the&nbsp;request.<br>
+headers&nbsp;--&nbsp;Optional&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;send.<br>
+query&nbsp;--&nbsp;Mapping&nbsp;with&nbsp;key/value-pairs&nbsp;to&nbsp;be&nbsp;added&nbsp;as&nbsp;query&nbsp;to&nbsp;the&nbsp;URI.<br>
+&nbsp;<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="WebDAVClient-head"><strong>head</strong></a>(self, uri, headers<font color="#909090">=None</font>, query<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;HEAD&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;URI&nbsp;of&nbsp;the&nbsp;request.<br>
+headers&nbsp;--&nbsp;Optional&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;send.<br>
+query&nbsp;--&nbsp;Mapping&nbsp;with&nbsp;key/value-pairs&nbsp;to&nbsp;be&nbsp;added&nbsp;as&nbsp;query&nbsp;to&nbsp;the&nbsp;URI.<br>
+&nbsp;<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="WebDAVClient-options"><strong>options</strong></a>(self, uri, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;OPTIONS&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;URI&nbsp;of&nbsp;the&nbsp;request.<br>
+headers&nbsp;--&nbsp;Optional&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;send.<br>
+&nbsp;<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="WebDAVClient-post"><strong>post</strong></a>(self, uri, content<font color="#909090">=''</font>, headers<font color="#909090">=None</font>, query<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;POST&nbsp;request&nbsp;and&nbsp;return&nbsp;<a href="#HTTPResponse">HTTPResponse</a>.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;to&nbsp;post&nbsp;data&nbsp;to.<br>
+content&nbsp;--&nbsp;File&nbsp;descriptor&nbsp;or&nbsp;string&nbsp;with&nbsp;content&nbsp;to&nbsp;POST.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;set.<br>
+query&nbsp;--&nbsp;Mapping&nbsp;with&nbsp;key/value-pairs&nbsp;to&nbsp;be&nbsp;added&nbsp;as&nbsp;query&nbsp;to&nbsp;the&nbsp;URI.<br>
+&nbsp;<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="WebDAVClient-put"><strong>put</strong></a>(self, uri, fileobject, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;PUT&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;for&nbsp;PUT.<br>
+fileobject&nbsp;--&nbsp;File&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;content&nbsp;to&nbsp;PUT.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;dict&nbsp;with&nbsp;headers&nbsp;to&nbsp;send.<br>
+&nbsp;<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<dl><dt><a name="WebDAVClient-setbasicauth"><strong>setbasicauth</strong></a>(self, user, password)</dt><dd><tt>Set&nbsp;authorization&nbsp;header&nbsp;for&nbsp;basic&nbsp;auth.<br>
+&nbsp;<br>
+user&nbsp;--&nbsp;Username<br>
+password&nbsp;--&nbsp;Password&nbsp;for&nbsp;user.</tt></dd></dl>
+
+<dl><dt><a name="WebDAVClient-trace"><strong>trace</strong></a>(self, uri, maxforwards<font color="#909090">=None</font>, via<font color="#909090">=None</font>, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;TRACE&nbsp;request&nbsp;and&nbsp;return&nbsp;<a href="#HTTPResponse">HTTPResponse</a>.<br>
+&nbsp;<br>
+uri&nbsp;--&nbsp;Path&nbsp;to&nbsp;post&nbsp;data&nbsp;to.<br>
+maxforwards&nbsp;--&nbsp;Number&nbsp;of&nbsp;maximum&nbsp;forwards.&nbsp;May&nbsp;be&nbsp;None.<br>
+via&nbsp;--&nbsp;If&nbsp;given,&nbsp;an&nbsp;iterable&nbsp;containing&nbsp;each&nbsp;station&nbsp;in&nbsp;the&nbsp;form<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stated&nbsp;in&nbsp;<a href="http://www.rfc-editor.org/rfc/rfc2616.txt">RFC2616</a>,&nbsp;section&nbsp;14.45.<br>
+headers&nbsp;--&nbsp;If&nbsp;given,&nbsp;must&nbsp;be&nbsp;a&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;set.<br>
+&nbsp;<br>
+Raise&nbsp;ValueError,&nbsp;if&nbsp;maxforward&nbsp;is&nbsp;not&nbsp;an&nbsp;<a href="__builtin__.html#int">int</a>&nbsp;or&nbsp;convertable&nbsp;to<br>
+an&nbsp;<a href="__builtin__.html#int">int</a>.<br>
+Raise&nbsp;TypeError,&nbsp;if&nbsp;via&nbsp;is&nbsp;not&nbsp;an&nbsp;iterable&nbsp;of&nbsp;string.<br>
+Raise&nbsp;<a href="#HTTPError">HTTPError</a>&nbsp;on&nbsp;HTTP&nbsp;errors.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="tinydav.html#HTTPClient">HTTPClient</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="WebDAVResponse">class <strong>WebDAVResponse</strong></a>(<a href="tinydav.html#HTTPResponse">HTTPResponse</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Result&nbsp;from&nbsp;WebDAV&nbsp;request.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="tinydav.html#WebDAVResponse">WebDAVResponse</a></dd>
+<dd><a href="tinydav.html#HTTPResponse">HTTPResponse</a></dd>
+<dd><a href="__builtin__.html#int">__builtin__.int</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="WebDAVResponse-__init__"><strong>__init__</strong></a>(self, response)</dt><dd><tt>Initialize&nbsp;the&nbsp;WebDAVResult.<br>
+&nbsp;<br>
+response&nbsp;--&nbsp;Response&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;from&nbsp;httplib.</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__iter__"><strong>__iter__</strong></a>(self)</dt><dd><tt>Iterator&nbsp;over&nbsp;the&nbsp;response.<br>
+&nbsp;<br>
+Yield&nbsp;<a href="#MultiStatusResponse">MultiStatusResponse</a>&nbsp;instances&nbsp;for&nbsp;each&nbsp;response&nbsp;in&nbsp;a&nbsp;207<br>
+response.<br>
+Yield&nbsp;self&nbsp;otherwise.</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__len__"><strong>__len__</strong></a>(self)</dt><dd><tt>Return&nbsp;the&nbsp;number&nbsp;of&nbsp;responses&nbsp;in&nbsp;a&nbsp;multistatus&nbsp;response.<br>
+&nbsp;<br>
+When&nbsp;the&nbsp;response&nbsp;was&nbsp;no&nbsp;multistatus&nbsp;the&nbsp;return&nbsp;value&nbsp;is&nbsp;1.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="tinydav.html#HTTPResponse">HTTPResponse</a>:<br>
+<dl><dt><a name="WebDAVResponse-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>Return&nbsp;representation&nbsp;string.</tt></dd></dl>
+
+<hr>
+Static methods inherited from <a href="tinydav.html#HTTPResponse">HTTPResponse</a>:<br>
+<dl><dt><a name="WebDAVResponse-__new__"><strong>__new__</strong></a>(cls, response)</dt><dd><tt>Construct&nbsp;<a href="#HTTPResponse">HTTPResponse</a>.<br>
+&nbsp;<br>
+response&nbsp;--&nbsp;Response&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;from&nbsp;httplib.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="tinydav.html#HTTPResponse">HTTPResponse</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="__builtin__.html#int">__builtin__.int</a>:<br>
+<dl><dt><a name="WebDAVResponse-__abs__"><strong>__abs__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__abs__">__abs__</a>()&nbsp;&lt;==&gt;&nbsp;abs(x)</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__add__"><strong>__add__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__add__">__add__</a>(y)&nbsp;&lt;==&gt;&nbsp;x+y</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__and__"><strong>__and__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__and__">__and__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&amp;y</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__cmp__"><strong>__cmp__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__cmp__">__cmp__</a>(y)&nbsp;&lt;==&gt;&nbsp;cmp(x,y)</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__coerce__"><strong>__coerce__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__coerce__">__coerce__</a>(y)&nbsp;&lt;==&gt;&nbsp;coerce(x,&nbsp;y)</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__div__"><strong>__div__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__div__">__div__</a>(y)&nbsp;&lt;==&gt;&nbsp;x/y</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__divmod__"><strong>__divmod__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__divmod__">__divmod__</a>(y)&nbsp;&lt;==&gt;&nbsp;divmod(x,&nbsp;y)</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__float__"><strong>__float__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__float__">__float__</a>()&nbsp;&lt;==&gt;&nbsp;float(x)</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__floordiv__"><strong>__floordiv__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__floordiv__">__floordiv__</a>(y)&nbsp;&lt;==&gt;&nbsp;x//y</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__format__"><strong>__format__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="WebDAVResponse-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__getnewargs__"><strong>__getnewargs__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="WebDAVResponse-__hash__"><strong>__hash__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__hash__">__hash__</a>()&nbsp;&lt;==&gt;&nbsp;hash(x)</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__hex__"><strong>__hex__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__hex__">__hex__</a>()&nbsp;&lt;==&gt;&nbsp;hex(x)</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__index__"><strong>__index__</strong></a>(...)</dt><dd><tt>x[y:z]&nbsp;&lt;==&gt;&nbsp;x[y.<a href="#WebDAVResponse-__index__">__index__</a>():z.<a href="#WebDAVResponse-__index__">__index__</a>()]</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__int__"><strong>__int__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__int__">__int__</a>()&nbsp;&lt;==&gt;&nbsp;<a href="__builtin__.html#int">int</a>(x)</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__invert__"><strong>__invert__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__invert__">__invert__</a>()&nbsp;&lt;==&gt;&nbsp;~x</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__long__"><strong>__long__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__long__">__long__</a>()&nbsp;&lt;==&gt;&nbsp;long(x)</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__lshift__"><strong>__lshift__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__lshift__">__lshift__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&lt;&lt;y</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__mod__"><strong>__mod__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__mod__">__mod__</a>(y)&nbsp;&lt;==&gt;&nbsp;x%y</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__mul__"><strong>__mul__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__mul__">__mul__</a>(y)&nbsp;&lt;==&gt;&nbsp;x*y</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__neg__"><strong>__neg__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__neg__">__neg__</a>()&nbsp;&lt;==&gt;&nbsp;-x</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__nonzero__"><strong>__nonzero__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__nonzero__">__nonzero__</a>()&nbsp;&lt;==&gt;&nbsp;x&nbsp;!=&nbsp;0</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__oct__"><strong>__oct__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__oct__">__oct__</a>()&nbsp;&lt;==&gt;&nbsp;oct(x)</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__or__"><strong>__or__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__or__">__or__</a>(y)&nbsp;&lt;==&gt;&nbsp;x|y</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__pos__"><strong>__pos__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__pos__">__pos__</a>()&nbsp;&lt;==&gt;&nbsp;+x</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__pow__"><strong>__pow__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__pow__">__pow__</a>(y[,&nbsp;z])&nbsp;&lt;==&gt;&nbsp;pow(x,&nbsp;y[,&nbsp;z])</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__radd__"><strong>__radd__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__radd__">__radd__</a>(y)&nbsp;&lt;==&gt;&nbsp;y+x</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__rand__"><strong>__rand__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__rand__">__rand__</a>(y)&nbsp;&lt;==&gt;&nbsp;y&amp;x</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__rdiv__"><strong>__rdiv__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__rdiv__">__rdiv__</a>(y)&nbsp;&lt;==&gt;&nbsp;y/x</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__rdivmod__"><strong>__rdivmod__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__rdivmod__">__rdivmod__</a>(y)&nbsp;&lt;==&gt;&nbsp;divmod(y,&nbsp;x)</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__rfloordiv__"><strong>__rfloordiv__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__rfloordiv__">__rfloordiv__</a>(y)&nbsp;&lt;==&gt;&nbsp;y//x</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__rlshift__"><strong>__rlshift__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__rlshift__">__rlshift__</a>(y)&nbsp;&lt;==&gt;&nbsp;y&lt;&lt;x</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__rmod__"><strong>__rmod__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__rmod__">__rmod__</a>(y)&nbsp;&lt;==&gt;&nbsp;y%x</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__rmul__"><strong>__rmul__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__rmul__">__rmul__</a>(y)&nbsp;&lt;==&gt;&nbsp;y*x</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__ror__"><strong>__ror__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__ror__">__ror__</a>(y)&nbsp;&lt;==&gt;&nbsp;y|x</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__rpow__"><strong>__rpow__</strong></a>(...)</dt><dd><tt>y.<a href="#WebDAVResponse-__rpow__">__rpow__</a>(x[,&nbsp;z])&nbsp;&lt;==&gt;&nbsp;pow(x,&nbsp;y[,&nbsp;z])</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__rrshift__"><strong>__rrshift__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__rrshift__">__rrshift__</a>(y)&nbsp;&lt;==&gt;&nbsp;y&gt;&gt;x</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__rshift__"><strong>__rshift__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__rshift__">__rshift__</a>(y)&nbsp;&lt;==&gt;&nbsp;x&gt;&gt;y</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__rsub__"><strong>__rsub__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__rsub__">__rsub__</a>(y)&nbsp;&lt;==&gt;&nbsp;y-x</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__rtruediv__"><strong>__rtruediv__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__rtruediv__">__rtruediv__</a>(y)&nbsp;&lt;==&gt;&nbsp;y/x</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__rxor__"><strong>__rxor__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__rxor__">__rxor__</a>(y)&nbsp;&lt;==&gt;&nbsp;y^x</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__sub__"><strong>__sub__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__sub__">__sub__</a>(y)&nbsp;&lt;==&gt;&nbsp;x-y</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__truediv__"><strong>__truediv__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__truediv__">__truediv__</a>(y)&nbsp;&lt;==&gt;&nbsp;x/y</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__trunc__"><strong>__trunc__</strong></a>(...)</dt><dd><tt>Truncating&nbsp;an&nbsp;Integral&nbsp;returns&nbsp;itself.</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-__xor__"><strong>__xor__</strong></a>(...)</dt><dd><tt>x.<a href="#WebDAVResponse-__xor__">__xor__</a>(y)&nbsp;&lt;==&gt;&nbsp;x^y</tt></dd></dl>
+
+<dl><dt><a name="WebDAVResponse-conjugate"><strong>conjugate</strong></a>(...)</dt><dd><tt>Returns&nbsp;self,&nbsp;the&nbsp;complex&nbsp;conjugate&nbsp;of&nbsp;any&nbsp;<a href="__builtin__.html#int">int</a>.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="__builtin__.html#int">__builtin__.int</a>:<br>
+<dl><dt><strong>denominator</strong></dt>
+<dd><tt>the&nbsp;denominator&nbsp;of&nbsp;a&nbsp;rational&nbsp;number&nbsp;in&nbsp;lowest&nbsp;terms</tt></dd>
+</dl>
+<dl><dt><strong>imag</strong></dt>
+<dd><tt>the&nbsp;imaginary&nbsp;part&nbsp;of&nbsp;a&nbsp;complex&nbsp;number</tt></dd>
+</dl>
+<dl><dt><strong>numerator</strong></dt>
+<dd><tt>the&nbsp;numerator&nbsp;of&nbsp;a&nbsp;rational&nbsp;number&nbsp;in&nbsp;lowest&nbsp;terms</tt></dd>
+</dl>
+<dl><dt><strong>real</strong></dt>
+<dd><tt>the&nbsp;real&nbsp;part&nbsp;of&nbsp;a&nbsp;complex&nbsp;number</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>MAX_TIMEOUT</strong> = 4294967295L<br>
+<strong>PYTHON2_6</strong> = True<br>
+<strong>with_statement</strong> = _Feature((2, 5, 0, 'alpha', 1), (2, 6, 0, 'alpha', 0), 32768)</td></tr></table>
+</body></html>
