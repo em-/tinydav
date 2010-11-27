@@ -251,7 +251,7 @@ class HTTPClient(object):
 
     ResponseType = HTTPResponse
 
-    def __init__(self, host, port, user=None, password="", protocol="http"):
+    def __init__(self, host, port=80, user=None, password="", protocol="http"):
         """Initialize the WebDAV client.
 
         host -- WebDAV server host.
