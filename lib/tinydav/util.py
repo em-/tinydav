@@ -25,7 +25,35 @@ def make_destination(httpclient, uri):
     uri -- The destination path.
 
     """
+    # RFC 2517, 9.3 Destination Header
+    # Destination = "Destination" ":" absoluteURI
     netloc = "%s:%d" % (httpclient.host, httpclient.port)
     parts = (httpclient.protocol, netloc, uri, None, None)
     return urlparse.urlunsplit(parts)
+
+
+def extract_namespace(key):
+    """Return the namespace in key or None, when no namespace is in key.
+
+    key -- String to get namespace from
+
+    """
+    if not key.startswith("{"):
+        return None
+    return key[1:].split("}")[0]
+
+
+def get_depth(depth, allowed=("0", "1", "infinity")):
+    """Return string with depth.
+
+    depth -- Depth value to check.
+    allowed -- Iterable with allowed depth header values.
+
+    Raise ValueError, if an illegal depth was given.
+
+    """
+    depth = str(depth).lower()
+    if depth not in allowed:
+        raise ValueError("illegal depth %s" % depth)
+    return depth
 

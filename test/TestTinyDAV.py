@@ -1,4 +1,5 @@
 # Unittests for tinydav lib.
+# coding: utf-8
 # Copyright (C) 2009  Manuel Hermann <manuel-hermann@gmx.net>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -372,7 +373,7 @@ class CoreWebDAVClientTestCase(unittest.TestCase):
     def test_propfind_illegal_args(self):
         """Test CoreWebDAVClient.propfind with illegal args."""
         # prepare mock connection
-        self.assertRaises(AttributeError,
+        self.assertRaises(ValueError,
                           self.dav.propfind, "/foobar", 1,
                           properties=["foo"], include=["bar"])
 
@@ -402,7 +403,7 @@ class CoreWebDAVClientTestCase(unittest.TestCase):
     def test_proppatch_noprops(self):
         """Test CoreWebDAVClient.proppatch with no defined properties."""
         ns = {"CADN": "CADN:"}
-        self.assertRaises(AttributeError,
+        self.assertRaises(ValueError,
                           self.dav.proppatch, "/foobar", None, None, ns)
 
     def test_delete(self):

@@ -27,6 +27,9 @@ try:
 except ImportError:
     coverage = None
 
+# FIXME: when the coverage module is present, the code breaks.
+coverage = None
+
 # Define packages/modules that shall not be checked for coverage.
 EXCEPTIONS = frozenset()
 

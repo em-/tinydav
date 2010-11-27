@@ -11,7 +11,7 @@ from setuptools import setup
 if __name__ == "__main__":
     setup(
         name="TinyDAV library",
-        version="0.5.1",
+        version="0.5.2",
         author="Manuel Hermann",
         author_email="manuel-hermann@gmx.net",
         description="Tiny WebDAV client.",

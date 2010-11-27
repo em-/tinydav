@@ -18,6 +18,7 @@
 from __future__ import with_statement
 from contextlib import closing
 from functools import wraps
+from httplib import MULTI_STATUS
 from StringIO import StringIO
 from xml.etree.ElementTree import ElementTree, Element, SubElement, tostring
 from xml.parsers.expat import ExpatError
@@ -30,6 +31,8 @@ from tinydav import creator, util
 
 PYTHON2_6 = (sys.version_info >= (2, 6))
 
+# RFC 2518, 9.8 Timeout Request Header
+# The timeout value for TimeType "Second" MUST NOT be greater than 2^32-1.
 MAX_TIMEOUT = 4294967295
 
 
@@ -87,7 +90,7 @@ class WebDAVResponse(HTTPResponse):
         self._etree = ElementTree()
         # on XML parsing error set this to the raised exception
         self.parse_error = None
-        if self == 207:
+        if self == MULTI_STATUS:
             try:
                 self._etree.parse(StringIO(self.content))
             except ExpatError, e:
@@ -101,7 +104,9 @@ class WebDAVResponse(HTTPResponse):
         When the response was no multistatus the return value is 1.
 
         """
-        if self == 207:
+        if self == MULTI_STATUS:
+            # RFC 2518, 12.9 multistatus XML Element
+            # <!ELEMENT multistatus (response+, responsedescription?) >
             return len(self._etree.findall("/{DAV:}response"))
         return 1
 
@@ -113,7 +118,9 @@ class WebDAVResponse(HTTPResponse):
         Yield self otherwise.
 
         """
-        if self == 207:
+        if self == MULTI_STATUS:
+            # RFC 2518, 12.9 multistatus XML Element
+            # <!ELEMENT multistatus (response+, responsedescription?) >
             for response in self._etree.findall("/{DAV:}response"):
                 yield MultiStatusResponse(response)
         else:
@@ -125,7 +132,10 @@ class MultiStatusResponse(int):
 
     def __new__(cls, response):
         """Create instance with status code as int value."""
-        statusline = response.find("{DAV:}propstat/{DAV:}status").text
+        # RFC 2518, 12.9.1 response XML Element
+        # <!ELEMENT response (href, ((href*, status)|(propstat+)),
+        # responsedescription?) >
+        statusline = response.findtext("{DAV:}propstat/{DAV:}status")
         status = int(statusline.split()[1])
         return int.__new__(cls, status)
 
@@ -154,6 +164,8 @@ class MultiStatusResponse(int):
         # check, whether its a default DAV property name
         if not name.startswith("{"):
             name = "{DAV:}%s" % name
+        # RFC 2518, 12.9.1.1 propstat XML Element
+        # <!ELEMENT propstat (prop, status, responsedescription?) >
         prop = self.response.find("{DAV:}propstat/{DAV:}prop/%s" % name)
         if prop is None:
             raise KeyError(name)
@@ -190,6 +202,8 @@ class MultiStatusResponse(int):
         cut_dav_ns -- No namespaces for DAV properties when this is True.
 
         """
+        # RFC 2518, 12.11 prop XML element
+        # <!ELEMENT prop ANY>
         props = self.response.findall("{DAV:}propstat/{DAV:}prop/*")
         for prop in props:
             tagname = prop.tag
@@ -219,30 +233,28 @@ class MultiStatusResponse(int):
     def statusline(self):
         """Return the status line for this response."""
         if self._statusline is None:
-            statustag = self.response.find("{DAV:}propstat/{DAV:}status")
-            self._statusline = statustag.text
+            # RFC 2518, 12.9.1.2 status XML Element
+            # <!ELEMENT status (#PCDATA) >
+            statustag = self.response.findtext("{DAV:}propstat/{DAV:}status")
+            self._statusline = statustag
         return self._statusline
 
     @property
     def href(self):
         """Return the href for this response."""
         if self._href is None:
-            self._href = self.response.find("{DAV:}href").text
+            # RFC 2518, 12.3 href XML Element
+            # <!ELEMENT href (#PCDATA)>
+            self._href = self.response.findtext("{DAV:}href")
         return self._href
 
     @property
     def namespaces(self):
         """Return frozenset of namespaces."""
         if self._namespaces is None:
-
-            def extract_namespace(key):
-                if not key.startswith("{"):
-                    return None
-                return key[1:].split("}")[0]
-
-            self._namespaces = frozenset(extract_namespace(key)
+            self._namespaces = frozenset(util.extract_namespace(key)
                                          for key in self.iterkeys(False)
-                                         if extract_namespace(key))
+                                         if util.extract_namespace(key))
         return self._namespaces
 
 
@@ -323,6 +335,13 @@ class HTTPClient(object):
         password -- Password for user.
 
         """
+        # RFC 2068, 11.1 Basic Authentication Scheme
+        # basic-credentials = "Basic" SP basic-cookie
+        # basic-cookie   = <base64 [7] encoding of user-pass,
+        # except not limited to 76 char/line>
+        # user-pass   = userid ":" password
+        # userid      = *<TEXT excluding ":">
+        # password    = *TEXT
         userpw = "%s:%s" % (user, password)
         auth = userpw.encode("base64").rstrip()
         self.headers["Authorization"] = "Basic %s" % auth
@@ -422,10 +441,12 @@ class HTTPClient(object):
 
         """
         (uri, headers) = self._prepare(uri, headers)
-        if maxforwards:
-            # check, if number
+        if maxforwards is not None:
+            # RFC 2068, 14.31 Max-Forwards
+            # Max-Forwards   = "Max-Forwards" ":" 1*DIGIT
             int(maxforwards)
             headers["Max-Forwards"] = str(maxforwards)
+        # RFC 2068, 14.44 Via
         if via:
             headers["Via"] = ", ".join(via)
         return self._request("TRACE", uri, None, headers)
@@ -450,14 +471,31 @@ class CoreWebDAVClient(HTTPClient):
 
     def _preparecopymove(self, source, destination, depth, overwrite, headers):
         """Return prepared for copy/move request version of uri and headers."""
-        if str(depth) not in ("0", "infinity"):
-            raise ValueError("depth must be either 0 or infinity")
+        # RFC 2518, 8.8.3 COPY for Collections
+        # A client may submit a Depth header on a COPY on a collection with a
+        # value of "0" or "infinity".
+        depth = util.get_depth(depth, ("0", "infinity"))
         headers = dict() if (headers is None) else headers
         (source, headers) = self._prepare(source, headers)
-        # set headers that are needed for COPY or MOVE
+        # RFC 2518, 8.8 COPY Method
+        # The Destination header MUST be present.
+        # RFC 2518, 8.9 MOVE Method
+        # Consequently, the Destination header MUST be present on all MOVE
+        # methods and MUST follow all COPY requirements for the COPY part of
+        # the MOVE method.
         headers["Destination"] = util.make_destination(self, destination)
+        # RFC 2518, 8.8.3 COPY for Collections
+        # A client may submit a Depth header on a COPY on a collection with
+        # a value of "0" or "infinity".
+        # RFC 2518, 8.9.2 MOVE for Collections
         if source.endswith("/"):
-            headers["Depth"] = str(depth)
+            headers["Depth"] = depth
+        # RFC 2518, 8.8.4 COPY and the Overwrite Header
+        #           8.9.3 MOVE and the Overwrite Header
+        # If a resource exists at the destination and the Overwrite header is
+        # "T" then prior to performing the copy the server MUST perform a
+        # DELETE with "Depth: infinity" on the destination resource.  If the
+        # Overwrite header is set to "F" then the operation will fail.
         if overwrite is not None:
             headers["Overwrite"] = "T" if overwrite else "F"
         return (source, headers)
@@ -489,18 +527,20 @@ class CoreWebDAVClient(HTTPClient):
         namespaces -- Mapping with namespaces for given properties, if needed.
         headers -- If given, must be a dict with headers to send.
 
-        Raise ValueError, if illegal depth was given.
+        Raise ValueError, if illegal depth was given or if properties and
+        include argunemtns were given.
         Raise WebDAVError on HTTP errors.
 
         """
         namespaces = dict() if (namespaces is None) else namespaces
-        # check allowed values for depth
-        depth = str(depth)
-        if depth not in ("0", "1", "infinity"):
-            raise ValueError("illegal depth %s" % str(depth))
+        # RFC 2517, 8.1 PROPFIND
+        # A client may submit a Depth header with a value of "0", "1", or
+        # "infinity" with a PROPFIND on a collection resource with internal
+        # member URIs.
+        depth = util.get_depth(depth)
         # check mutually exclusive arguments
         if all([properties, include]):
-            raise AttributeError("properties and include are "
+            raise ValueError("properties and include are "
                                  "mutually exclusive")
         (uri, headers) = self._prepare(uri, headers)
         # additional headers needed for PROPFIND
@@ -520,11 +560,14 @@ class CoreWebDAVClient(HTTPClient):
         namespaces -- dict with namespaces: name -> URI.
         headers -- If given, must be a dict with headers to send.
 
-        Either setprops or delprops or both of them must be given.
+        Either setprops or delprops or both of them must be given, else
+        ValueError will be risen.
 
         """
+        # RFC 2517, 12.13 propertyupdate XML element
+        # <!ELEMENT propertyupdate (remove | set)+ >
         if not any((setprops, delprops)):
-            raise AttributeError("setprops and/or delprops must be given")
+            raise ValueError("setprops and/or delprops must be given")
         (uri, headers) = self._prepare(uri, headers)
         # additional header for proppatch
         headers["Content-Type"] = "application/xml"
@@ -541,8 +584,10 @@ class CoreWebDAVClient(HTTPClient):
 
         """
         headers = dict() if (headers is None) else headers
-        # always send depth:infinity-header when deleting collections
         if uri.endswith("/"):
+            # RFC 2517, 8.6.2 DELETE for Collections
+            # A client MUST NOT submit a Depth header with a DELETE on a
+            # collection with any value but infinity.
             headers["Depth"] = "infinity"
         return super(CoreWebDAVClient, self).delete(uri, headers)
 
@@ -576,8 +621,14 @@ class CoreWebDAVClient(HTTPClient):
         headers -- If given, must be a mapping with headers to set.
 
         Raise WebDAVError HTTP errors.
+        Raise ValueError, if an illegal depth was given.
 
         """
+        # RFC 2518, 8.9.2 MOVE for Collections
+        # A client MUST NOT submit a Depth header on a MOVE on a collection
+        # with any value but "infinity".
+        if source.endswith("/") and (depth != "infinity"):
+            raise ValueError("depth must be infinity when moving collections")
         (source, headers) = self._preparecopymove(source, destination, depth,
                                                   overwrite, headers)
         return self._request("MOVE", source, None, headers)
@@ -597,7 +648,11 @@ class CoreWebDAVClient(HTTPClient):
 
         """
         (uri, headers) = self._prepare(uri, headers)
-        # implement timeout constraints
+        # RFC 2517, 9.8 Timeout Request Header
+        # TimeOut = "Timeout" ":" 1#TimeType
+        # TimeType = ("Second-" DAVTimeOutVal | "Infinite" | Other)
+        # DAVTimeOutVal = 1*digit
+        # Other = "Extend" field-value   ; See section 4.2 of [RFC2068]
         if timeout is not None:
             try:
                 timeout = int(timeout)
@@ -611,12 +666,12 @@ class CoreWebDAVClient(HTTPClient):
                     raise ValueError("timeout too big")
                 value = "Second-%d" % int(timeout)
             headers["Timeout"] = value
-        # implement depth constaints
+        # RFC 2517, 8.10.4 Depth and Locking
+        # Values other than
+        # 0 or infinity MUST NOT be used with the Depth header on a LOCK
+        # method.
         if depth is not None:
-            depth = str(depth)
-            if depth not in ("0", "infinity"):
-                raise ValueError("illegal depth %s" % str(depth))
-            headers["Depth"] = depth
+            headers["Depth"] = util.get_depth(depth, ("0", "infinity"))
         content = creator.create_lock(scope, type_, owner)
         return self._request("LOCK", uri, content, headers)
 
@@ -636,14 +691,15 @@ class ExtendedWebDAVClient(CoreWebDAVClient):
         headers -- If given, must be a mapping with headers to set.
 
         Raise WebDAVError HTTP errors.
+        Raise ValueError, if an illegal depth value was given.
+
         """
-        # check allowed values for depth
-        depth = str(depth)
-        if depth not in ("0", "1", "infinity"):
-            raise ValueError("illegal depth %s" % str(depth))
+        depth = util.get_depth(depth)
         (uri, headers) = self._prepare(uri, headers)
         content = creator.create_report(properties, elements, namespaces)
-        # additional headers needed for REPORT
+        # RFC 3253, 3.6 REPORT Method
+        # The request MAY include a Depth header.  If no Depth header is
+        # included, Depth:0 is assumed.
         headers["Depth"] = depth
         headers["Content-Type"] = "application/xml"
         return self._request("REPORT", uri, content, headers)
