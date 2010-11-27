@@ -18,7 +18,7 @@
 from __future__ import with_statement
 from contextlib import closing
 from functools import wraps
-from httplib import MULTI_STATUS
+from httplib import MULTI_STATUS, OK
 from StringIO import StringIO
 from xml.etree.ElementTree import ElementTree, Element, SubElement, tostring
 from xml.parsers.expat import ExpatError
@@ -125,6 +125,86 @@ class WebDAVResponse(HTTPResponse):
                 yield MultiStatusResponse(response)
         else:
             yield self
+
+
+class WebDAVLockResponse(WebDAVResponse):
+    def __init__(self, response, client):
+        super(WebDAVLockResponse, self).__init__(response)
+        self._client = client
+        self._locktype = None
+        self._lockscope = None
+        self._depth = None
+        self._owner = None
+        self._timeout = None
+        self._locktoken = None
+        self._previous_if = None
+        if self == OK:
+            try:
+                self._etree.parse(StringIO(self.content))
+            except ExpatError, e:
+                self.parse_error = e
+                # don't fail on further processing
+                self._etree.parse(StringIO("<root><empty/></root>"))
+
+    def __enter__(self):
+        if self.locktoken:
+            self._previous_if = self._client.headers.get("If")
+            self._client.headers["If"] = "(%s)" % self.locktoken
+        return self._client
+
+    def __exit__(self, excname, exctype, exctb):
+        if "If" in self._client.headers:
+            if self._previous_if is not None:
+                self._client.headers["If"] = self._previous_if
+            else:
+                del self._client.headers["If"]
+
+    @property
+    def locktype(self):
+        if self._locktype is None:
+            locktype = "/{DAV:}lockdiscovery/{DAV:}activelock/{DAV:}locktype/*"
+            try:
+                self._locktype = self._etree.findall(locktype)[0]
+            except IndexError:
+                pass
+        return self._locktype
+
+    @property
+    def lockscope(self):
+        if self._lockscope is None:
+            scope = "/{DAV:}lockdiscovery/{DAV:}activelock/{DAV:}lockscope/*"
+            try:
+                self._lockscope = self._etree.findall(scope)[0]
+            except IndexError:
+                pass
+        return self._locktype
+
+    @property
+    def depth(self):
+        if self._depth is None:
+            depth = "/{DAV:}lockdiscovery/{DAV:}activelock/{DAV:}depth"
+            self._depth = self._etree.findtext(depth)
+        return self._depth
+
+    @property
+    def owner(self):
+        if self._owner is None:
+            owner = "/{DAV:}lockdiscovery/{DAV:}activelock/{DAV:}owner/*"
+            try:
+                self._owner = self._etree.findall(owner)
+            except IndexError:
+                pass
+        return self._owner
+
+    @property
+    def locktoken(self):
+        if self._locktoken is None:
+            token = "/{DAV:}lockdiscovery/{DAV:}activelock/{DAV:}locktoken/*"
+            try:
+                self._locktoken = self._etree.findall(token)
+            except IndexError:
+                pass
+        return self._locktoken
 
 
 class MultiStatusResponse(int):
