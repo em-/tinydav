@@ -451,7 +451,9 @@ class HTTPClient(object):
         """Make POST request and return HTTPResponse.
 
         uri -- Path to post data to.
-        content -- File descriptor or string with content to POST.
+        content -- File descriptor,string or dict with content to POST. If it
+                   is a dict, the dict contents will be posted as content type
+                   application/x-www-form-urlencoded.
         headers -- If given, must be a mapping with headers to set.
         query -- Mapping with key/value-pairs to be added as query to the URI.
 
@@ -459,6 +461,9 @@ class HTTPClient(object):
 
         """
         (uri, headers) = self._prepare(uri, headers, query)
+        if isinstance(content, dict):
+            headers["content-type"] = "application/x-www-form-urlencoded"
+            content = urllib.urlencode(content)
         return self._request("POST", uri, content, headers)
 
     def put(self, uri, fileobject, headers=None):
