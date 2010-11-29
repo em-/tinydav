@@ -175,7 +175,8 @@ class HTTPClientTestCase(unittest.TestCase):
         """Test HTTPClient._prepare."""
         headers = {"X-Test": "Hello"}
         query = {"foo": "bär"}
-        http = HTTPClient("127.0.0.1", 80, user="me", password="secret")
+        http = HTTPClient("127.0.0.1", 80)
+        http.setbasicauth("me", "secret")
         (uri, headers) = http._prepare("/foo bar/baz", headers, query)
         self.assertEqual(uri, "/foo%20bar/baz?foo=b%C3%A4r")
         expect = {'Authorization': 'Basic bWU6c2VjcmV0', 'X-Test': 'Hello'}
@@ -277,7 +278,8 @@ class CoreWebDAVClientTestCase(unittest.TestCase):
     """Test the CoreWebDAVClient class."""
     def setUp(self):
         """Setup the client."""
-        self.dav = CoreWebDAVClient("127.0.0.1", 80, "test", "passwd")
+        self.dav = CoreWebDAVClient("127.0.0.1", 80)
+        self.dav.setbasicauth("test", "passwd")
         self.con = Mock.HTTPConnection()
         self.dav._getconnection = lambda: self.con
 
@@ -287,7 +289,8 @@ class CoreWebDAVClientTestCase(unittest.TestCase):
         dest = "/dest/in/ation"
         headers = {"X-Test": "Hello"}
         query = {"foo": "bär"}
-        http = CoreWebDAVClient("127.0.0.1", 80, user="me", password="secret")
+        http = CoreWebDAVClient("127.0.0.1", 80)
+        http.setbasicauth("me", "secret")
         (source, headers) = http._preparecopymove(source, dest, 0,
                                                   False, headers)
         self.assertEqual(source, "/foo%20bar/baz")
@@ -305,7 +308,8 @@ class CoreWebDAVClientTestCase(unittest.TestCase):
         dest = "/dest/in/ation"
         headers = {"X-Test": "Hello"}
         query = {"foo": "bär"}
-        http = CoreWebDAVClient("127.0.0.1", 80, user="me", password="secret")
+        http = CoreWebDAVClient("127.0.0.1", 80)
+        http.setbasicauth("me", "secret")
         (source, headers) = http._preparecopymove(source, dest, 0,
                                                   True, headers)
         self.assertEqual(source, "/foo%20bar/baz/")
@@ -324,7 +328,8 @@ class CoreWebDAVClientTestCase(unittest.TestCase):
         dest = "/dest/in/ation"
         headers = {"X-Test": "Hello"}
         query = {"foo": "bär"}
-        http = CoreWebDAVClient("127.0.0.1", 80, user="me", password="secret")
+        http = CoreWebDAVClient("127.0.0.1", 80)
+        http.setbasicauth("me", "secret")
         self.assertRaises(
             ValueError,
             http._preparecopymove,
@@ -490,7 +495,8 @@ class ExtendedWebDAVClientTestCase(unittest.TestCase):
     """Test the ExtendedWebDAVClient class."""
     def setUp(self):
         """Setup the client."""
-        self.dav = ExtendedWebDAVClient("127.0.0.1", 80, "test", "passwd")
+        self.dav = ExtendedWebDAVClient("127.0.0.1", 80)
+        self.dav.setbasicauth("test", "passwd")
         self.con = Mock.HTTPConnection()
         self.dav._getconnection = lambda: self.con
 

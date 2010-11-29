@@ -35,6 +35,13 @@ PYTHON2_6 = (sys.version_info >= (2, 6))
 # The timeout value for TimeType "Second" MUST NOT be greater than 2^32-1.
 MAX_TIMEOUT = 4294967295
 
+# map with default ports mapped to http protocol
+PROTOCOL = {
+    80: "http",
+    443: "https",
+    8080: "http",
+    8081: "http",
+}
 
 class FakeHTTPRequest(object):
     """Fake HTTP request object needed for cookies.
@@ -303,25 +310,31 @@ class HTTPClient(object):
 
     ResponseType = HTTPResponse
 
-    def __init__(self, host, port=80, user=None, password="", protocol="http"):
+    def __init__(self, host, port=80, protocol=None):
         """Initialize the WebDAV client.
 
         host -- WebDAV server host.
         port -- WebDAV server port.
-        user -- Login name.
-        password -- Password for login.
-        protocol -- Either "http" or "https".
+        protocol -- Override protocol name. Is either 'http' or 'https'. If
+                    not given, the protocol will be chosen by the port number
+                    automatically:
+                        80   -> http
+                        443  -> https
+                        8080 -> http
+                        8081 -> http
+                    Default port is 'http'.
 
         """
         assert isinstance(port, int)
+        assert protocol in (None, "http", "https")
         self.host = host
         self.port = port
-        self.protocol = protocol
+        if protocol is None:
+            self.protocol = PROTOCOL.get(port, "http")
+        else:
+            self.protocol = protocol
         self.headers = dict()
         self.cookie = None
-        # set header for basic authentication
-        if user is not None:
-            self.setbasicauth(user, password)
 
     def _getconnection(self):
         """Return HTTP(S)Connection object depending on set protocol."""
