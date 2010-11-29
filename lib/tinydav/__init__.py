@@ -36,6 +36,46 @@ PYTHON2_6 = (sys.version_info >= (2, 6))
 MAX_TIMEOUT = 4294967295
 
 
+class FakeHTTPRequest(object):
+    """Fake HTTP request object needed for cookies.
+    
+    See http://docs.python.org/library/cookielib.html#cookiejar-and-filecookiejar-objects
+
+    """
+    def __init__(self, client, uri, headers):
+        """Initialize the fake HTTP request object.
+
+        client -- HTTPClient object or one of its subclasses.
+        uri -- The URI to call.
+        headers -- Headers dict to add cookie stuff to.
+
+        """
+        self._client = client
+        self._uri = uri
+        self._headers = headers
+
+    def get_full_url(self):
+        return util.make_destination(self._client, self._uri)
+
+    def get_host(self):
+        return self._client.host
+
+    def is_unverifiable(self):
+        return False
+
+    def get_origin_req_host(self):
+        return self.get_host()
+
+    def get_type(self):
+        return self._client.protocol
+
+    def has_header(self, name):
+        return (name in self._headers)
+
+    def add_unredirected_header(self, key, header):
+        self._headers[key] = header
+
+
 class HTTPError(Exception):
     """Exception for any error that occurs."""
 
@@ -278,6 +318,7 @@ class HTTPClient(object):
         self.port = port
         self.protocol = protocol
         self.headers = dict()
+        self.cookie = None
         # set header for basic authentication
         if user is not None:
             self.setbasicauth(user, password)
@@ -297,7 +338,16 @@ class HTTPClient(object):
         headers -- If given, a mapping with additonal headers to send.
 
         """
+        if not uri.startswith("/"):
+            uri = "/%s" % uri
+
         headers = dict() if (headers is None) else headers
+
+        # handle cookies, if necessary
+        if self.cookie is not None:
+            fake_request = FakeHTTPRequest(self, uri, headers)
+            self.cookie.add_cookie_header(fake_request)
+
         con = self._getconnection()
         try:
             with closing(con):
@@ -305,7 +355,12 @@ class HTTPClient(object):
                 response = self.ResponseType(con.getresponse())
         except Exception, err:
             raise HTTPError(err)
-        return response
+        else:
+            if self.cookie is not None:
+                # make httplib.Response compatible with urllib2.Response
+                response.response.info = lambda: response.response.msg
+                self.cookie.extract_cookies(response.response, fake_request)
+            return response
 
     def _prepare(self, uri, headers, query=None):
         """Return 2-tuple with prepared version of uri and headers.
@@ -345,6 +400,14 @@ class HTTPClient(object):
         userpw = "%s:%s" % (user, password)
         auth = userpw.encode("base64").rstrip()
         self.headers["Authorization"] = "Basic %s" % auth
+
+    def setcookie(self, cookie):
+        """Set cookie class to be used in requests.
+
+        cookie -- Cookie class from cookielib.
+
+        """
+        self.cookie = cookie
 
     def options(self, uri, headers=None):
         """Make OPTIONS request and return status.
