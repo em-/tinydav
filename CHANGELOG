@@ -3,6 +3,23 @@ Tinydav - WebDAV client libaray
 ===============================
 
 -------------
+Version 0.5.2
+-------------
+FEATURES
+* Changes license to LGPL Version 3.
+* Support of all WebDAV methods.
+* Support for Versioning Extensions to WebDAV (RFC 3253): REPORT method
+* Added support for application/x-www-form-urlencoded.
+* Added cookie support.
+
+NOTICE
+* Slightly incompatible with Version 0.5.1:
+  * Client classes don't take username and password anymore. Use setbasicauth
+    method instead.
+  * Raise ValueErrors instead of AttributeErrors in methods.
+
+
+-------------
 Version 0.5.1
 -------------
 FEATURES
