@@ -28,6 +28,7 @@ import urllib
 
 from tinydav import creator, util
 
+__all__ = ("HTTPError", "HTTPClient", "WebDAVClient")
 
 PYTHON2_6 = (sys.version_info >= (2, 6))
 
@@ -84,7 +85,12 @@ class FakeHTTPRequest(object):
 
 
 class HTTPError(Exception):
-    """Exception for any error that occurs."""
+    """Exception for any error that occurs.
+    
+    The HTTPError has one attribute: carry. This attribute is the real 
+    exception object that has been raised.
+
+    """
 
     def __init__(self, carry):
         """Initialize the HTTPError.
@@ -96,7 +102,19 @@ class HTTPError(Exception):
 
 
 class HTTPResponse(int):
-    """Result from HTTP request."""
+    """Result from HTTP request.
+
+    An HTTPResponse object is a subclass of int. The int value of such an
+    object is the HTTP status number from the response.
+
+    This object has the following attributes:
+
+      response -- The original httplib.Response object.
+      headers -- A dictionary with the received headers.
+      content -- The content of the response as string.
+      statusline -- The received HTTP status line. E.g. "HTTP/1.1 200 OK".
+
+    """
 
     def __new__(cls, response):
         """Construct HTTPResponse.
@@ -125,7 +143,28 @@ class HTTPResponse(int):
 
 
 class WebDAVResponse(HTTPResponse):
-    """Result from WebDAV request."""
+    """Result from WebDAV request.
+
+    A WebDAVResponse object is a subclass of int. The int value of such an
+    object is the HTTP status number from the response.
+
+    This object has the following attributes:
+
+      response -- The original httplib.Response object.
+      headers -- A dictionary with the received headers.
+      content -- The content of the response as string.
+      statusline -- The received HTTP status line. E.g. "HTTP/1.1 200 OK".
+
+    You can iterate over a WebDAVResponse object. If the received data was
+    a multi-status response, the iterator will yield a MultiStatusResponse
+    object per result. If it was no multi-status response, the iterator will
+    just yield this WebDAVResponse object.
+
+    The length of a WebDAVResponse object is 1, except for multi-status 
+    responses. The length will then be the number of results in the
+    multi-status.
+
+    """
 
     def __init__(self, response):
         """Initialize the WebDAVResult.
@@ -175,7 +214,22 @@ class WebDAVResponse(HTTPResponse):
 
 
 class MultiStatusResponse(int):
-    """Wrapper for multistatus responses."""
+    """Wrapper for multistatus responses.
+    
+    A MultiStatusResponse object is a subclass of int. The int value of such an
+    object is the HTTP status number from the response.
+
+    Furthermore this object implements the dictionary interface. Through it 
+    you can access all properties that the resource has.
+
+    This object has the following attributes:
+
+      statusline -- The received HTTP status line. E.g. "HTTP/1.1 200 OK".
+      href -- The HREF of the resource this status is for.
+      namespaces -- A frozenset with all the XML namespaces that the underlying
+                    XML structure had.
+
+    """
 
     def __new__(cls, response):
         """Create instance with status code as int value."""
@@ -306,7 +360,17 @@ class MultiStatusResponse(int):
 
 
 class HTTPClient(object):
-    """Mini HTTP client."""
+    """Mini HTTP client.
+
+    This object has the following attributes:
+        host -- Given host on initialization.
+        port -- Given port on initialization.
+        protocol -- Used protocol. Either chosen by the port number or taken
+                    from given value in initialization.
+        headers -- Dictionary with headers to send with every request.
+        cookie -- If set with setcookie: the given object.
+
+    """
 
     ResponseType = HTTPResponse
 
@@ -546,7 +610,17 @@ class HTTPClient(object):
 
 
 class CoreWebDAVClient(HTTPClient):
-    """Basic WebDAVClient specified in RFC 2518."""
+    """Basic WebDAVClient specified in RFC 2518.
+
+    This object has the following attributes:
+        host -- Given host on initialization.
+        port -- Given port on initialization.
+        protocol -- Used protocol. Either chosen by the port number or taken
+                    from given value in initialization.
+        headers -- Dictionary with headers to send with every request.
+        cookie -- If set with setcookie: the given object.
+
+    """
 
     ResponseType = WebDAVResponse
 
@@ -787,4 +861,13 @@ class ExtendedWebDAVClient(CoreWebDAVClient):
 
 
 class WebDAVClient(ExtendedWebDAVClient):
-    """Mini WebDAV client."""
+    """Mini WebDAV client.
+
+    This object has the following attributes:
+        host -- Given host on initialization.
+        port -- Given port on initialization.
+        protocol -- Used protocol. Either chosen by the port number or taken
+                    from given value in initialization.
+        headers -- Dictionary with headers to send with every request.
+        cookie -- If set with setcookie: the given object.
+    """
