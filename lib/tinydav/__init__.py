@@ -18,7 +18,7 @@
 from __future__ import with_statement
 from contextlib import closing
 from functools import wraps
-from httplib import MULTI_STATUS, OK
+from httplib import MULTI_STATUS, OK, CONFLICT
 from StringIO import StringIO
 from xml.etree.ElementTree import ElementTree, Element, SubElement, tostring
 from xml.parsers.expat import ExpatError
@@ -152,7 +152,7 @@ class WebDAVLockResponse(WebDAVResponse):
             self._client.headers["If"] = "(%s)" % self.locktoken
         return self._client
 
-    def __exit__(self, excname, exctype, exctb):
+    def __exit__(self, exc, exctype, exctb):
         if "If" in self._client.headers:
             if self._previous_if is not None:
                 self._client.headers["If"] = self._previous_if
@@ -744,7 +744,7 @@ class CoreWebDAVClient(HTTPClient):
             else:
                 if timeout > MAX_TIMEOUT:
                     raise ValueError("timeout too big")
-                value = "Second-%d" % int(timeout)
+                value = "Second-%d" % timeout
             headers["Timeout"] = value
         # RFC 2517, 8.10.4 Depth and Locking
         # Values other than
