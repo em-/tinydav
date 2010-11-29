@@ -86,23 +86,7 @@ class FakeHTTPRequest(object):
         self._headers[key] = header
 
 
-class HTTPError(Exception):
-    """Exception for any error that occurs.
-    
-    The HTTPError has one attribute: carry. This attribute is the real 
-    exception object that has been raised.
-
-    """
-
-    def __init__(self, carry):
-        """Initialize the HTTPError.
-
-        carry -- The original exception.
-
-        """
-        self.carry = carry
-
-
+# Responses
 class HTTPResponse(int):
     """Result from HTTP request.
 
@@ -179,12 +163,7 @@ class WebDAVResponse(HTTPResponse):
         # on XML parsing error set this to the raised exception
         self.parse_error = None
         if self == MULTI_STATUS:
-            try:
-                self._etree.parse(StringIO(self.content))
-            except ExpatError, e:
-                self.parse_error = e
-                # don't fail on further processing
-                self._etree.parse(StringIO("<root><empty/></root>"))
+            self._parse_xml_content()
 
     def __len__(self):
         """Return the number of responses in a multistatus response.
@@ -214,6 +193,15 @@ class WebDAVResponse(HTTPResponse):
         else:
             yield self
 
+    def _parse_xml_content(self):
+        """Parse the XML content."""
+        try:
+            self._etree.parse(StringIO(self.content))
+        except ExpatError, e:
+            self.parse_error = e
+            # don't fail on further processing
+            self._etree.parse(StringIO("<root><empty/></root>"))
+
 
 class WebDAVLockResponse(WebDAVResponse):
     def __init__(self, response, client):
@@ -227,12 +215,7 @@ class WebDAVLockResponse(WebDAVResponse):
         self._locktoken = None
         self._previous_if = None
         if self == OK:
-            try:
-                self._etree.parse(StringIO(self.content))
-            except ExpatError, e:
-                self.parse_error = e
-                # don't fail on further processing
-                self._etree.parse(StringIO("<root><empty/></root>"))
+            self._parse_xml_content()
 
     def __enter__(self):
         if self.locktoken:
@@ -297,7 +280,7 @@ class WebDAVLockResponse(WebDAVResponse):
 
 class MultiStatusResponse(int):
     """Wrapper for multistatus responses.
-    
+
     A MultiStatusResponse object is a subclass of int. The int value of such an
     object is the HTTP status number from the response.
 
@@ -441,6 +424,41 @@ class MultiStatusResponse(int):
         return self._namespaces
 
 
+# Exceptions
+class HTTPError(HTTPResponse, Exception):
+    """Base exception class for HTTP errors.
+
+    This exception is a subclass of an HTTPResponse.  
+
+    response -- httplib.Response object.
+    method -- String with uppercase method name.
+
+    """
+    def __init__(self, response, method):
+        HTTPResponse.__init__(self, response)
+        self.request_method = method
+
+
+class HTTPUserError(HTTPError):
+    """Exception class for 4xx HTTP errors."""
+
+
+class HTTPServerError(HTTPError):
+    """Exception class for 5xx HTTP errors."""
+
+
+class WebDAVUserError(HTTPUserError):
+    """Exception class for 4xx HTTP errors used by WebDAVClient."""
+    def __init__(self, response, method):
+        if (method == "LOCK") and (self == CONFLICT):
+            self._parse_xml_content()
+
+
+class WebDAVServerError(HTTPUserError):
+    """Exception class for 5xx HTTP errors used by WebDAVClient."""
+
+
+# Clients
 class HTTPClient(object):
     """Mini HTTP client.
 
@@ -508,18 +526,24 @@ class HTTPClient(object):
             self.cookie.add_cookie_header(fake_request)
 
         con = self._getconnection()
-        try:
-            with closing(con):
-                con.request(method, uri, content, headers)
-                response = self.ResponseType(con.getresponse())
-        except Exception, err:
-            raise HTTPError(err)
-        else:
-            if self.cookie is not None:
-                # make httplib.Response compatible with urllib2.Response
-                response.response.info = lambda: response.response.msg
-                self.cookie.extract_cookies(response.response, fake_request)
-            return response
+        with closing(con):
+            con.request(method, uri, content, headers)
+            response = con.getresponse()
+            if 400 <= response.status < 500:
+                response = HTTPUserError(response, method)
+            elif 500 <= response.status < 600:
+                response = HTTPServerError(response, method)
+            else:
+                response = self.ResponseType(response)
+
+        if self.cookie is not None:
+            # make httplib.Response compatible with urllib2.Response
+            response.response.info = lambda: response.response.msg
+            self.cookie.extract_cookies(response.response, fake_request)
+
+        if isinstance(response, HTTPError):
+            raise response
+        return response
 
     def _prepare(self, uri, headers, query=None):
         """Return 2-tuple with prepared version of uri and headers.
@@ -574,7 +598,8 @@ class HTTPClient(object):
         uri -- URI of the request.
         headers -- Optional mapping with headers to send.
 
-        Raise HTTPError on HTTP errors.
+        Raise HTTPUserError on 4xx HTTP status codes.
+        Raise HTTPServerError on 5xx HTTP status codes.
 
         """
         (uri, headers) = self._prepare(uri, headers)
@@ -587,7 +612,8 @@ class HTTPClient(object):
         headers -- Optional mapping with headers to send.
         query -- Mapping with key/value-pairs to be added as query to the URI.
 
-        Raise HTTPError on HTTP errors.
+        Raise HTTPUserError on 4xx HTTP status codes.
+        Raise HTTPServerError on 5xx HTTP status codes.
 
         """
         (uri, headers) = self._prepare(uri, headers, query)
@@ -600,7 +626,8 @@ class HTTPClient(object):
         headers -- Optional mapping with headers to send.
         query -- Mapping with key/value-pairs to be added as query to the URI.
 
-        Raise HTTPError on HTTP errors.
+        Raise HTTPUserError on 4xx HTTP status codes.
+        Raise HTTPServerError on 5xx HTTP status codes.
 
         """
         (uri, headers) = self._prepare(uri, headers, query)
@@ -616,7 +643,8 @@ class HTTPClient(object):
         headers -- If given, must be a mapping with headers to set.
         query -- Mapping with key/value-pairs to be added as query to the URI.
 
-        Raise HTTPError on HTTP errors.
+        Raise HTTPUserError on 4xx HTTP status codes.
+        Raise HTTPServerError on 5xx HTTP status codes.
 
         """
         (uri, headers) = self._prepare(uri, headers, query)
@@ -632,7 +660,8 @@ class HTTPClient(object):
         fileobject -- File object with content to PUT.
         headers -- If given, must be a dict with headers to send.
 
-        Raise HTTPError on HTTP errors.
+        Raise HTTPUserError on 4xx HTTP status codes.
+        Raise HTTPServerError on 5xx HTTP status codes.
 
         """
         (uri, headers) = self._prepare(uri, headers)
@@ -646,7 +675,8 @@ class HTTPClient(object):
         uri -- Path to post data to.
         headers -- If given, must be a mapping with headers to set.
 
-        Raise HTTPError on HTTP errors.
+        Raise HTTPUserError on 4xx HTTP status codes.
+        Raise HTTPServerError on 5xx HTTP status codes.
 
         """
         (uri, headers) = self._prepare(uri, headers)
@@ -664,7 +694,8 @@ class HTTPClient(object):
         Raise ValueError, if maxforward is not an int or convertable to
         an int.
         Raise TypeError, if via is not an iterable of string.
-        Raise HTTPError on HTTP errors.
+        Raise HTTPUserError on 4xx HTTP status codes.
+        Raise HTTPServerError on 5xx HTTP status codes.
 
         """
         (uri, headers) = self._prepare(uri, headers)
@@ -684,7 +715,8 @@ class HTTPClient(object):
         uri -- Path to post data to.
         headers -- If given, must be a mapping with headers to set.
 
-        Raise HTTPError on HTTP errors.
+        Raise HTTPUserError on 4xx HTTP status codes.
+        Raise HTTPServerError on 5xx HTTP status codes.
 
         """
         (uri, headers) = self._prepare(uri, headers)
@@ -743,7 +775,8 @@ class CoreWebDAVClient(HTTPClient):
         uri -- Path to create.
         headers -- If given, must be a dict with headers to send.
 
-        Raise WebDAVError HTTP errors.
+        Raise WebDAVUserError on 4xx HTTP status codes.
+        Raise WebDAVServerError on 5xx HTTP status codes.
 
         """
         (uri, headers) = self._prepare(uri, headers)
@@ -765,8 +798,9 @@ class CoreWebDAVClient(HTTPClient):
         headers -- If given, must be a dict with headers to send.
 
         Raise ValueError, if illegal depth was given or if properties and
-        include argunemtns were given.
-        Raise WebDAVError on HTTP errors.
+        include arguments were given.
+        Raise WebDAVUserError on 4xx HTTP status codes.
+        Raise WebDAVServerError on 5xx HTTP status codes.
 
         """
         namespaces = dict() if (namespaces is None) else namespaces
@@ -799,6 +833,8 @@ class CoreWebDAVClient(HTTPClient):
 
         Either setprops or delprops or both of them must be given, else
         ValueError will be risen.
+        Raise WebDAVUserError on 4xx HTTP status codes.
+        Raise WebDAVServerError on 5xx HTTP status codes.
 
         """
         # RFC 2517, 12.13 propertyupdate XML element
@@ -817,7 +853,8 @@ class CoreWebDAVClient(HTTPClient):
         uri -- Path of resource or collection to delete.
         headers -- If given, must be a mapping with headers to set.
 
-        Raise WebDAVError HTTP errors.
+        Raise WebDAVUserError on 4xx HTTP status codes.
+        Raise WebDAVServerError on 5xx HTTP status codes.
 
         """
         headers = dict() if (headers is None) else headers
@@ -839,7 +876,8 @@ class CoreWebDAVClient(HTTPClient):
                      Overwrite header ist set to "T" (True) or "F" (False).
         headers -- If given, must be a mapping with headers to set.
 
-        Raise WebDAVError HTTP errors.
+        Raise WebDAVUserError on 4xx HTTP status codes.
+        Raise WebDAVServerError on 5xx HTTP status codes.
 
         """
         (source, headers) = self._preparecopymove(source, destination, depth,
@@ -857,8 +895,9 @@ class CoreWebDAVClient(HTTPClient):
                      Overwrite header ist set to "T" (True) or "F" (False).
         headers -- If given, must be a mapping with headers to set.
 
-        Raise WebDAVError HTTP errors.
         Raise ValueError, if an illegal depth was given.
+        Raise WebDAVUserError on 4xx HTTP status codes.
+        Raise WebDAVServerError on 5xx HTTP status codes.
 
         """
         # RFC 2518, 8.9.2 MOVE for Collections
@@ -882,6 +921,9 @@ class CoreWebDAVClient(HTTPClient):
                  ElementTree element.
         timeout -- Value for the timeout header. Either "infinite" or a number
                    representing the seconds (not greater than 2^32 - 1).
+
+        Raise WebDAVUserError on 4xx HTTP status codes.
+        Raise WebDAVServerError on 5xx HTTP status codes.
 
         """
         (uri, headers) = self._prepare(uri, headers)
@@ -927,8 +969,9 @@ class ExtendedWebDAVClient(CoreWebDAVClient):
         namespaces -- Mapping with namespaces for given properties, if needed.
         headers -- If given, must be a mapping with headers to set.
 
-        Raise WebDAVError HTTP errors.
         Raise ValueError, if an illegal depth value was given.
+        Raise WebDAVUserError on 4xx HTTP status codes.
+        Raise WebDAVServerError on 5xx HTTP status codes.
 
         """
         depth = util.get_depth(depth)
@@ -952,4 +995,5 @@ class WebDAVClient(ExtendedWebDAVClient):
                     from given value in initialization.
         headers -- Dictionary with headers to send with every request.
         cookie -- If set with setcookie: the given object.
+
     """
