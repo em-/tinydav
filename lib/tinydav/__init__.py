@@ -1,17 +1,19 @@
 # The tinydav WebDAV client.
 # Copyright (C) 2009  Manuel Hermann <manuel-hermann@gmx.net>
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
+# This file is part of tinydav.
+#
+# tinydav is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+# GNU Lesser General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License
+# You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """The tinydav WebDAV client."""
 
@@ -28,6 +30,7 @@ import urllib
 
 from tinydav import creator, util
 
+__all__ = ("HTTPError", "HTTPClient", "WebDAVClient")
 
 PYTHON2_6 = (sys.version_info >= (2, 6))
 
@@ -35,9 +38,61 @@ PYTHON2_6 = (sys.version_info >= (2, 6))
 # The timeout value for TimeType "Second" MUST NOT be greater than 2^32-1.
 MAX_TIMEOUT = 4294967295
 
+# map with default ports mapped to http protocol
+PROTOCOL = {
+    80: "http",
+    443: "https",
+    8080: "http",
+    8081: "http",
+}
+
+class FakeHTTPRequest(object):
+    """Fake HTTP request object needed for cookies.
+    
+    See http://docs.python.org/library/cookielib.html#cookiejar-and-filecookiejar-objects
+
+    """
+    def __init__(self, client, uri, headers):
+        """Initialize the fake HTTP request object.
+
+        client -- HTTPClient object or one of its subclasses.
+        uri -- The URI to call.
+        headers -- Headers dict to add cookie stuff to.
+
+        """
+        self._client = client
+        self._uri = uri
+        self._headers = headers
+
+    def get_full_url(self):
+        return util.make_destination(self._client, self._uri)
+
+    def get_host(self):
+        return self._client.host
+
+    def is_unverifiable(self):
+        return False
+
+    def get_origin_req_host(self):
+        return self.get_host()
+
+    def get_type(self):
+        return self._client.protocol
+
+    def has_header(self, name):
+        return (name in self._headers)
+
+    def add_unredirected_header(self, key, header):
+        self._headers[key] = header
+
 
 class HTTPError(Exception):
-    """Exception for any error that occurs."""
+    """Exception for any error that occurs.
+    
+    The HTTPError has one attribute: carry. This attribute is the real 
+    exception object that has been raised.
+
+    """
 
     def __init__(self, carry):
         """Initialize the HTTPError.
@@ -49,7 +104,19 @@ class HTTPError(Exception):
 
 
 class HTTPResponse(int):
-    """Result from HTTP request."""
+    """Result from HTTP request.
+
+    An HTTPResponse object is a subclass of int. The int value of such an
+    object is the HTTP status number from the response.
+
+    This object has the following attributes:
+
+      response -- The original httplib.Response object.
+      headers -- A dictionary with the received headers.
+      content -- The content of the response as string.
+      statusline -- The received HTTP status line. E.g. "HTTP/1.1 200 OK".
+
+    """
 
     def __new__(cls, response):
         """Construct HTTPResponse.
@@ -78,7 +145,28 @@ class HTTPResponse(int):
 
 
 class WebDAVResponse(HTTPResponse):
-    """Result from WebDAV request."""
+    """Result from WebDAV request.
+
+    A WebDAVResponse object is a subclass of int. The int value of such an
+    object is the HTTP status number from the response.
+
+    This object has the following attributes:
+
+      response -- The original httplib.Response object.
+      headers -- A dictionary with the received headers.
+      content -- The content of the response as string.
+      statusline -- The received HTTP status line. E.g. "HTTP/1.1 200 OK".
+
+    You can iterate over a WebDAVResponse object. If the received data was
+    a multi-status response, the iterator will yield a MultiStatusResponse
+    object per result. If it was no multi-status response, the iterator will
+    just yield this WebDAVResponse object.
+
+    The length of a WebDAVResponse object is 1, except for multi-status 
+    responses. The length will then be the number of results in the
+    multi-status.
+
+    """
 
     def __init__(self, response):
         """Initialize the WebDAVResult.
@@ -208,7 +296,22 @@ class WebDAVLockResponse(WebDAVResponse):
 
 
 class MultiStatusResponse(int):
-    """Wrapper for multistatus responses."""
+    """Wrapper for multistatus responses.
+    
+    A MultiStatusResponse object is a subclass of int. The int value of such an
+    object is the HTTP status number from the response.
+
+    Furthermore this object implements the dictionary interface. Through it 
+    you can access all properties that the resource has.
+
+    This object has the following attributes:
+
+      statusline -- The received HTTP status line. E.g. "HTTP/1.1 200 OK".
+      href -- The HREF of the resource this status is for.
+      namespaces -- A frozenset with all the XML namespaces that the underlying
+                    XML structure had.
+
+    """
 
     def __new__(cls, response):
         """Create instance with status code as int value."""
@@ -339,28 +442,45 @@ class MultiStatusResponse(int):
 
 
 class HTTPClient(object):
-    """Mini HTTP client."""
+    """Mini HTTP client.
+
+    This object has the following attributes:
+        host -- Given host on initialization.
+        port -- Given port on initialization.
+        protocol -- Used protocol. Either chosen by the port number or taken
+                    from given value in initialization.
+        headers -- Dictionary with headers to send with every request.
+        cookie -- If set with setcookie: the given object.
+
+    """
 
     ResponseType = HTTPResponse
 
-    def __init__(self, host, port=80, user=None, password="", protocol="http"):
+    def __init__(self, host, port=80, protocol=None):
         """Initialize the WebDAV client.
 
         host -- WebDAV server host.
         port -- WebDAV server port.
-        user -- Login name.
-        password -- Password for login.
-        protocol -- Either "http" or "https".
+        protocol -- Override protocol name. Is either 'http' or 'https'. If
+                    not given, the protocol will be chosen by the port number
+                    automatically:
+                        80   -> http
+                        443  -> https
+                        8080 -> http
+                        8081 -> http
+                    Default port is 'http'.
 
         """
         assert isinstance(port, int)
+        assert protocol in (None, "http", "https")
         self.host = host
         self.port = port
-        self.protocol = protocol
+        if protocol is None:
+            self.protocol = PROTOCOL.get(port, "http")
+        else:
+            self.protocol = protocol
         self.headers = dict()
-        # set header for basic authentication
-        if user is not None:
-            self.setbasicauth(user, password)
+        self.cookie = None
 
     def _getconnection(self):
         """Return HTTP(S)Connection object depending on set protocol."""
@@ -377,7 +497,16 @@ class HTTPClient(object):
         headers -- If given, a mapping with additonal headers to send.
 
         """
+        if not uri.startswith("/"):
+            uri = "/%s" % uri
+
         headers = dict() if (headers is None) else headers
+
+        # handle cookies, if necessary
+        if self.cookie is not None:
+            fake_request = FakeHTTPRequest(self, uri, headers)
+            self.cookie.add_cookie_header(fake_request)
+
         con = self._getconnection()
         try:
             with closing(con):
@@ -385,7 +514,12 @@ class HTTPClient(object):
                 response = self.ResponseType(con.getresponse())
         except Exception, err:
             raise HTTPError(err)
-        return response
+        else:
+            if self.cookie is not None:
+                # make httplib.Response compatible with urllib2.Response
+                response.response.info = lambda: response.response.msg
+                self.cookie.extract_cookies(response.response, fake_request)
+            return response
 
     def _prepare(self, uri, headers, query=None):
         """Return 2-tuple with prepared version of uri and headers.
@@ -425,6 +559,14 @@ class HTTPClient(object):
         userpw = "%s:%s" % (user, password)
         auth = userpw.encode("base64").rstrip()
         self.headers["Authorization"] = "Basic %s" % auth
+
+    def setcookie(self, cookie):
+        """Set cookie class to be used in requests.
+
+        cookie -- Cookie class from cookielib.
+
+        """
+        self.cookie = cookie
 
     def options(self, uri, headers=None):
         """Make OPTIONS request and return status.
@@ -468,7 +610,9 @@ class HTTPClient(object):
         """Make POST request and return HTTPResponse.
 
         uri -- Path to post data to.
-        content -- File descriptor or string with content to POST.
+        content -- File descriptor,string or dict with content to POST. If it
+                   is a dict, the dict contents will be posted as content type
+                   application/x-www-form-urlencoded.
         headers -- If given, must be a mapping with headers to set.
         query -- Mapping with key/value-pairs to be added as query to the URI.
 
@@ -476,6 +620,9 @@ class HTTPClient(object):
 
         """
         (uri, headers) = self._prepare(uri, headers, query)
+        if isinstance(content, dict):
+            headers["content-type"] = "application/x-www-form-urlencoded"
+            content = urllib.urlencode(content)
         return self._request("POST", uri, content, headers)
 
     def put(self, uri, fileobject, headers=None):
@@ -545,7 +692,17 @@ class HTTPClient(object):
 
 
 class CoreWebDAVClient(HTTPClient):
-    """Basic WebDAVClient specified in RFC 2518."""
+    """Basic WebDAVClient specified in RFC 2518.
+
+    This object has the following attributes:
+        host -- Given host on initialization.
+        port -- Given port on initialization.
+        protocol -- Used protocol. Either chosen by the port number or taken
+                    from given value in initialization.
+        headers -- Dictionary with headers to send with every request.
+        cookie -- If set with setcookie: the given object.
+
+    """
 
     ResponseType = WebDAVResponse
 
@@ -786,4 +943,13 @@ class ExtendedWebDAVClient(CoreWebDAVClient):
 
 
 class WebDAVClient(ExtendedWebDAVClient):
-    """Mini WebDAV client."""
+    """Mini WebDAV client.
+
+    This object has the following attributes:
+        host -- Given host on initialization.
+        port -- Given port on initialization.
+        protocol -- Used protocol. Either chosen by the port number or taken
+                    from given value in initialization.
+        headers -- Dictionary with headers to send with every request.
+        cookie -- If set with setcookie: the given object.
+    """

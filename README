@@ -30,5 +30,4 @@ $ python setup.py test
 
 License
 -------
-TinyDAV ist licensed under the GPLv3. See separate LICENSE.
-
+TinyDAV ist licensed under the LGPLv3. See separate LICENSE and LICENSE.LESSER. 
