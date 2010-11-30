@@ -19,8 +19,8 @@
 
 from __future__ import with_statement
 from contextlib import closing
-from functools import wraps
-from httplib import MULTI_STATUS, OK
+from functools import wraps, partial
+from httplib import MULTI_STATUS, OK, CONFLICT
 from StringIO import StringIO
 from xml.etree.ElementTree import ElementTree, Element, SubElement, tostring
 from xml.parsers.expat import ExpatError
@@ -43,6 +43,8 @@ PYTHON2_6 = (sys.version_info >= (2, 6))
 # RFC 2518, 9.8 Timeout Request Header
 # The timeout value for TimeType "Second" MUST NOT be greater than 2^32-1.
 MAX_TIMEOUT = 4294967295
+
+ACTIVELOCK = "/{DAV:}lockdiscovery/{DAV:}activelock"
 
 # map with default ports mapped to http protocol
 PROTOCOL = {
@@ -91,8 +93,12 @@ class HTTPResponse(int):
                         % (version, response.status, response.reason)
 
     def __repr__(self):
-        """Return representation string."""
+        """Return representation."""
         return "<%s: %d>" % (self.__class__.__name__, self)
+
+    def __str__(self):
+        """Return string representation."""
+        return self.statusline
 
 
 class WebDAVResponse(HTTPResponse):
@@ -107,6 +113,8 @@ class WebDAVResponse(HTTPResponse):
     headers -- A dictionary with the received headers.
     content -- The content of the response as string.
     statusline -- The received HTTP status line. E.g. "HTTP/1.1 200 OK".
+    is_multistatus -- True, if the response's content is a multi-status
+                      response.
 
     You can iterate over a WebDAVResponse object. If the received data was
     a multi-status response, the iterator will yield a MultiStatusResponse
@@ -171,14 +179,19 @@ class WebDAVResponse(HTTPResponse):
             self._etree.parse(StringIO("<root><empty/></root>"))
 
     def _set_multistatus(self):
+        """Set this response to a multistatus response."""
         self.is_multistatus = True
         self._parse_xml_content()
 
 
 class WebDAVLockResponse(WebDAVResponse):
-    def __init__(self, response, client):
+    def __new__(cls, client, uri, response):
+        return WebDAVResponse.__new__(cls, response)
+
+    def __init__(self, client, uri, response):
         super(WebDAVLockResponse, self).__init__(response)
-        self._client = client
+        self._client = None
+        self._uri = None
         self._locktype = None
         self._lockscope = None
         self._depth = None
@@ -188,14 +201,28 @@ class WebDAVLockResponse(WebDAVResponse):
         self._previous_if = None
         if self == OK:
             self._parse_xml_content()
+            self._client = client
+            self._uri = uri
+        elif self == CONFLICT:
+            # RFC 2518, 8.10.4 Depth and Locking
+            # If the lock cannot be granted to all resources, a 409 (Conflict)
+            # status code MUST be returned with a response entity body
+            # containing a multistatus XML element describing which resource(s)
+            # prevented the lock from being granted.
+            self._set_multistatus()
 
     def __enter__(self):
+        """Use the lock on requests on the returned prepare WebDAVClient."""
         if self.locktoken:
             self._previous_if = self._client.headers.get("If")
-            self._client.headers["If"] = "(%s)" % self.locktoken
+            tag = util.make_destination(self._client, self._uri)
+            tokens = "".join("<%s>" % token for token in self.locktoken)
+            if_value = "<%s> (%s)" % (tag, tokens)
+            self._client.headers["If"] = if_value
         return self._client
 
     def __exit__(self, exc, exctype, exctb):
+        """Remove If statement in WebDAVClient."""
         if "If" in self._client.headers:
             if self._previous_if is not None:
                 self._client.headers["If"] = self._previous_if
@@ -232,7 +259,7 @@ class WebDAVLockResponse(WebDAVResponse):
     @property
     def owner(self):
         if self._owner is None:
-            owner = "/{DAV:}lockdiscovery/{DAV:}activelock/{DAV:}owner/*"
+            owner = ACTIVELOCK + "/{DAV:}owner/*"
             try:
                 self._owner = self._etree.findall(owner)
             except IndexError:
@@ -242,9 +269,9 @@ class WebDAVLockResponse(WebDAVResponse):
     @property
     def locktoken(self):
         if self._locktoken is None:
-            token = "/{DAV:}lockdiscovery/{DAV:}activelock/{DAV:}locktoken/*"
+            token = ACTIVELOCK + "/{DAV:}locktoken/{DAV:}href"
             try:
-                self._locktoken = self._etree.findall(token)
+                self._locktoken = [t.text for t in self._etree.findall(token)]
             except IndexError:
                 pass
         return self._locktoken
@@ -863,6 +890,7 @@ class CoreWebDAVClient(HTTPClient):
                  ElementTree element.
         timeout -- Value for the timeout header. Either "infinite" or a number
                    representing the seconds (not greater than 2^32 - 1).
+        headers -- If given, must be a mapping with headers to set.
 
         Raise WebDAVUserError on 4xx HTTP status codes.
         Raise WebDAVServerError on 5xx HTTP status codes.
@@ -894,7 +922,28 @@ class CoreWebDAVClient(HTTPClient):
         if depth is not None:
             headers["Depth"] = util.get_depth(depth, ("0", "infinity"))
         content = creator.create_lock(scope, type_, owner)
-        return self._request("LOCK", uri, content, headers)
+        self.ResponseType = partial(WebDAVLockResponse, self, uri)
+        try:
+            return self._request("LOCK", uri, content, headers)
+        finally:
+            self.ResponseType = WebDAVResponse
+
+    def unlock(self, uri, locktoken, headers=None):
+        """Make UNLOCK request and return WebDAVResponse.
+
+        uri -- Resource to unlock on.
+        locktoken -- Must contain the lock-token as string or be a
+                     WebDAVLockResponse.
+        headers -- If given, must be a mapping with headers to set.
+
+        Raise WebDAVUserError on 4xx HTTP status codes.
+        Raise WebDAVServerError on 5xx HTTP status codes.
+
+        """
+        if isinstance(locktoken, WebDAVLockResponse):
+            locktoken = locktoken.locktoken
+        headers["Lock-Token"] = "<%s>" % locktoken
+        return self._request("UNLOCK", uri, None, headers)
 
 
 class ExtendedWebDAVClient(CoreWebDAVClient):

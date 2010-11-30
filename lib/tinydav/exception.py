@@ -30,8 +30,26 @@ class HTTPError(Exception):
     
     """
     def __init__(self, response, method):
+        """Initialize the HTTPError.
+
+        response -- HTTPClient or one of its subclasses.
+        method -- The uppercase method name where the error occured.
+
+        This instance has the following attributes:
+
+        response -- Given HTTPClient.
+
+        """
         Exception.__init__(self)
         self.response = response
+
+    def __repr__(self):
+        """Return representation of an HTTPError."""
+        return "<%s: %d>" % (self.__class__.__name__, self.response)
+
+    def __str__(self):
+        """Return string representation of an HTTPError."""
+        return self.response.statusline
 
 
 class HTTPUserError(HTTPError):
@@ -44,15 +62,6 @@ class HTTPServerError(HTTPError):
 
 class WebDAVUserError(HTTPUserError):
     """Exception class for 4xx HTTP errors used by WebDAVClient."""
-    def __init__(self, response, method):
-        # RFC 2818, 8.10.4 Depth and Locking
-        # If the lock cannot be granted to all resources, a 409 (Conflict)
-        # status code MUST be returned with a response entity body containing
-        # a multistatus XML element describing which resource(s) prevented
-        # the lock from being granted.
-        if (method == "LOCK") and (self == CONFLICT):
-            response._set_multistatus()
-        super(WebDAVUserError, self).__init__(response, method)
 
 
 class WebDAVServerError(HTTPUserError):
