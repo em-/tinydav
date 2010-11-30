@@ -20,7 +20,7 @@
 from __future__ import with_statement
 from contextlib import closing
 from functools import wraps, partial
-from httplib import MULTI_STATUS, OK, CONFLICT
+from httplib import MULTI_STATUS, OK, CONFLICT, NO_CONTENT
 from StringIO import StringIO
 from xml.etree.ElementTree import ElementTree, Element, SubElement, tostring
 from xml.parsers.expat import ExpatError
@@ -199,10 +199,12 @@ class WebDAVLockResponse(WebDAVResponse):
         self._timeout = None
         self._locktoken = None
         self._previous_if = None
+        self._tagged = True
         if self == OK:
             self._parse_xml_content()
             self._client = client
             self._uri = uri
+            self._tag = util.make_destination(self._client, uri)
         elif self == CONFLICT:
             # RFC 2518, 8.10.4 Depth and Locking
             # If the lock cannot be granted to all resources, a 409 (Conflict)
@@ -211,13 +213,30 @@ class WebDAVLockResponse(WebDAVResponse):
             # prevented the lock from being granted.
             self._set_multistatus()
 
+    def __repr__(self):
+        """Return representation."""
+        return "<%s: <%s> %d>" % (self.__class__.__name__, self._tag, self)
+
+    def __call__(self, tagged=True):
+        """Configure this lock to use tagged header or not.
+
+        tagged -- True, if the If header should contain a tagged list.
+                  False, if the If header should contain a no-tag-list.
+                  Default is True.
+
+        """
+        self._tagged = tagged
+        return self
+
     def __enter__(self):
         """Use the lock on requests on the returned prepare WebDAVClient."""
         if self.locktoken:
             self._previous_if = self._client.headers.get("If")
-            tag = util.make_destination(self._client, self._uri)
             tokens = "".join("<%s>" % token for token in self.locktoken)
-            if_value = "<%s> (%s)" % (tag, tokens)
+            if self._tagged:
+                if_value = "<%s> (%s)" % (self._tag, tokens)
+            else:
+                if_value = "(%s)" % tokens
             self._client.headers["If"] = if_value
         return self._client
 
@@ -435,6 +454,7 @@ class HTTPClient(object):
                 from given value in initialization.
     headers -- Dictionary with headers to send with every request.
     cookie -- If set with setcookie: the given object.
+    locks -- Mapping with locks.
 
     """
 
@@ -700,12 +720,31 @@ class CoreWebDAVClient(HTTPClient):
                 from given value in initialization.
     headers -- Dictionary with headers to send with every request.
     cookie -- If set with setcookie: the given object.
+    locks -- Dictionary containing all active locks, mapped by tag -> Lock.
 
     """
 
     ResponseType = WebDAVResponse
     UserError = WebDAVUserError
     ServerError = WebDAVServerError
+
+    def __init__(self, host, port=80, protocol=None):
+        """Initialize the WebDAV client.
+
+        host -- WebDAV server host.
+        port -- WebDAV server port.
+        protocol -- Override protocol name. Is either 'http' or 'https'. If
+                    not given, the protocol will be chosen by the port number
+                    automatically:
+                        80   -> http
+                        443  -> https
+                        8080 -> http
+                        8081 -> http
+                    Default port is 'http'.
+
+        """
+        super(CoreWebDAVClient, self).__init__(host, port, protocol)
+        self.locks = dict()
 
     def _preparecopymove(self, source, destination, depth, overwrite, headers):
         """Return prepared for copy/move request version of uri and headers."""
@@ -924,26 +963,49 @@ class CoreWebDAVClient(HTTPClient):
         content = creator.create_lock(scope, type_, owner)
         self.ResponseType = partial(WebDAVLockResponse, self, uri)
         try:
-            return self._request("LOCK", uri, content, headers)
+            lock_response = self._request("LOCK", uri, content, headers)
+            if lock_response == OK:
+                self.locks[lock_response._tag] = lock_response
+            return lock_response
         finally:
             self.ResponseType = WebDAVResponse
 
-    def unlock(self, uri, locktoken, headers=None):
+    def unlock(self, uri_or_lock, locktoken=None, headers=None):
         """Make UNLOCK request and return WebDAVResponse.
 
-        uri -- Resource to unlock on.
-        locktoken -- Must contain the lock-token as string or be a
-                     WebDAVLockResponse.
+        uri_or_lock -- Resource URI to unlock or WebDAVLockResponse.
+        locktoken -- Use this lock token for unlocking. If not given, the
+                     registered locks (self.locks) will be referenced.
         headers -- If given, must be a mapping with headers to set.
 
         Raise WebDAVUserError on 4xx HTTP status codes.
         Raise WebDAVServerError on 5xx HTTP status codes.
 
         """
-        if isinstance(locktoken, WebDAVLockResponse):
-            locktoken = locktoken.locktoken
+        if isinstance(uri_or_lock, WebDAVLockResponse):
+            uri = uri_or_lock._uri
+            tag = uri_or_lock._tag
+            locktoken = uri_or_lock.locktoken[0]
+            # uri is already prepared in WebDAVLockResponse
+            (_, headers) = self._prepare(uri, headers)
+        else:
+            tag = util.make_destination(self, uri_or_lock)
+            if locktoken is None:
+                try:
+                    lock = self.locks[tag]
+                except KeyError:
+                    raise ValueError("no lock token")
+                tag = lock._tag
+                locktoken = lock.locktoken[0]
+            (uri, headers) = self._prepare(uri_or_lock, headers)
         headers["Lock-Token"] = "<%s>" % locktoken
-        return self._request("UNLOCK", uri, None, headers)
+        response = self._request("UNLOCK", uri, None, headers)
+        if response == NO_CONTENT:
+            try:
+                del self.locks[tag]
+            except KeyError:
+                pass
+        return response
 
 
 class ExtendedWebDAVClient(CoreWebDAVClient):
