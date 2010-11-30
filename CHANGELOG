@@ -3,6 +3,18 @@ Tinydav - WebDAV client libaray
 ===============================
 
 -------------
+Version 0.6.0
+-------------
+FEATURES
+* Support of all WebDAV methods.
+* Support for Versioning Extensions to WebDAV (RFC 3253): REPORT method
+* Added multipart/form-data support for POST method.
+
+FIXES
+* Fix locking support.
+
+
+-------------
 Version 0.5.2
 -------------
 FEATURES

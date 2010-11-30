@@ -32,6 +32,10 @@ from tinydav import creator, util
 from tinydav.exception import HTTPError, HTTPUserError, HTTPServerError
 from tinydav.exception import WebDAVUserError, WebDAVServerError
 
+__author__ = "Manuel Hermann <manuel-hermann@gmx.net>"
+__license__ = "LGPL"
+__version__ = "0.6.0"
+
 __all__ = (
     "HTTPError", "HTTPUserError", "HTTPServerError",
     "WebDAVUserError", "WebDAVServerError",

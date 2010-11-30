@@ -12,7 +12,7 @@ if __name__ == "__main__":
     setup(
         name="TinyDAV library",
         license="LGPLv3",
-        version="0.5.2",
+        version="0.6.0",
         author="Manuel Hermann",
         author_email="manuel-hermann@gmx.net",
         description="Tiny WebDAV client.",
