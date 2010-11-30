@@ -717,7 +717,8 @@ class HTTPClient(object):
         (uri, headers) = self._prepare(uri, headers, query)
         return self._request("HEAD", uri, None, headers)
 
-    def post(self, uri, content="", headers=None, query=None):
+    def post(self, uri, content="", headers=None, query=None,
+             as_multipart=False, encoding="utf-8"):
         """Make POST request and return HTTPResponse.
 
         uri -- Path to post data to.
@@ -726,6 +727,10 @@ class HTTPClient(object):
                    application/x-www-form-urlencoded.
         headers -- If given, must be a mapping with headers to set.
         query -- Mapping with key/value-pairs to be added as query to the URI.
+        as_multipart -- Send post data as multipart/form-data. content must be
+                        a dict, then. If content is not a dict, then this 
+                        argument is ignored.
+        encoding -- Send multipart content encoding with this encoding.
 
         Raise HTTPUserError on 4xx HTTP status codes.
         Raise HTTPServerError on 5xx HTTP status codes.
@@ -733,8 +738,12 @@ class HTTPClient(object):
         """
         (uri, headers) = self._prepare(uri, headers, query)
         if isinstance(content, dict):
-            headers["content-type"] = "application/x-www-form-urlencoded"
-            content = urllib.urlencode(content)
+            if as_multipart:
+                headers["content-type"] = "multipart/form-data"
+                content = util.make_multipart(content, encoding)
+            else:
+                headers["content-type"] = "application/x-www-form-urlencoded"
+                content = urllib.urlencode(content)
         return self._request("POST", uri, content, headers)
 
     def put(self, uri, fileobject, headers=None):

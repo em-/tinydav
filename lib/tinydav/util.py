@@ -17,7 +17,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Utility functions and classes for tinydav WebDAV client."""
 
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import urlparse
+
+__all__ = (
+    "FakeHTTPRequest", "make_destination", "make_multipart",
+    "extract_namespace", "get_depth"
+)
 
 
 class FakeHTTPRequest(object):
@@ -72,6 +80,27 @@ def make_destination(httpclient, uri):
     netloc = "%s:%d" % (httpclient.host, httpclient.port)
     parts = (httpclient.protocol, netloc, uri, None, None)
     return urlparse.urlunsplit(parts)
+
+
+def make_multipart(content, encoding):
+    """Return the content as multipart/form-data. RFC 2388
+
+    content -- Dict with content to POST. The dict values are expected to
+               be unicode or decodable with us-ascii.
+    encoding -- Send multipart with this encoding.
+
+    """
+    # RFC 2388 Returning Values from Forms:  multipart/form-data
+    mime = MIMEMultipart("form-data")
+    for (key, value) in content.iteritems():
+        # send file-like objects as octet-streams
+        if hasattr(value, "read"):
+            sub_part = MIMEApplication(value.read(), "octet-stream")
+        else:
+            sub_part = MIMEText(str(value), "plain", encoding)
+        sub_part.add_header("Content-Disposition", "form-data", name=key)
+        mime.attach(sub_part)
+    return mime.as_string()
 
 
 def extract_namespace(key):
