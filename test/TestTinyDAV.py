@@ -124,13 +124,13 @@ RESPONSE = """\
 """
 
 
-class HTTPErrorTestCase(unittest.TestCase):
-    """Test the HTTPError exception."""
-    def test_normal(self):
-        """Test HTTPError exception."""
-        valueerror = ValueError("foo")
-        exc = HTTPError(valueerror)
-        self.assertEqual(exc.carry, valueerror)
+#class HTTPErrorTestCase(unittest.TestCase):
+#    """Test the HTTPError exception."""
+#    def test_normal(self):
+#        """Test HTTPError exception."""
+#        valueerror = ValueError("foo")
+#        exc = HTTPError(valueerror)
+#        self.assertEqual(exc.carry, valueerror)
 
 
 class HTTPClientTestCase(unittest.TestCase):
@@ -162,16 +162,6 @@ class HTTPClientTestCase(unittest.TestCase):
         headers = {"X-Test": "Hello"}
         resp = self.http._request("POST", "/foo", "my content", headers)
         self.assertEqual(resp, 200)
-
-    def test_request_err(self):
-        """Test HTTPClient._request."""
-        mockcon = Mock.Omnivore(request=[ValueError("foo")])
-        self.http._getconnection = Mock.omnivore_func(mockcon)
-        self.assertRaises(
-            HTTPError,
-            self.http._request,
-            "POST", "/foo", "my content"
-        )
 
     def test_prepare(self):
         """Test HTTPClient._prepare."""

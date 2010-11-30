@@ -20,7 +20,7 @@
 from __future__ import with_statement
 from contextlib import closing
 from functools import wraps
-from httplib import MULTI_STATUS, OK, CONFLICT
+from httplib import MULTI_STATUS, OK
 from StringIO import StringIO
 from xml.etree.ElementTree import ElementTree, Element, SubElement, tostring
 from xml.parsers.expat import ExpatError
@@ -29,8 +29,14 @@ import sys
 import urllib
 
 from tinydav import creator, util
+from tinydav.exception import HTTPError, HTTPUserError, HTTPServerError
+from tinydav.exception import WebDAVUserError, WebDAVServerError
 
-__all__ = ("HTTPError", "HTTPClient", "WebDAVClient")
+__all__ = (
+    "HTTPError", "HTTPUserError", "HTTPServerError",
+    "WebDAVUserError", "WebDAVServerError",
+    "HTTPClient", "WebDAVClient",
+)
 
 PYTHON2_6 = (sys.version_info >= (2, 6))
 
@@ -46,45 +52,6 @@ PROTOCOL = {
     8081: "http",
 }
 
-class FakeHTTPRequest(object):
-    """Fake HTTP request object needed for cookies.
-    
-    See http://docs.python.org/library/cookielib.html#cookiejar-and-filecookiejar-objects
-
-    """
-    def __init__(self, client, uri, headers):
-        """Initialize the fake HTTP request object.
-
-        client -- HTTPClient object or one of its subclasses.
-        uri -- The URI to call.
-        headers -- Headers dict to add cookie stuff to.
-
-        """
-        self._client = client
-        self._uri = uri
-        self._headers = headers
-
-    def get_full_url(self):
-        return util.make_destination(self._client, self._uri)
-
-    def get_host(self):
-        return self._client.host
-
-    def is_unverifiable(self):
-        return False
-
-    def get_origin_req_host(self):
-        return self.get_host()
-
-    def get_type(self):
-        return self._client.protocol
-
-    def has_header(self, name):
-        return (name in self._headers)
-
-    def add_unredirected_header(self, key, header):
-        self._headers[key] = header
-
 
 # Responses
 class HTTPResponse(int):
@@ -95,10 +62,10 @@ class HTTPResponse(int):
 
     This object has the following attributes:
 
-      response -- The original httplib.Response object.
-      headers -- A dictionary with the received headers.
-      content -- The content of the response as string.
-      statusline -- The received HTTP status line. E.g. "HTTP/1.1 200 OK".
+    response -- The original httplib.Response object.
+    headers -- A dictionary with the received headers.
+    content -- The content of the response as string.
+    statusline -- The received HTTP status line. E.g. "HTTP/1.1 200 OK".
 
     """
 
@@ -136,10 +103,10 @@ class WebDAVResponse(HTTPResponse):
 
     This object has the following attributes:
 
-      response -- The original httplib.Response object.
-      headers -- A dictionary with the received headers.
-      content -- The content of the response as string.
-      statusline -- The received HTTP status line. E.g. "HTTP/1.1 200 OK".
+    response -- The original httplib.Response object.
+    headers -- A dictionary with the received headers.
+    content -- The content of the response as string.
+    statusline -- The received HTTP status line. E.g. "HTTP/1.1 200 OK".
 
     You can iterate over a WebDAVResponse object. If the received data was
     a multi-status response, the iterator will yield a MultiStatusResponse
@@ -162,8 +129,9 @@ class WebDAVResponse(HTTPResponse):
         self._etree = ElementTree()
         # on XML parsing error set this to the raised exception
         self.parse_error = None
-        if self == MULTI_STATUS:
-            self._parse_xml_content()
+        self.is_multistatus = False
+        if (self == MULTI_STATUS):
+            self._set_multistatus()
 
     def __len__(self):
         """Return the number of responses in a multistatus response.
@@ -171,7 +139,7 @@ class WebDAVResponse(HTTPResponse):
         When the response was no multistatus the return value is 1.
 
         """
-        if self == MULTI_STATUS:
+        if self.is_multistatus:
             # RFC 2518, 12.9 multistatus XML Element
             # <!ELEMENT multistatus (response+, responsedescription?) >
             return len(self._etree.findall("/{DAV:}response"))
@@ -185,7 +153,7 @@ class WebDAVResponse(HTTPResponse):
         Yield self otherwise.
 
         """
-        if self == MULTI_STATUS:
+        if self.is_multistatus:
             # RFC 2518, 12.9 multistatus XML Element
             # <!ELEMENT multistatus (response+, responsedescription?) >
             for response in self._etree.findall("/{DAV:}response"):
@@ -201,6 +169,10 @@ class WebDAVResponse(HTTPResponse):
             self.parse_error = e
             # don't fail on further processing
             self._etree.parse(StringIO("<root><empty/></root>"))
+
+    def _set_multistatus(self):
+        self.is_multistatus = True
+        self._parse_xml_content()
 
 
 class WebDAVLockResponse(WebDAVResponse):
@@ -289,10 +261,10 @@ class MultiStatusResponse(int):
 
     This object has the following attributes:
 
-      statusline -- The received HTTP status line. E.g. "HTTP/1.1 200 OK".
-      href -- The HREF of the resource this status is for.
-      namespaces -- A frozenset with all the XML namespaces that the underlying
-                    XML structure had.
+    statusline -- The received HTTP status line. E.g. "HTTP/1.1 200 OK".
+    href -- The HREF of the resource this status is for.
+    namespaces -- A frozenset with all the XML namespaces that the underlying
+                  XML structure had.
 
     """
 
@@ -424,55 +396,24 @@ class MultiStatusResponse(int):
         return self._namespaces
 
 
-# Exceptions
-class HTTPError(HTTPResponse, Exception):
-    """Base exception class for HTTP errors.
-
-    This exception is a subclass of an HTTPResponse.  
-
-    response -- httplib.Response object.
-    method -- String with uppercase method name.
-
-    """
-    def __init__(self, response, method):
-        HTTPResponse.__init__(self, response)
-        self.request_method = method
-
-
-class HTTPUserError(HTTPError):
-    """Exception class for 4xx HTTP errors."""
-
-
-class HTTPServerError(HTTPError):
-    """Exception class for 5xx HTTP errors."""
-
-
-class WebDAVUserError(HTTPUserError):
-    """Exception class for 4xx HTTP errors used by WebDAVClient."""
-    def __init__(self, response, method):
-        if (method == "LOCK") and (self == CONFLICT):
-            self._parse_xml_content()
-
-
-class WebDAVServerError(HTTPUserError):
-    """Exception class for 5xx HTTP errors used by WebDAVClient."""
-
-
 # Clients
 class HTTPClient(object):
     """Mini HTTP client.
 
     This object has the following attributes:
-        host -- Given host on initialization.
-        port -- Given port on initialization.
-        protocol -- Used protocol. Either chosen by the port number or taken
-                    from given value in initialization.
-        headers -- Dictionary with headers to send with every request.
-        cookie -- If set with setcookie: the given object.
+
+    host -- Given host on initialization.
+    port -- Given port on initialization.
+    protocol -- Used protocol. Either chosen by the port number or taken
+                from given value in initialization.
+    headers -- Dictionary with headers to send with every request.
+    cookie -- If set with setcookie: the given object.
 
     """
 
     ResponseType = HTTPResponse
+    UserError = HTTPUserError
+    ServerError = HTTPServerError
 
     def __init__(self, host, port=80, protocol=None):
         """Initialize the WebDAV client.
@@ -522,19 +463,17 @@ class HTTPClient(object):
 
         # handle cookies, if necessary
         if self.cookie is not None:
-            fake_request = FakeHTTPRequest(self, uri, headers)
+            fake_request = util.FakeHTTPRequest(self, uri, headers)
             self.cookie.add_cookie_header(fake_request)
 
         con = self._getconnection()
         with closing(con):
             con.request(method, uri, content, headers)
-            response = con.getresponse()
-            if 400 <= response.status < 500:
-                response = HTTPUserError(response, method)
-            elif 500 <= response.status < 600:
-                response = HTTPServerError(response, method)
-            else:
-                response = self.ResponseType(response)
+            response = self.ResponseType(con.getresponse())
+            if 400 <= response < 500:
+                response = self.UserError(response, method)
+            elif 500 <= response < 600:
+                response = self.ServerError(response, method)
 
         if self.cookie is not None:
             # make httplib.Response compatible with urllib2.Response
@@ -727,16 +666,19 @@ class CoreWebDAVClient(HTTPClient):
     """Basic WebDAVClient specified in RFC 2518.
 
     This object has the following attributes:
-        host -- Given host on initialization.
-        port -- Given port on initialization.
-        protocol -- Used protocol. Either chosen by the port number or taken
-                    from given value in initialization.
-        headers -- Dictionary with headers to send with every request.
-        cookie -- If set with setcookie: the given object.
+
+    host -- Given host on initialization.
+    port -- Given port on initialization.
+    protocol -- Used protocol. Either chosen by the port number or taken
+                from given value in initialization.
+    headers -- Dictionary with headers to send with every request.
+    cookie -- If set with setcookie: the given object.
 
     """
 
     ResponseType = WebDAVResponse
+    UserError = WebDAVUserError
+    ServerError = WebDAVServerError
 
     def _preparecopymove(self, source, destination, depth, overwrite, headers):
         """Return prepared for copy/move request version of uri and headers."""
@@ -989,11 +931,12 @@ class WebDAVClient(ExtendedWebDAVClient):
     """Mini WebDAV client.
 
     This object has the following attributes:
-        host -- Given host on initialization.
-        port -- Given port on initialization.
-        protocol -- Used protocol. Either chosen by the port number or taken
-                    from given value in initialization.
-        headers -- Dictionary with headers to send with every request.
-        cookie -- If set with setcookie: the given object.
+
+    host -- Given host on initialization.
+    port -- Given port on initialization.
+    protocol -- Used protocol. Either chosen by the port number or taken
+                from given value in initialization.
+    headers -- Dictionary with headers to send with every request.
+    cookie -- If set with setcookie: the given object.
 
     """

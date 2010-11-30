@@ -15,9 +15,49 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""Utility function for tinydav WebDAV client."""
+"""Utility functions and classes for tinydav WebDAV client."""
 
 import urlparse
+
+
+class FakeHTTPRequest(object):
+    """Fake HTTP request object needed for cookies.
+    
+    See http://docs.python.org/library/cookielib.html#cookiejar-and-filecookiejar-objects
+
+    """
+    def __init__(self, client, uri, headers):
+        """Initialize the fake HTTP request object.
+
+        client -- HTTPClient object or one of its subclasses.
+        uri -- The URI to call.
+        headers -- Headers dict to add cookie stuff to.
+
+        """
+        self._client = client
+        self._uri = uri
+        self._headers = headers
+
+    def get_full_url(self):
+        return make_destination(self._client, self._uri)
+
+    def get_host(self):
+        return self._client.host
+
+    def is_unverifiable(self):
+        return False
+
+    def get_origin_req_host(self):
+        return self.get_host()
+
+    def get_type(self):
+        return self._client.protocol
+
+    def has_header(self, name):
+        return (name in self._headers)
+
+    def add_unredirected_header(self, key, header):
+        self._headers[key] = header
 
 
 def make_destination(httpclient, uri):
