@@ -51,7 +51,7 @@ class WebDAVUserError(HTTPUserError):
         # a multistatus XML element describing which resource(s) prevented
         # the lock from being granted.
         if (method == "LOCK") and (self == CONFLICT):
-            response.set_multistatus()
+            response._set_multistatus()
         super(WebDAVUserError, self).__init__(response, method)
 
 
