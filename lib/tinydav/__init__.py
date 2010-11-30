@@ -750,11 +750,14 @@ class HTTPClient(object):
                 content = urllib.urlencode(content)
         return self._request("POST", uri, content, headers)
 
-    def put(self, uri, fileobject, headers=None):
+    def put(self, uri, fileobject, content_type="application/octet-stream",
+            headers=None):
         """Make PUT request and return status.
 
         uri -- Path for PUT.
         fileobject -- File object with content to PUT.
+        content_type -- The content-type of the file. Default value is
+                        application/octet-stream.
         headers -- If given, must be a dict with headers to send.
 
         Raise HTTPUserError on 4xx HTTP status codes.
@@ -762,6 +765,7 @@ class HTTPClient(object):
 
         """
         (uri, headers) = self._prepare(uri, headers)
+        headers["content-type"] = content_type
         # use 2.6 feature, if running under this version
         data = fileobject if PYTHON2_6 else fileobject.read()
         return self._request("PUT", uri, data, headers)
