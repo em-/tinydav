@@ -64,7 +64,7 @@ class HTTPResponse(int):
 
     This object has the following attributes:
 
-    response -- The original httplib.Response object.
+    response -- The original httplib.HTTPResponse object.
     headers -- A dictionary with the received headers.
     content -- The content of the response as string.
     statusline -- The received HTTP status line. E.g. "HTTP/1.1 200 OK".
@@ -74,7 +74,7 @@ class HTTPResponse(int):
     def __new__(cls, response):
         """Construct HTTPResponse.
 
-        response -- Response object from httplib.
+        response -- The original httplib.HTTPResponse object.
 
         """
         return int.__new__(cls, response.status)
@@ -82,7 +82,7 @@ class HTTPResponse(int):
     def __init__(self, response):
         """Initialize the HTTPResponse.
 
-        response -- Response object from httplib.
+        response -- The original httplib.HTTPResponse object. 
 
         """
         self.response = response
@@ -109,7 +109,7 @@ class WebDAVResponse(HTTPResponse):
 
     This object has the following attributes:
 
-    response -- The original httplib.Response object.
+    response -- The original httplib.HTTPResponse object.
     headers -- A dictionary with the received headers.
     content -- The content of the response as string.
     statusline -- The received HTTP status line. E.g. "HTTP/1.1 200 OK".
@@ -128,9 +128,9 @@ class WebDAVResponse(HTTPResponse):
     """
 
     def __init__(self, response):
-        """Initialize the WebDAVResult.
+        """Initialize the WebDAVResponse.
 
-        response -- Response object from httplib.
+        response -- The original httplib.HTTPResponse object. 
 
         """
         super(WebDAVResponse, self).__init__(response)
@@ -185,10 +185,69 @@ class WebDAVResponse(HTTPResponse):
 
 
 class WebDAVLockResponse(WebDAVResponse):
+    """Result from WebDAV LOCK request.
+
+    A WebDAVLockResponse object is a subclass of WebDAVResponse which is a 
+    subclass of int. The int value of such an object is the HTTP status number
+    from the response.
+
+    This object has the following attributes:
+
+    response -- The original httplib.HTTPResponse object.
+    headers -- A dictionary with the received headers.
+    content -- The content of the response as string.
+    statusline -- The received HTTP status line. E.g. "HTTP/1.1 200 OK".
+    is_multistatus -- True, if the response's content is a multi-status
+                      response.
+    lockscope -- Specifies whether a lock is an exclusive lock, or a
+                 shared lock.
+    locktype -- Specifies the access type of a lock (which is always write).
+    depth -- The value of the Depth header.
+    owner --  The principal taking out this lock.
+    timeout -- The timeout associated with this lock
+    locktoken -- The lock token associated with this lock.
+
+    You can iterate over a WebDAVLockResponse object. If the received data was
+    a multi-status response, the iterator will yield a MultiStatusResponse
+    object per result. If it was no multi-status response, the iterator will
+    just yield this WebDAVLockResponse object.
+
+    The length of a WebDAVLockResponse object is 1, except for multi-status 
+    responses. The length will then be the number of results in the
+    multi-status.
+
+    You can use this object to make conditional requests. For this, the context
+    manager protocol is implemented:
+
+    >>> lock = dav.lock("somewhere")
+    >>> with lock:
+    >>>    dav.put("somwhere", <something>)
+
+    The above example will make a tagged PUT request. For untagged requests do:
+
+    >>> lock = dav.lock("somewhere")
+    >>> with lock(False):
+    >>>    dav.put("somwhere", <something>)
+
+    """
     def __new__(cls, client, uri, response):
+        """Construct WebDAVLockResponse.
+        
+        client -- HTTPClient instance or one of its subclasses.
+        uri -- The called uri.
+        response --The original httplib.HTTPResponse object. 
+
+        """
         return WebDAVResponse.__new__(cls, response)
 
     def __init__(self, client, uri, response):
+        """Initialize the WebDAVLockResponse.
+
+        client -- HTTPClient instance or one of its subclasses.
+        uri -- The called uri.
+        response -- The original httplib.HTTPResponse object.
+
+        """
         super(WebDAVLockResponse, self).__init__(response)
         self._client = None
         self._uri = None
@@ -197,9 +256,12 @@ class WebDAVLockResponse(WebDAVResponse):
         self._depth = None
         self._owner = None
         self._timeout = None
-        self._locktoken = None
+        self._locktokens = None
         self._previous_if = None
         self._tagged = True
+        # RFC 2518, 8.10.7 Status Codes
+        # 200 (OK) - The lock request succeeded and the value of the
+        # lockdiscovery property is included in the body.
         if self == OK:
             self._parse_xml_content()
             self._client = client
@@ -230,13 +292,22 @@ class WebDAVLockResponse(WebDAVResponse):
 
     def __enter__(self):
         """Use the lock on requests on the returned prepare WebDAVClient."""
-        if self.locktoken:
+        if self.locktokens:
+            # RFC 2518, 9.4 If Header
+            # If = "If" ":" ( 1*No-tag-list | 1*Tagged-list)
+            # No-tag-list = List
+            # Tagged-list = Resource 1*List
+            # Resource = Coded-URL
+            # List = "(" 1*(["Not"](State-token | "[" entity-tag "]")) ")"
+            # State-token = Coded-URL
+            # Coded-URL = "<" absoluteURI ">"
             self._previous_if = self._client.headers.get("If")
-            tokens = "".join("<%s>" % token for token in self.locktoken)
+            tokens = "".join("<%s>" % token for token in self.locktokens)
             if self._tagged:
                 if_value = "<%s> (%s)" % (self._tag, tokens)
             else:
                 if_value = "(%s)" % tokens
+                self._tagged = True
             self._client.headers["If"] = if_value
         return self._client
 
@@ -249,19 +320,16 @@ class WebDAVLockResponse(WebDAVResponse):
                 del self._client.headers["If"]
 
     @property
-    def locktype(self):
-        if self._locktype is None:
-            locktype = "/{DAV:}lockdiscovery/{DAV:}activelock/{DAV:}locktype/*"
-            try:
-                self._locktype = self._etree.findall(locktype)[0]
-            except IndexError:
-                pass
-        return self._locktype
-
-    @property
     def lockscope(self):
+        """Return the lockscope as ElementTree element."""
         if self._lockscope is None:
-            scope = "/{DAV:}lockdiscovery/{DAV:}activelock/{DAV:}lockscope/*"
+            # RFC 2518, 12.7 lockscope XML Element
+            # <!ELEMENT lockscope (exclusive | shared) >
+            # RFC 2518, 12.7.1 exclusive XML Element
+            # <!ELEMENT exclusive EMPTY >
+            # RFC 2518, 12.7.2 shared XML Element
+            # <!ELEMENT shared EMPTY >
+            scope = ACTIVELOCK + "/{DAV:}lockscope/*"
             try:
                 self._lockscope = self._etree.findall(scope)[0]
             except IndexError:
@@ -269,31 +337,61 @@ class WebDAVLockResponse(WebDAVResponse):
         return self._locktype
 
     @property
+    def locktype(self):
+        """Return the type of this lock."""
+        if self._locktype is None:
+            # RFC 2518, 12.8 locktype XML Element
+            # <!ELEMENT locktype (write) >
+            locktype = ACTIVELOCK + "/{DAV:}locktype/*"
+            try:
+                self._locktype = self._etree.findall(locktype)[0]
+            except IndexError:
+                pass
+        return self._locktype
+
+    @property
     def depth(self):
+        """Return the applied depth."""
         if self._depth is None:
-            depth = "/{DAV:}lockdiscovery/{DAV:}activelock/{DAV:}depth"
+            # RFC 2518, 12.1.1 depth XML Element
+            # <!ELEMENT depth (#PCDATA) >
+            depth = ACTIVELOCK + "/{DAV:}depth"
             self._depth = self._etree.findtext(depth)
         return self._depth
 
     @property
     def owner(self):
+        """Return the owner of this lock or None, if no owner is available."""
         if self._owner is None:
+            # RFC 2518, 12.10 owner XML Element
+            # <!ELEMENT owner ANY>
             owner = ACTIVELOCK + "/{DAV:}owner/*"
-            try:
-                self._owner = self._etree.findall(owner)
-            except IndexError:
-                pass
+            self._owner = self._etree.findall(owner)
+            if not self._owner:
+                self._owner = None
         return self._owner
 
     @property
-    def locktoken(self):
-        if self._locktoken is None:
+    def timeout(self):
+        """Return the timeout of this lock or None, if no owner is available."""
+        if self._owner is None:
+            # RFC 2518, 12.1.3 timeout XML Element
+            # <!ELEMENT timeout (#PCDATA) >
+            timeout = ACTIVELOCK + "/{DAV:}timeout"
+            self._timeout = self._etree.findtext(timeout)
+            if not self._timeout:
+                self._timeout = None
+        return self._timeout
+
+    @property
+    def locktokens(self):
+        """Return the locktokens for this lock."""
+        if self._locktokens is None:
+            # RFC 2518, 12.1.2 locktoken XML Element
+            # <!ELEMENT locktoken (href+) >
             token = ACTIVELOCK + "/{DAV:}locktoken/{DAV:}href"
-            try:
-                self._locktoken = [t.text for t in self._etree.findall(token)]
-            except IndexError:
-                pass
-        return self._locktoken
+            self._locktokens = [t.text for t in self._etree.findall(token)]
+        return self._locktokens
 
 
 class MultiStatusResponse(int):
@@ -523,7 +621,7 @@ class HTTPClient(object):
                 response = self.ServerError(response, method)
 
         if self.cookie is not None:
-            # make httplib.Response compatible with urllib2.Response
+            # make httplib.HTTPResponse compatible with urllib2.Response
             response.response.info = lambda: response.response.msg
             self.cookie.extract_cookies(response.response, fake_request)
 
@@ -985,7 +1083,7 @@ class CoreWebDAVClient(HTTPClient):
         if isinstance(uri_or_lock, WebDAVLockResponse):
             uri = uri_or_lock._uri
             tag = uri_or_lock._tag
-            locktoken = uri_or_lock.locktoken[0]
+            locktoken = uri_or_lock.locktokens[0]
             # uri is already prepared in WebDAVLockResponse
             (_, headers) = self._prepare(uri, headers)
         else:
@@ -996,10 +1094,15 @@ class CoreWebDAVClient(HTTPClient):
                 except KeyError:
                     raise ValueError("no lock token")
                 tag = lock._tag
-                locktoken = lock.locktoken[0]
+                locktoken = lock.locktokens[0]
             (uri, headers) = self._prepare(uri_or_lock, headers)
+        # RFC 2518, 9.5 Lock-Token Header
+        # Lock-Token = "Lock-Token" ":" Coded-URL
         headers["Lock-Token"] = "<%s>" % locktoken
         response = self._request("UNLOCK", uri, None, headers)
+        # RFC 2518, 8.11 UNLOCK Method
+        # The 204 (No Content) status code is used instead of 200 (OK) because
+        # there is no response entity body.
         if response == NO_CONTENT:
             try:
                 del self.locks[tag]
