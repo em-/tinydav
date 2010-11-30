@@ -83,7 +83,7 @@ def make_destination(httpclient, uri):
 
 
 def make_multipart(content, encoding):
-    """Return the content as multipart/form-data. RFC 2388
+    """Return the headers and content for multipart/form-data.
 
     content -- Dict with content to POST. The dict values are expected to
                be unicode or decodable with us-ascii.
@@ -100,7 +100,11 @@ def make_multipart(content, encoding):
             sub_part = MIMEText(str(value), "plain", encoding)
         sub_part.add_header("Content-Disposition", "form-data", name=key)
         mime.attach(sub_part)
-    return mime.as_string()
+    headers = dict(mime.items())
+    complete_mime = mime.as_string()
+    payload_start = complete_mime.index("\n\n") + 2 # start after \n\n
+    payload = complete_mime[payload_start:]
+    return (headers, payload)
 
 
 def extract_namespace(key):

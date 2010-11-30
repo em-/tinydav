@@ -743,8 +743,8 @@ class HTTPClient(object):
         (uri, headers) = self._prepare(uri, headers, query)
         if isinstance(content, dict):
             if as_multipart:
-                headers["content-type"] = "multipart/form-data"
-                content = util.make_multipart(content, encoding)
+                (multihead, content) = util.make_multipart(content, encoding)
+                headers.update(multihead)
             else:
                 headers["content-type"] = "application/x-www-form-urlencoded"
                 content = urllib.urlencode(content)
