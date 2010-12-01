@@ -59,12 +59,3 @@ class HTTPUserError(HTTPError):
 class HTTPServerError(HTTPError):
     """Exception class for 5xx HTTP errors."""
 
-
-class WebDAVUserError(HTTPUserError):
-    """Exception class for 4xx HTTP errors used by WebDAVClient."""
-
-
-class WebDAVServerError(HTTPUserError):
-    """Exception class for 5xx HTTP errors used by WebDAVClient."""
-
-

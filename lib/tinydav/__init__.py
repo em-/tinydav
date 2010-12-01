@@ -30,7 +30,6 @@ import urllib
 
 from tinydav import creator, util
 from tinydav.exception import HTTPError, HTTPUserError, HTTPServerError
-from tinydav.exception import WebDAVUserError, WebDAVServerError
 
 __author__ = "Manuel Hermann <manuel-hermann@gmx.net>"
 __license__ = "LGPL"
@@ -38,7 +37,6 @@ __version__ = "0.6.0"
 
 __all__ = (
     "HTTPError", "HTTPUserError", "HTTPServerError",
-    "WebDAVUserError", "WebDAVServerError",
     "HTTPClient", "WebDAVClient",
 )
 
@@ -271,7 +269,7 @@ class WebDAVLockResponse(WebDAVResponse):
             self._parse_xml_content()
             self._client = client
             self._uri = uri
-            self._tag = util.make_destination(self._client, uri)
+            self._tag = util.make_absolute(self._client, uri)
         elif self == CONFLICT:
             # RFC 2518, 8.10.4 Depth and Locking
             # If the lock cannot be granted to all resources, a 409 (Conflict)
@@ -562,8 +560,6 @@ class HTTPClient(object):
     """
 
     ResponseType = HTTPResponse
-    UserError = HTTPUserError
-    ServerError = HTTPServerError
 
     def __init__(self, host, port=80, protocol=None, strict=False,
                  timeout=None, source_address=None):
@@ -584,11 +580,13 @@ class HTTPClient(object):
                   doc for httplib).
         timeout -- Operations will timeout after that many seconds. Else the
                    global default timeout setting is used (see Python doc for
-                   httplib). This argument is available since Python 2.6.
+                   httplib). This argument is available since Python 2.6. It
+                   won't have any effect in previous version.
         source_address -- A tuple of (host, port) to use as the source address
                           the HTTP connection is made from (see Python doc for
                           httplib). This argument is available since
-                          Python 2.7.
+                          Python 2.7. It won't have any effect in previous
+                          versions.
 
         """
         assert isinstance(port, int)
@@ -646,9 +644,9 @@ class HTTPClient(object):
             con.request(method, uri, content, headers)
             response = self.ResponseType(con.getresponse())
             if 400 <= response < 500:
-                response = self.UserError(response, method)
+                response = self.HTTPUserError(response, method)
             elif 500 <= response < 600:
-                response = self.ServerError(response, method)
+                response = self.HTTPServerError(response, method)
 
         if self.cookie is not None:
             # make httplib.HTTPResponse compatible with urllib2.Response
@@ -797,7 +795,7 @@ class HTTPClient(object):
         """Make PUT request and return status.
 
         uri -- Path for PUT.
-        fileobject -- File object with content to PUT.
+        fileobject -- File-like object with content to PUT.
         content_type -- The content-type of the file. Default value is
                         application/octet-stream.
         headers -- If given, must be a dict with headers to send.
@@ -882,8 +880,6 @@ class CoreWebDAVClient(HTTPClient):
     """
 
     ResponseType = WebDAVResponse
-    UserError = WebDAVUserError
-    ServerError = WebDAVServerError
 
     def __init__(self, host, port=80, protocol=None):
         """Initialize the WebDAV client.
@@ -917,7 +913,9 @@ class CoreWebDAVClient(HTTPClient):
         # Consequently, the Destination header MUST be present on all MOVE
         # methods and MUST follow all COPY requirements for the COPY part of
         # the MOVE method.
-        headers["Destination"] = util.make_destination(self, destination)
+        # RFC 2517, 9.3 Destination Header
+        # Destination = "Destination" ":" absoluteURI
+        headers["Destination"] = util.make_absolute(self, destination)
         # RFC 2518, 8.8.3 COPY for Collections
         # A client may submit a Depth header on a COPY on a collection with
         # a value of "0" or "infinity".
@@ -940,8 +938,8 @@ class CoreWebDAVClient(HTTPClient):
         uri -- Path to create.
         headers -- If given, must be a dict with headers to send.
 
-        Raise WebDAVUserError on 4xx HTTP status codes.
-        Raise WebDAVServerError on 5xx HTTP status codes.
+        Raise HTTPUserError on 4xx HTTP status codes.
+        Raise HTTPServerError on 5xx HTTP status codes.
 
         """
         (uri, headers) = self._prepare(uri, headers)
@@ -964,8 +962,8 @@ class CoreWebDAVClient(HTTPClient):
 
         Raise ValueError, if illegal depth was given or if properties and
         include arguments were given.
-        Raise WebDAVUserError on 4xx HTTP status codes.
-        Raise WebDAVServerError on 5xx HTTP status codes.
+        Raise HTTPUserError on 4xx HTTP status codes.
+        Raise HTTPServerError on 5xx HTTP status codes.
 
         """
         namespaces = dict() if (namespaces is None) else namespaces
@@ -998,8 +996,8 @@ class CoreWebDAVClient(HTTPClient):
 
         Either setprops or delprops or both of them must be given, else
         ValueError will be risen.
-        Raise WebDAVUserError on 4xx HTTP status codes.
-        Raise WebDAVServerError on 5xx HTTP status codes.
+        Raise HTTPUserError on 4xx HTTP status codes.
+        Raise HTTPServerError on 5xx HTTP status codes.
 
         """
         # RFC 2517, 12.13 propertyupdate XML element
@@ -1018,8 +1016,8 @@ class CoreWebDAVClient(HTTPClient):
         uri -- Path of resource or collection to delete.
         headers -- If given, must be a mapping with headers to set.
 
-        Raise WebDAVUserError on 4xx HTTP status codes.
-        Raise WebDAVServerError on 5xx HTTP status codes.
+        Raise HTTPUserError on 4xx HTTP status codes.
+        Raise HTTPServerError on 5xx HTTP status codes.
 
         """
         headers = dict() if (headers is None) else headers
@@ -1041,8 +1039,8 @@ class CoreWebDAVClient(HTTPClient):
                      Overwrite header ist set to "T" (True) or "F" (False).
         headers -- If given, must be a mapping with headers to set.
 
-        Raise WebDAVUserError on 4xx HTTP status codes.
-        Raise WebDAVServerError on 5xx HTTP status codes.
+        Raise HTTPUserError on 4xx HTTP status codes.
+        Raise HTTPServerError on 5xx HTTP status codes.
 
         """
         (source, headers) = self._preparecopymove(source, destination, depth,
@@ -1061,8 +1059,8 @@ class CoreWebDAVClient(HTTPClient):
         headers -- If given, must be a mapping with headers to set.
 
         Raise ValueError, if an illegal depth was given.
-        Raise WebDAVUserError on 4xx HTTP status codes.
-        Raise WebDAVServerError on 5xx HTTP status codes.
+        Raise HTTPUserError on 4xx HTTP status codes.
+        Raise HTTPServerError on 5xx HTTP status codes.
 
         """
         # RFC 2518, 8.9.2 MOVE for Collections
@@ -1088,8 +1086,8 @@ class CoreWebDAVClient(HTTPClient):
                    representing the seconds (not greater than 2^32 - 1).
         headers -- If given, must be a mapping with headers to set.
 
-        Raise WebDAVUserError on 4xx HTTP status codes.
-        Raise WebDAVServerError on 5xx HTTP status codes.
+        Raise HTTPUserError on 4xx HTTP status codes.
+        Raise HTTPServerError on 5xx HTTP status codes.
 
         """
         (uri, headers) = self._prepare(uri, headers)
@@ -1135,8 +1133,8 @@ class CoreWebDAVClient(HTTPClient):
                      registered locks (self.locks) will be referenced.
         headers -- If given, must be a mapping with headers to set.
 
-        Raise WebDAVUserError on 4xx HTTP status codes.
-        Raise WebDAVServerError on 5xx HTTP status codes.
+        Raise HTTPUserError on 4xx HTTP status codes.
+        Raise HTTPServerError on 5xx HTTP status codes.
 
         """
         if isinstance(uri_or_lock, WebDAVLockResponse):
@@ -1144,9 +1142,9 @@ class CoreWebDAVClient(HTTPClient):
             tag = uri_or_lock._tag
             locktoken = uri_or_lock.locktokens[0]
             # uri is already prepared in WebDAVLockResponse
-            (_, headers) = self._prepare(uri, headers)
+            (_, headers) = self._prepare("", headers)
         else:
-            tag = util.make_destination(self, uri_or_lock)
+            tag = util.make_absolute(self, uri_or_lock)
             if locktoken is None:
                 try:
                     lock = self.locks[tag]
@@ -1185,8 +1183,8 @@ class ExtendedWebDAVClient(CoreWebDAVClient):
         headers -- If given, must be a mapping with headers to set.
 
         Raise ValueError, if an illegal depth value was given.
-        Raise WebDAVUserError on 4xx HTTP status codes.
-        Raise WebDAVServerError on 5xx HTTP status codes.
+        Raise HTTPUserError on 4xx HTTP status codes.
+        Raise HTTPServerError on 5xx HTTP status codes.
 
         """
         depth = util.get_depth(depth)

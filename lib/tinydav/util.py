@@ -23,9 +23,11 @@ from email.mime.text import MIMEText
 import urlparse
 
 __all__ = (
-    "FakeHTTPRequest", "make_destination", "make_multipart",
+    "FakeHTTPRequest", "make_absolute", "make_multipart",
     "extract_namespace", "get_depth"
 )
+
+DEFAULT_CONTENT_TYPE = "application/octet-stream"
 
 
 class FakeHTTPRequest(object):
@@ -47,7 +49,7 @@ class FakeHTTPRequest(object):
         self._headers = headers
 
     def get_full_url(self):
-        return make_destination(self._client, self._uri)
+        return make_absolute(self._client, self._uri)
 
     def get_host(self):
         return self._client.host
@@ -68,41 +70,53 @@ class FakeHTTPRequest(object):
         self._headers[key] = header
 
 
-def make_destination(httpclient, uri):
-    """Return correct destination header value.
+def make_absolute(httpclient, uri):
+    """Return correct absolute URI.
 
     httpclient -- HTTPClient instance with protocol, host and port attribute.
     uri -- The destination path.
 
     """
-    # RFC 2517, 9.3 Destination Header
-    # Destination = "Destination" ":" absoluteURI
     netloc = "%s:%d" % (httpclient.host, httpclient.port)
     parts = (httpclient.protocol, netloc, uri, None, None)
     return urlparse.urlunsplit(parts)
 
 
-def make_multipart(content, encoding):
+def make_multipart(content, default_encoding):
     """Return the headers and content for multipart/form-data.
 
     content -- Dict with content to POST. The dict values are expected to
                be unicode or decodable with us-ascii.
-    encoding -- Send multipart with this encoding.
+    default_encoding -- Send multipart with this encoding, if no special 
+                        encoding was given with the content.
 
     """
     # RFC 2388 Returning Values from Forms:  multipart/form-data
     mime = MIMEMultipart("form-data")
-    for (key, value) in content.iteritems():
-        # send file-like objects as octet-streams
-        if hasattr(value, "read"):
-            sub_part = MIMEApplication(value.read(), "octet-stream")
-        else:
+    for (key, data) in content.iteritems():
+        # are there explicit encodings/content-types given?
+        try:
+            (value, encoding) = data
+        except ValueError:
+            value = data
+            encoding = default_encoding
+        # cope with file-like objects
+        try:
+            value = value.read()
+        except AttributeError:
+            # no file-like object
+            encoding = encoding if encoding else default_encoding
             sub_part = MIMEText(str(value), "plain", encoding)
-        sub_part.add_header("Content-Disposition", "form-data", name=key)
+        else:
+            # encoding is content-type when treating with file-like objects
+            content_type = encoding if encoding else DEFAULT_CONTENT_TYPE
+            sub_part = MIMEApplication(value.read(), content_type)
+        sub_part.add_header("content-disposition", "form-data", name=key)
         mime.attach(sub_part)
     headers = dict(mime.items())
     complete_mime = mime.as_string()
-    payload_start = complete_mime.index("\n\n") + 2 # start after \n\n
+    # start after \n\n
+    payload_start = complete_mime.index("\n\n") + 2
     payload = complete_mime[payload_start:]
     return (headers, payload)
 

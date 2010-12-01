@@ -9,6 +9,7 @@ FEATURES
 * Support of all WebDAV methods.
 * Support for Versioning Extensions to WebDAV (RFC 3253): REPORT method
 * Added multipart/form-data support for POST method.
+* Support all instantiation arguments of httlib.HTTP(S)Connection.
 
 FIXES
 * Fix locking support.

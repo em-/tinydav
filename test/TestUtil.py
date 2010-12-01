@@ -26,12 +26,12 @@ import Mock
 
 class UtilTestCase(unittest.TestCase):
     """Test util module."""
-    def test_make_destination(self):
-        """Test util.make_destination function."""
+    def test_make_absolute(self):
+        """Test util.make_absolute function."""
         mockclient = Mock.Omnivore()
         mockclient.protocol = "http"
         mockclient.host = "localhost"
         mockclient.port = 80
         expect = "http://localhost:80/foo/bar"
-        self.assertEqual(util.make_destination(mockclient, "/foo/bar"), expect)
+        self.assertEqual(util.make_absolute(mockclient, "/foo/bar"), expect)
 
