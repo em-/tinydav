@@ -43,6 +43,7 @@ __all__ = (
 )
 
 PYTHON2_6 = (sys.version_info >= (2, 6))
+PYTHON2_7 = (sys.version_info >= (2, 7))
 
 # RFC 2518, 9.8 Timeout Request Header
 # The timeout value for TimeType "Second" MUST NOT be greater than 2^32-1.
@@ -564,7 +565,8 @@ class HTTPClient(object):
     UserError = HTTPUserError
     ServerError = HTTPServerError
 
-    def __init__(self, host, port=80, protocol=None):
+    def __init__(self, host, port=80, protocol=None, strict=False,
+                 timeout=None, source_address=None):
         """Initialize the WebDAV client.
 
         host -- WebDAV server host.
@@ -577,6 +579,16 @@ class HTTPClient(object):
                         8080 -> http
                         8081 -> http
                     Default port is 'http'.
+        strict -- When True, raise BadStatusLine if the status line can't be
+                  parsed as a valid HTTP/1.0 or 1.1 status line (see Python
+                  doc for httplib).
+        timeout -- Operations will timeout after that many seconds. Else the
+                   global default timeout setting is used (see Python doc for
+                   httplib). This argument is available since Python 2.6.
+        source_address -- A tuple of (host, port) to use as the source address
+                          the HTTP connection is made from (see Python doc for
+                          httplib). Thie argument is available since
+                          Python 2.7.
 
         """
         assert isinstance(port, int)
@@ -587,14 +599,22 @@ class HTTPClient(object):
             self.protocol = PROTOCOL.get(port, "http")
         else:
             self.protocol = protocol
+        self.strict = strict
+        self.timeout = timeout
+        self.source_address = source_address
         self.headers = dict()
         self.cookie = None
 
     def _getconnection(self):
         """Return HTTP(S)Connection object depending on set protocol."""
+        args = [self.host, self.port, self.strict]
+        if PYTHON2_6:
+            args.append(self.timeout)
+        if PYTHON2_7:
+            args.append(self.source_address)
         if self.protocol == "http":
-            return httplib.HTTPConnection(self.host, self.port)
-        return httplib.HTTPSConnection(self.host, self.port)
+            return httplib.HTTPConnection(*args)
+        return httplib.HTTPSConnection(*args)
 
     def _request(self, method, uri, content=None, headers=None):
         """Make request and return response.
