@@ -335,7 +335,7 @@ class WebDAVLockResponse(WebDAVResponse):
             # <!ELEMENT shared EMPTY >
             scope = ACTIVELOCK + "/{DAV:}lockscope/*"
             try:
-                self._lockscope = self._etree.findall(scope)[0]
+                self._lockscope = self._etree.find(scope)
             except IndexError:
                 pass
         return self._locktype
@@ -348,7 +348,7 @@ class WebDAVLockResponse(WebDAVResponse):
             # <!ELEMENT locktype (write) >
             locktype = ACTIVELOCK + "/{DAV:}locktype/*"
             try:
-                self._locktype = self._etree.findall(locktype)[0]
+                self._locktype = self._etree.find(locktype)
             except IndexError:
                 pass
         return self._locktype
@@ -365,12 +365,12 @@ class WebDAVLockResponse(WebDAVResponse):
 
     @property
     def owner(self):
-        """Return the owner of this lock or None, if no owner is available."""
+        """Return the owner ElementTree element or None, if there's no owner."""
         if self._owner is None:
             # RFC 2518, 12.10 owner XML Element
             # <!ELEMENT owner ANY>
-            owner = ACTIVELOCK + "/{DAV:}owner/*"
-            self._owner = self._etree.findall(owner)
+            owner = ACTIVELOCK + "/{DAV:}owner"
+            self._owner = self._etree.find(owner)
             if not self._owner:
                 self._owner = None
         return self._owner
