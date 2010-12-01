@@ -587,7 +587,7 @@ class HTTPClient(object):
                    httplib). This argument is available since Python 2.6.
         source_address -- A tuple of (host, port) to use as the source address
                           the HTTP connection is made from (see Python doc for
-                          httplib). Thie argument is available since
+                          httplib). This argument is available since
                           Python 2.7.
 
         """
@@ -602,19 +602,25 @@ class HTTPClient(object):
         self.strict = strict
         self.timeout = timeout
         self.source_address = source_address
+        self.key_file = None
+        self.cert_file = None
         self.headers = dict()
         self.cookie = None
 
     def _getconnection(self):
         """Return HTTP(S)Connection object depending on set protocol."""
-        args = [self.host, self.port, self.strict]
+        args = (self.host, self.port,)
+        kwargs = dict(strict=self.strict)
         if PYTHON2_6:
-            args.append(self.timeout)
+            kwargs["timeout"] = self.timeout
         if PYTHON2_7:
-            args.append(self.source_address)
+            kwargs["source_address"] = self.source_address
         if self.protocol == "http":
-            return httplib.HTTPConnection(*args)
-        return httplib.HTTPSConnection(*args)
+            return httplib.HTTPConnection(*args, **kwargs)
+        # setup HTTPS
+        kwargs["key_file"] = self.key_file
+        kwargs["cert_file"] = self.cert_file
+        return httplib.HTTPSConnection(*args, **kwargs)
 
     def _request(self, method, uri, content=None, headers=None):
         """Make request and return response.
@@ -699,6 +705,22 @@ class HTTPClient(object):
 
         """
         self.cookie = cookie
+
+    def setssl(self, key_file=None, cert_file=None):
+        """Set SSL key file and/or certificate chain file for HTTPS.
+
+        Calling this method has the side effect of setting the protocol to
+        https.
+
+        key_file -- The name of a PEM formatted file that contains your
+                    private key.
+        cert_file -- PEM formatted certificate chain file (see Python doc for
+                     httplib).
+        """
+        self.key_file = key_file
+        self.cert_file = cert_file
+        if any((key_file, cert_file)):
+            self.protocol = "https"
 
     def options(self, uri, headers=None):
         """Make OPTIONS request and return status.
