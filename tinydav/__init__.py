@@ -773,7 +773,10 @@ class HTTPClient(object):
         query -- Mapping with key/value-pairs to be added as query to the URI.
         as_multipart -- Send post data as multipart/form-data. content must be
                         a dict, then. If content is not a dict, then this 
-                        argument is ignored.
+                        argument is ignored. The values of the dict may be a
+                        2-tuple containing the actual value (or file-like 
+                        object) and an encoding for this value (or the
+                        content-type in case of a file-like object).
         encoding -- Send multipart content encoding with this encoding.
 
         Raise HTTPUserError on 4xx HTTP status codes.

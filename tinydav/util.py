@@ -17,7 +17,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Utility functions and classes for tinydav WebDAV client."""
 
+from email.encoders import encode_base64
 from email.mime.application import MIMEApplication
+from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import urlparse
@@ -106,15 +108,22 @@ def make_multipart(content, default_encoding):
         except AttributeError:
             # no file-like object
             encoding = encoding if encoding else default_encoding
-            sub_part = MIMEText(str(value), "plain", encoding)
+            sub_part = MIMEText(value, "plain", encoding)
         else:
             # encoding is content-type when treating with file-like objects
-            content_type = encoding if encoding else DEFAULT_CONTENT_TYPE
-            sub_part = MIMEApplication(value.read(), content_type)
+            if encoding:
+                (maintype, subtype) = encoding.split("/")
+                sub_part = MIMEBase(maintype, subtype)
+                sub_part.set_payload(value)
+                encode_base64(sub_part)
+            else:
+                sub_part = MIMEApplication(value, DEFAULT_CONTENT_TYPE)
         sub_part.add_header("content-disposition", "form-data", name=key)
         mime.attach(sub_part)
-    headers = dict(mime.items())
+    # mime.items must be called after mime.as_string when the headers shall
+    # contain the boundary
     complete_mime = mime.as_string()
+    headers = dict(mime.items())
     # start after \n\n
     payload_start = complete_mime.index("\n\n") + 2
     payload = complete_mime[payload_start:]
