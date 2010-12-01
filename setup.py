@@ -6,7 +6,7 @@ from distutils.core import setup
 
 VERSION = "0.6.0"
 DOWNLOAD = "http://tinydav.googlecode.com/files/tinydav-%s.tar.gz" % VERSION
-DESCRIPTION = "An easy-to-use HTTP and WebDAV client."
+DESCRIPTION = "An easy-to-use HTTP and WebDAV client library."
 LONG_DESCRIPTION = """\
 An easy-to-use HTML and WebDAV client library for Python
 --------------------------------------------------------
