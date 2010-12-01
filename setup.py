@@ -43,7 +43,7 @@ CLASSIFIERS = [
 
 if __name__ == "__main__":
     setup(
-        name="TinyDAV library",
+        name="tinydav",
         packages=["tinydav"],
         version=VERSION,
         description=DESCRIPTION,
