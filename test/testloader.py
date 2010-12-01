@@ -43,7 +43,7 @@ sys.path.insert(1, MODULE_DIR)
 def find_modules():
     """Collect all defined modules and packages to be covered."""
     modpack = set()
-    lib = path.abspath(path.join(MODULE_DIR, "..", "lib"))
+    lib = path.abspath(path.join(MODULE_DIR, ".."))
     for (dirpath, dirnames, filenames) in os.walk(lib):
         if (dirpath == lib) or ("__init__.py" in filenames):
             try:
