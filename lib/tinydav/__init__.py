@@ -766,7 +766,7 @@ class HTTPClient(object):
         """Make POST request and return HTTPResponse.
 
         uri -- Path to post data to.
-        content -- File descriptor,string or dict with content to POST. If it
+        content -- File descriptor, string or dict with content to POST. If it
                    is a dict, the dict contents will be posted as content type
                    application/x-www-form-urlencoded.
         headers -- If given, must be a mapping with headers to set.
@@ -788,6 +788,9 @@ class HTTPClient(object):
             else:
                 headers["content-type"] = "application/x-www-form-urlencoded"
                 content = urllib.urlencode(content)
+        if hasattr(content, "read") and not PYTHON2_6:
+            # python 2.5 httlib cannot handle file-like objects
+            content = content.read()
         return self._request("POST", uri, content, headers)
 
     def put(self, uri, fileobject, content_type="application/octet-stream",
