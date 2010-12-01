@@ -262,6 +262,7 @@ class WebDAVLockResponse(WebDAVResponse):
         self._locktokens = None
         self._previous_if = None
         self._tagged = True
+        self._tag = None
         # RFC 2518, 8.10.7 Status Codes
         # 200 (OK) - The lock request succeeded and the value of the
         # lockdiscovery property is included in the body.
