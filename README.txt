@@ -18,7 +18,8 @@ Python 3 is not supported, yet.
 
 Documentation
 -------------
-Reference: http://code.google.com/p/tinydav/w/list
+Tutorial: http://code.google.com/p/tinydav/wiki/Tutorial
+Reference: http://code.google.com/p/tinydav/wiki/tinydav
 
 
 Unittests
@@ -30,4 +31,4 @@ $ python setup.py test
 
 License
 -------
-TinyDAV ist licensed under the LGPLv3. See separate LICENSE and LICENSE.LESSER. 
+TinyDAV ist licensed under the LGPLv3. See separate COPYING and COPYING.LESSER. 
