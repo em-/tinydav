@@ -645,9 +645,9 @@ class HTTPClient(object):
             con.request(method, uri, content, headers)
             response = self.ResponseType(con.getresponse())
             if 400 <= response < 500:
-                response = HTTPUserError(response, method)
+                response = HTTPUserError(response)
             elif 500 <= response < 600:
-                response = HTTPServerError(response, method)
+                response = HTTPServerError(response)
 
         if self.cookie is not None:
             # Get response object suitable for cookielib

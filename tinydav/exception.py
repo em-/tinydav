@@ -29,7 +29,7 @@ class HTTPError(Exception):
       response -- The HTTPResponse object.
     
     """
-    def __init__(self, response, method):
+    def __init__(self, response):
         """Initialize the HTTPError.
 
         response -- HTTPClient or one of its subclasses.
