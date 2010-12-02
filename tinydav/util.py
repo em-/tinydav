@@ -24,6 +24,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import urlparse
 
+from tinydav.exception import HTTPError
+
 __all__ = (
     "FakeHTTPRequest", "make_absolute", "make_multipart",
     "extract_namespace", "get_depth"
@@ -154,4 +156,16 @@ def get_depth(depth, allowed=("0", "1", "infinity")):
     if depth not in allowed:
         raise ValueError("illegal depth %s" % depth)
     return depth
+
+
+def get_cookie_response(tiny_response):
+    """Return response object suitable with cookielib.
+
+    This makes the httplib.HTTPResponse compatible with cookielib.
+
+    """
+    if isinstance(tiny_response, HTTPError):
+        tiny_response = tiny_response.response
+    tiny_response.response.info = lambda: tiny_response.response.msg
+    return tiny_response.response
 

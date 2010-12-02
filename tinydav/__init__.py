@@ -650,9 +650,9 @@ class HTTPClient(object):
                 response = HTTPServerError(response, method)
 
         if self.cookie is not None:
-            # make httplib.HTTPResponse compatible with urllib2.Response
-            response.response.info = lambda: response.response.msg
-            self.cookie.extract_cookies(response.response, fake_request)
+            # Get response object suitable for cookielib
+            cookie_response = util.get_cookie_response(response)
+            self.cookie.extract_cookies(cookie_response, fake_request)
 
         if isinstance(response, HTTPError):
             raise response
