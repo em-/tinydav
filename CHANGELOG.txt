@@ -3,6 +3,13 @@ Tinydav - WebDAV client libaray
 ===============================
 
 -------------
+Version 0.6.1
+-------------
+FIXES
+* Fix cookie support.
+
+
+-------------
 Version 0.6.0
 -------------
 FEATURES
