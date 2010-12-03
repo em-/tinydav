@@ -3,6 +3,18 @@ Tinydav - WebDAV client libaray
 ===============================
 
 -------------
+Version 0.6.2
+-------------
+FIXES
+* multi-status prop element may contain arbitrary XML elements. Return them
+  as ElementTree elements instead of strings.
+
+CHANGES
+* Fixed RFC number in comments
+* Updated
+
+
+-------------
 Version 0.6.1
 -------------
 FIXES
