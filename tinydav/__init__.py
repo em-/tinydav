@@ -33,7 +33,7 @@ from tinydav.exception import HTTPError, HTTPUserError, HTTPServerError
 
 __author__ = "Manuel Hermann <manuel-hermann@gmx.net>"
 __license__ = "LGPL"
-__version__ = "0.6.1"
+__version__ = "0.6.2"
 
 __all__ = (
     "HTTPError", "HTTPUserError", "HTTPServerError",
