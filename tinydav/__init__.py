@@ -1174,7 +1174,8 @@ class ExtendedWebDAVClient(CoreWebDAVClient):
         depth -- Either 0 or 1 or "infinity". Default is zero.
         properties -- If given, an iterable with all requested properties is
                       expected.
-        elements -- An iterable with additional XML elements.
+        elements -- An iterable with additional XML (ElementTree) elements to
+                    append to the version-tree.
         namespaces -- Mapping with namespaces for given properties, if needed.
         headers -- If given, must be a mapping with headers to set.
 
