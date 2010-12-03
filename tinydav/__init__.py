@@ -334,10 +334,7 @@ class WebDAVLockResponse(WebDAVResponse):
             # RFC 2518, 12.7.2 shared XML Element
             # <!ELEMENT shared EMPTY >
             scope = ACTIVELOCK + "/{DAV:}lockscope/*"
-            try:
-                self._lockscope = self._etree.find(scope)
-            except IndexError:
-                pass
+            self._lockscope = self._etree.find(scope)
         return self._locktype
 
     @property
@@ -347,10 +344,7 @@ class WebDAVLockResponse(WebDAVResponse):
             # RFC 2518, 12.8 locktype XML Element
             # <!ELEMENT locktype (write) >
             locktype = ACTIVELOCK + "/{DAV:}locktype/*"
-            try:
-                self._locktype = self._etree.find(locktype)
-            except IndexError:
-                pass
+            self._locktype = self._etree.find(locktype)
         return self._locktype
 
     @property
@@ -371,8 +365,6 @@ class WebDAVLockResponse(WebDAVResponse):
             # <!ELEMENT owner ANY>
             owner = ACTIVELOCK + "/{DAV:}owner"
             self._owner = self._etree.find(owner)
-            if not self._owner:
-                self._owner = None
         return self._owner
 
     @property
@@ -383,8 +375,6 @@ class WebDAVLockResponse(WebDAVResponse):
             # <!ELEMENT timeout (#PCDATA) >
             timeout = ACTIVELOCK + "/{DAV:}timeout"
             self._timeout = self._etree.findtext(timeout)
-            if not self._timeout:
-                self._timeout = None
         return self._timeout
 
     @property
@@ -415,7 +405,6 @@ class MultiStatusResponse(int):
                   XML structure had.
 
     """
-
     def __new__(cls, response):
         """Create instance with status code as int value."""
         # RFC 2518, 12.9.1 response XML Element
@@ -920,7 +909,7 @@ class CoreWebDAVClient(HTTPClient):
         # Consequently, the Destination header MUST be present on all MOVE
         # methods and MUST follow all COPY requirements for the COPY part of
         # the MOVE method.
-        # RFC 2517, 9.3 Destination Header
+        # RFC 2518, 9.3 Destination Header
         # Destination = "Destination" ":" absoluteURI
         headers["Destination"] = util.make_absolute(self, destination)
         # RFC 2518, 8.8.3 COPY for Collections
@@ -974,7 +963,7 @@ class CoreWebDAVClient(HTTPClient):
 
         """
         namespaces = dict() if (namespaces is None) else namespaces
-        # RFC 2517, 8.1 PROPFIND
+        # RFC 2518, 8.1 PROPFIND
         # A client may submit a Depth header with a value of "0", "1", or
         # "infinity" with a PROPFIND on a collection resource with internal
         # member URIs.
@@ -1007,7 +996,7 @@ class CoreWebDAVClient(HTTPClient):
         Raise HTTPServerError on 5xx HTTP status codes.
 
         """
-        # RFC 2517, 12.13 propertyupdate XML element
+        # RFC 2518, 12.13 propertyupdate XML element
         # <!ELEMENT propertyupdate (remove | set)+ >
         if not any((setprops, delprops)):
             raise ValueError("setprops and/or delprops must be given")
@@ -1029,7 +1018,7 @@ class CoreWebDAVClient(HTTPClient):
         """
         headers = dict() if (headers is None) else headers
         if uri.endswith("/"):
-            # RFC 2517, 8.6.2 DELETE for Collections
+            # RFC 2518, 8.6.2 DELETE for Collections
             # A client MUST NOT submit a Depth header with a DELETE on a
             # collection with any value but infinity.
             headers["Depth"] = "infinity"
@@ -1098,7 +1087,7 @@ class CoreWebDAVClient(HTTPClient):
 
         """
         (uri, headers) = self._prepare(uri, headers)
-        # RFC 2517, 9.8 Timeout Request Header
+        # RFC 2518, 9.8 Timeout Request Header
         # TimeOut = "Timeout" ":" 1#TimeType
         # TimeType = ("Second-" DAVTimeOutVal | "Infinite" | Other)
         # DAVTimeOutVal = 1*digit
@@ -1116,7 +1105,7 @@ class CoreWebDAVClient(HTTPClient):
                     raise ValueError("timeout too big")
                 value = "Second-%d" % timeout
             headers["Timeout"] = value
-        # RFC 2517, 8.10.4 Depth and Locking
+        # RFC 2518, 8.10.4 Depth and Locking
         # Values other than
         # 0 or infinity MUST NOT be used with the Depth header on a LOCK
         # method.

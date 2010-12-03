@@ -54,22 +54,22 @@ def create_propfind(names=False, properties=None,
 
     """
     namespaces = dict() if (namespaces is None) else namespaces
-    # RFC 2517, 12.14 propfind XML Element
+    # RFC 2518, 12.14 propfind XML Element
     # <!ELEMENT propfind (allprop | propname | prop) >
     propfind = Element("propfind", _NS)
     _addnamespaces(propfind, namespaces)
     if names:
-        # RFC 2517, 12.14.2 propname XML Element
+        # RFC 2518, 12.14.2 propname XML Element
         # <!ELEMENT propname EMPTY >
         names_element = SubElement(propfind, "propname")
     elif properties:
-        # RFC 2517, 12.11 prop XML Element
+        # RFC 2518, 12.11 prop XML Element
         # <!ELEMENT prop ANY >
         prop = SubElement(propfind, "prop")
         for propname in properties:
             propelement = SubElement(prop, propname)
     else:
-        # RFC 2517, 12.14.2 allprop XML Element
+        # RFC 2518, 12.14.2 allprop XML Element
         # <!ELEMENT allprop EMPTY >
         allprop = SubElement(propfind, "allprop")
         # draft-reschke-webdav-allprop-include-00
@@ -91,12 +91,12 @@ def create_proppatch(setprops, delprops, namespaces=None):
                   if necessary.
 
     """
-    # RFC 2517, 12.13 propertyupdate XML element
+    # RFC 2518, 12.13 propertyupdate XML element
     # <!ELEMENT propertyupdate (remove | set)+ >
     propertyupdate = Element("propertyupdate", _NS)
     if namespaces:
         _addnamespaces(propertyupdate, namespaces)
-    # RFC 2517, 12.13.2 set XML element
+    # RFC 2518, 12.13.2 set XML element
     # <!ELEMENT set (prop) >
     if setprops:
         set_ = SubElement(propertyupdate, "set")
@@ -104,7 +104,7 @@ def create_proppatch(setprops, delprops, namespaces=None):
         for (propname, propvalue) in setprops.iteritems():
             property = SubElement(prop, propname)
             property.text = propvalue
-    # RFC 2517, 12.13.1 set XML element
+    # RFC 2518, 12.13.1 set XML element
     # <!ELEMENT remove (prop) >
     if delprops:
         remove = SubElement(propertyupdate, "remove")
@@ -124,28 +124,28 @@ def create_lock(scope="exclusive", type_="write", owner=None):
     Raise ValueError, if illegal scope was given.
 
     """
-    # RFC 2517, 12.7 lockscope XML Element
+    # RFC 2518, 12.7 lockscope XML Element
     # <!ELEMENT lockscope (exclusive | shared) >
-    # RFC 2517, 12.7.1 exclusive XML Element
+    # RFC 2518, 12.7.1 exclusive XML Element
     # <!ELEMENT exclusive EMPTY >
-    # RFC 2517, 12.7.2 shared XML Element
+    # RFC 2518, 12.7.2 shared XML Element
     # <!ELEMENT shared EMPTY >
     if scope not in ("exclusive", "shared"):
         raise ValueError("scope must be either exclusive or shared")
-    # RFC 2517, 12.6 lockinfo XML Element
+    # RFC 2518, 12.6 lockinfo XML Element
     # <!ELEMENT lockinfo (lockscope, locktype, owner?) >
     lockinfo = Element("lockinfo", _NS)
     # set lockscope
     lockscope = SubElement(lockinfo, "lockscope")
     scope = SubElement(lockscope, scope)
-    # RFC 2517, 12.8 locktype XML Element
+    # RFC 2518, 12.8 locktype XML Element
     # <!ELEMENT locktype (write) >
-    # RFC 2517, 12.8.1 write XML Element
+    # RFC 2518, 12.8.1 write XML Element
     # <!ELEMENT write EMPTY >
     locktype = SubElement(lockinfo, "locktype")
     typ_ = SubElement(locktype, type_)
     if owner is not None:
-        # RFC 2517, 12.10 owner XML Element
+        # RFC 2518, 12.10 owner XML Element
         # <!ELEMENT owner ANY>
         owner_elem = SubElement(lockinfo, "owner")
         if isinstance(owner, basestring):
