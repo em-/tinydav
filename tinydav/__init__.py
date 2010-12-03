@@ -468,11 +468,11 @@ class MultiStatusResponse(int):
             yield tagname
 
     def items(self):
-        """Return list of 2-tuples with propertyname and value."""
+        """Return list of 2-tuples with propertyname and ElementTree element."""
         return list(self.iteritems())
 
     def iteritems(self, cut_dav_ns=True):
-        """Iterate list of 2-tuples with propertyname and value.
+        """Iterate list of 2-tuples with propertyname and ElementTree element.
 
         cut_dav_ns -- No namespaces for DAV properties when this is True.
 
@@ -484,7 +484,7 @@ class MultiStatusResponse(int):
             tagname = prop.tag
             if cut_dav_ns and tagname.startswith("{DAV:}"):
                 tagname = tagname[6:]
-            yield (tagname, prop.text)
+            yield (tagname, prop)
 
     def get(self, key, default=None, namespace=None):
         """Return value for requested property.
