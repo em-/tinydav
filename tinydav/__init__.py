@@ -45,7 +45,7 @@ PYTHON2_7 = (sys.version_info >= (2, 7))
 
 # RFC 2518, 9.8 Timeout Request Header
 # The timeout value for TimeType "Second" MUST NOT be greater than 2^32-1.
-MAX_TIMEOUT = 4294967295
+MAX_TIMEOUT = 2**32-1
 
 ACTIVELOCK = "/{DAV:}lockdiscovery/{DAV:}activelock"
 
@@ -129,7 +129,6 @@ class WebDAVResponse(HTTPResponse):
     multi-status.
 
     """
-
     def __init__(self, response):
         """Initialize the WebDAVResponse.
 
@@ -173,9 +172,18 @@ class WebDAVResponse(HTTPResponse):
             yield self
 
     def _parse_xml_content(self):
-        """Parse the XML content."""
+        """Parse the XML content.
+        
+        If the response content cannot be parsed as XML content, 
+        <root><empty/></root> will be taken as content instead.
+
+        """
         try:
-            self._etree.parse(StringIO(self.content))
+            if self._content is None:
+                parse_me = self.response
+            else:
+                parse_me = StringIO(self.content)
+            self._etree.parse(parse_me)
         except ExpatError, e:
             self.parse_error = e
             # don't fail on further processing
