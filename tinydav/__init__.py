@@ -760,7 +760,7 @@ class HTTPClient(object):
         return self._request("HEAD", uri, None, headers)
 
     def post(self, uri, content="", headers=None, query=None,
-             as_multipart=False, encoding="utf-8"):
+             as_multipart=False, encoding="ascii"):
         """Make POST request and return HTTPResponse.
 
         uri -- Path to post data to.
@@ -775,7 +775,8 @@ class HTTPClient(object):
                         2-tuple containing the actual value (or file-like 
                         object) and an encoding for this value (or the
                         content-type in case of a file-like object).
-        encoding -- Send multipart content encoding with this encoding.
+        encoding -- Send multipart content encoding with this encoding. Default
+                    is ASCII.
 
         Raise HTTPUserError on 4xx HTTP status codes.
         Raise HTTPServerError on 5xx HTTP status codes.
