@@ -24,6 +24,7 @@ from httplib import MULTI_STATUS, OK, CONFLICT, NO_CONTENT
 from StringIO import StringIO
 from xml.etree.ElementTree import ElementTree, Element, SubElement, tostring
 from xml.parsers.expat import ExpatError
+import hashlib
 import httplib
 import sys
 import urllib
@@ -102,6 +103,22 @@ class HTTPResponse(int):
     def __str__(self):
         """Return string representation."""
         return self.statusline
+
+
+class HTTPAuthResponse(HTTPResponse):
+    def __init__(self, response):
+        super(HTTPAuthResponse, self).__init__(response)
+        self.schema = None
+        self.realm = None
+        self.domain = None
+        self.nonce = None
+        self.opaque = None
+        self.stale = self.headers.get("stale", False)
+        self.algorithm = hashlib.md5
+        self._set_auth_data()
+
+    def _set_auth_data(self):
+        auth = self.headers.get("www-authenticate")
 
 
 class WebDAVResponse(HTTPResponse):
@@ -693,6 +710,9 @@ class HTTPClient(object):
         userpw = "%s:%s" % (user, password)
         auth = userpw.encode("base64").rstrip()
         self.headers["Authorization"] = "Basic %s" % auth
+
+    def setdigestauth(self):
+        pass
 
     def setcookie(self, cookie):
         """Set cookie class to be used in requests.
