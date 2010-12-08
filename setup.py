@@ -4,7 +4,9 @@
 # Copyright (C) 2009  Manuel Hermann <manuel-hermann@gmx.net>
 from distutils.core import setup
 
-VERSION = "0.6.2"
+import tinydav
+
+VERSION = tinydav.__version__
 DOWNLOAD = "http://tinydav.googlecode.com/files/tinydav-%s.tar.gz" % VERSION
 DESCRIPTION = "An easy-to-use HTTP and WebDAV client library."
 LONG_DESCRIPTION = """\

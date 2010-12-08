@@ -22,6 +22,7 @@ from email.mime.application import MIMEApplication
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import re
 import urlparse
 
 from tinydav.exception import HTTPError
@@ -32,6 +33,19 @@ __all__ = (
 )
 
 DEFAULT_CONTENT_TYPE = "application/octet-stream"
+
+authparser = re.compile("""
+    (?P<schema>Basic|Digest)
+    (
+        \s+
+        (?:realm="(?P<realm>[^"]*)")?
+        (?:domain="(?P<domain>[^"]*)")?
+        (?:nonce="(?P<nonce>[^"]*)")?
+        (?:opaque="(?P<opaque>[^"]*)")?
+        (?:stale=(?P<stale>true|false|TRUE|FALSE))?
+        (?:algorithm=(?P<algorithm>\w+))?
+    )+
+""", re.VERBOSE)
 
 
 class FakeHTTPRequest(object):
@@ -169,3 +183,16 @@ def get_cookie_response(tiny_response):
     tiny_response.response.info = lambda: tiny_response.response.msg
     return tiny_response.response
 
+
+def parse_authenticate(value):
+    """Parse www-authenticate header and return dict with values.
+
+    Return empty dict when value doesn't match a www-authenticate header value.
+
+    value -- String value of www-authenticate header.
+
+    """
+    sre = authparser.match(value)
+    if sre:
+        return sre.groupdict()
+    return dict()

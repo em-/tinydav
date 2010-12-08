@@ -20,7 +20,7 @@
 from __future__ import with_statement
 from contextlib import closing
 from functools import wraps, partial
-from httplib import MULTI_STATUS, OK, CONFLICT, NO_CONTENT
+from httplib import MULTI_STATUS, OK, CONFLICT, NO_CONTENT, UNAUTHORIZED
 from StringIO import StringIO
 from xml.etree.ElementTree import ElementTree, Element, SubElement, tostring
 from xml.parsers.expat import ExpatError
@@ -95,6 +95,8 @@ class HTTPResponse(int):
         version = "HTTP/%s.%s" % tuple(str(response.version))
         self.statusline = "%s %d %s"\
                         % (version, response.status, response.reason)
+        if self == UNAUTHORIZED:
+            self._setauth()
 
     def __repr__(self):
         """Return representation."""
@@ -104,21 +106,18 @@ class HTTPResponse(int):
         """Return string representation."""
         return self.statusline
 
-
-class HTTPAuthResponse(HTTPResponse):
-    def __init__(self, response):
-        super(HTTPAuthResponse, self).__init__(response)
-        self.schema = None
-        self.realm = None
-        self.domain = None
-        self.nonce = None
-        self.opaque = None
-        self.stale = self.headers.get("stale", False)
-        self.algorithm = hashlib.md5
-        self._set_auth_data()
-
-    def _set_auth_data(self):
-        auth = self.headers.get("www-authenticate")
+    def _setauth(self):
+        value = self.headers.get("www-authenticate", "")
+        auth = util.parse_authenticate(value)
+        self.schema = auth.get("schema")
+        self.realm = auth.get("realm")
+        self.domain = auth.get("domain")
+        self.nonce = auth.get("nonce")
+        self.opaque = auth.get("opaque")
+        stale = auth.get("stale", "false")
+        self.stale = (state.lower() == "true")
+        algorithm = auth.get("algoritm", "MD5")
+        self.algorithm = getattr(hashlib, algorithm.lower())
 
 
 class WebDAVResponse(HTTPResponse):
@@ -619,6 +618,7 @@ class HTTPClient(object):
         self.cert_file = None
         self.headers = dict()
         self.cookie = None
+        self._do_digest_auth = False
 
     def _getconnection(self):
         """Return HTTP(S)Connection object depending on set protocol."""
@@ -711,8 +711,22 @@ class HTTPClient(object):
         auth = userpw.encode("base64").rstrip()
         self.headers["Authorization"] = "Basic %s" % auth
 
-    def setdigestauth(self):
-        pass
+    def setdigestauth(self, user, password, auth_response):
+        """Set next request to authenticate via digest auth.
+
+        user -- Username
+        password -- Password for user.
+        auth_response -- Either a HTTPResonse object with status 401 or the
+                         corresponding HTTPError object.
+
+        """
+        if isinstance(auth_response, HTTPError):
+            auth_response = auth_response.response
+        if response != UNAUTHORIZED:
+            raise ValueError("need 401 Unauthorized response")
+        self._user = None
+        self._password = None
+        self._response = auth_response
 
     def setcookie(self, cookie):
         """Set cookie class to be used in requests.
