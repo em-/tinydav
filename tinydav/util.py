@@ -22,6 +22,7 @@ from email.mime.application import MIMEApplication
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from os import path
 import re
 import urlparse
 
@@ -31,8 +32,6 @@ __all__ = (
     "FakeHTTPRequest", "make_absolute", "make_multipart",
     "extract_namespace", "get_depth"
 )
-
-DEFAULT_CONTENT_TYPE = "application/octet-stream"
 
 authparser = re.compile("""
     (?P<schema>Basic|Digest)
@@ -46,6 +45,8 @@ authparser = re.compile("""
         (?:algorithm=(?P<algorithm>\w+))?
     )+
 """, re.VERBOSE)
+
+DEFAULT_CONTENT_TYPE = "application/octet-stream"
 
 
 class FakeHTTPRequest(object):
@@ -100,47 +101,111 @@ def make_absolute(httpclient, uri):
     return urlparse.urlunsplit(parts)
 
 
-def make_multipart(content, default_encoding):
+def make_multipart(content, default_encoding="ascii", with_filenames=False):
     """Return the headers and content for multipart/form-data.
 
     content -- Dict with content to POST. The dict values are expected to
                be unicode or decodable with us-ascii.
     default_encoding -- Send multipart with this encoding, if no special 
-                        encoding was given with the content.
+                        encoding was given with the content. Default is ascii.
+    with_filenames -- If True, a multipart's files will be sent with the
+                      filename paramenter set. Default is False.
 
     """
-    # RFC 2388 Returning Values from Forms:  multipart/form-data
+    def add_disposition(part, name, filename=None, disposition="form-data"):
+        """Add a Content-Disposition header to the part.
+
+        part -- Part to add header to.
+        name -- Name of the part.
+        filename -- Add this filename as parameter, if given.
+        disposition -- Value of the content-disposition header.
+
+        """
+        # RFC 2388 Returning Values from Forms: multipart/form-data
+        # Each part is expected to contain a content-disposition header
+        # [RFC 2183] where the disposition type is "form-data", and where the
+        # disposition contains an (additional) parameter of "name", where the
+        # value of that parameter is the original field name in the form.
+        params = dict(name=name)
+        if with_filenames and (filename is not None):
+            # RFC 2388 Returning Values from Forms: multipart/form-data
+            # The original local file name may be supplied as well, either as
+            # a "filename" parameter either of the "content-disposition: 
+            # form-data" header or, in the case of multiple files, in a
+            # "content-disposition: file" header of the subpart.
+            params["filename"] = path.basename(filename)
+        part.add_header("Content-Disposition", disposition, **params)
+
+    def create_part(key, fileobject, content_type, multiple=False):
+        """Create and return a multipart part as to given file data.
+
+        key -- Field name.
+        fileobject -- The file-like object to add to the part.
+        content_type -- Content-type of the file. If None, use default.
+        multiple -- If true, use Content-Disposition: file.
+
+        """
+        if not content_type:
+            content_type = DEFAULT_CONTENT_TYPE
+        (maintype, subtype) = content_type.split("/")
+        part = MIMEBase(maintype, subtype)
+        part.set_payload(fileobject.read())
+        encode_base64(part)
+        filename = getattr(fileobject, "name", None)
+        kwargs = dict()
+        if multiple:
+            # RFC 2388 Returning Values from Forms: multipart/form-data
+            # The original local file name may be supplied as well, either as
+            # a "filename" parameter either of the "content-disposition: 
+            # form-data" header or, in the case of multiple files, in a
+            # "content-disposition: file" header of the subpart.
+            kwargs["disposition"] = "file"
+        add_disposition(part, key, filename, **kwargs)
+        return part
+
+    # RFC 2388 Returning Values from Forms: multipart/form-data
     mime = MIMEMultipart("form-data")
+    files = list()
     for (key, data) in content.iteritems():
-        # are there explicit encodings/content-types given?
-        try:
+        # Are there explicit encodings/content-types given?
+        # Note: Cannot to a (value, encoding) = value here as fileobjects then
+        # would get iterated, which is not what we want.
+        if isinstance(data, tuple) and (len(data) == 2):
             (value, encoding) = data
-        except ValueError:
-            value = data
-            encoding = default_encoding
-        # cope with file-like objects
-        try:
-            value = value.read()
-        except AttributeError:
-            # no file-like object
-            encoding = encoding if encoding else default_encoding
-            sub_part = MIMEText(value, "plain", encoding)
         else:
-            # encoding is content-type when treating with file-like objects
-            if encoding:
-                (maintype, subtype) = encoding.split("/")
-                sub_part = MIMEBase(maintype, subtype)
-                sub_part.set_payload(value)
-                encode_base64(sub_part)
-            else:
-                sub_part = MIMEApplication(value, DEFAULT_CONTENT_TYPE)
-        sub_part.add_header("content-disposition", "form-data", name=key)
-        mime.attach(sub_part)
+            (value, encoding) = (data, None)
+        # collect file-like objects
+        if hasattr(value, "read"):
+            files.append((key, value, encoding))
+        # no file-like object
+        else:
+            encoding = encoding if encoding else default_encoding
+            part = MIMEText(value, "plain", encoding)
+            add_disposition(part, key)
+            mime.attach(part)
+
+    filecount = len(files)
+    if filecount == 1:
+        filedata = files[0]
+        part = create_part(*filedata)
+        mime.attach(part)
+    elif filecount > 1: 
+        # RFC 2388 Returning Values from Forms: multipart/form-data
+        # 4.2 Sets of files
+        # If the value of a form field is a set of files rather than a single
+        # file, that value can be transferred together using the
+        # "multipart/mixed" format.
+        mixed = MIMEMultipart("mixed")
+        for filedata in files:
+            part = create_part(*filedata, multiple=True)
+            mixed.attach(part)
+        mime.attach(mixed)
+
     # mime.items must be called after mime.as_string when the headers shall
     # contain the boundary
     complete_mime = mime.as_string()
     headers = dict(mime.items())
-    # start after \n\n
+    # trim headers from create mime as these will later be added by httplib.
     payload_start = complete_mime.index("\n\n") + 2
     payload = complete_mime[payload_start:]
     return (headers, payload)

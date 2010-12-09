@@ -794,7 +794,7 @@ class HTTPClient(object):
         return self._request("HEAD", uri, None, headers)
 
     def post(self, uri, content="", headers=None, query=None,
-             as_multipart=False, encoding="ascii"):
+             as_multipart=False, encoding="ascii", with_filenames=False):
         """Make POST request and return HTTPResponse.
 
         uri -- Path to post data to.
@@ -811,6 +811,8 @@ class HTTPClient(object):
                         content-type in case of a file-like object).
         encoding -- Send multipart content encoding with this encoding. Default
                     is ASCII.
+        with_filenames -- If True, a multipart's files will be sent with the
+                          filename paramenter set. Default is False.
 
         Raise HTTPUserError on 4xx HTTP status codes.
         Raise HTTPServerError on 5xx HTTP status codes.
@@ -819,7 +821,9 @@ class HTTPClient(object):
         (uri, headers) = self._prepare(uri, headers, query)
         if isinstance(content, dict):
             if as_multipart:
-                (multihead, content) = util.make_multipart(content, encoding)
+                (multihead, content) = util.make_multipart(content,
+                                                           encoding,
+                                                           with_filenames)
                 headers.update(multihead)
             else:
                 headers["content-type"] = "application/x-www-form-urlencoded"
