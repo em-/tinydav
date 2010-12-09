@@ -168,7 +168,7 @@ def make_multipart(content, default_encoding="ascii", with_filenames=False):
     files = list()
     for (key, data) in content.iteritems():
         # Are there explicit encodings/content-types given?
-        # Note: Cannot to a (value, encoding) = value here as fileobjects then
+        # Note: Cannot do a (value, encoding) = value here as fileobjects then
         # would get iterated, which is not what we want.
         if isinstance(data, tuple) and (len(data) == 2):
             (value, encoding) = data
