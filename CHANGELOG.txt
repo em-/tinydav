@@ -3,6 +3,19 @@ Tinydav - WebDAV client libaray
 ===============================
 
 -------------
+Version 0.6.3
+-------------
+FIXES
+* Exception occured when trying to post a file without explicit content-type.
+
+CHANGES
+* Don't use reserved names as variable names.
+* Set default encoding for multi-part posts from utf-8 to ascii.
+* multipart/form-data: Multiple files will be sent as multipart/mixed.
+* Posting files can include the filenames.
+
+
+-------------
 Version 0.6.2
 -------------
 FIXES

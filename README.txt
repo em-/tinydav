@@ -16,17 +16,20 @@ Requirements
 Python 3 is not supported, yet.
 
 
+Installation
+------------
+Get from PyPI:
+# easy_install tinydav
+
+Get package from Google Code:
+python setup.py build
+python setup.py install
+
+
 Documentation
 -------------
 Tutorial: http://code.google.com/p/tinydav/wiki/Tutorial
 Reference: http://code.google.com/p/tinydav/wiki/tinydav
-
-
-Unittests
----------
-To run the unittests and coverage type:
-
-$ python setup.py test
 
 
 License
