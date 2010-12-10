@@ -13,17 +13,15 @@ LONG_DESCRIPTION = """\
 An easy-to-use HTML and WebDAV client library for Python
 --------------------------------------------------------
 
-This library contains a HTTP and WebDAV client supporting HTTP and HTTPS.
+This is a small library for contacting HTTP and WebDAV servers. Goal of this project until version 1.0 is supporting all WebDAV methods including the versioning extensions from RFC 3253).
 
-Features of the HTTP client:
- - Cookie support
- - SSL support
- - HTTP methods: OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, CONNECT
-
-Features of the WebDAV client:
- - All features of the HTTP client
- - WebDAV methods: MKCOL, PROPFIND, PROPPATCH, DELETE, COPY, MOVE, LOCK, UNLOCK
- - RFC 3253 REPORT (rudimentary)
+Features:
+ - HTTP methods OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, CONNECT.
+ - WebDAV methods MKCOL, PROPFIND, PROPPATCH, DELETE, COPY, MOVE, LOCK, UNLOCK
+ - Support for REPORT method (report-tree requests only, RFC 3253)
+ - Cookies
+ - SSL
+ - Multipart/form-data and application/x-www-form-urlencoded POST requests
 
 This version requires Python 2.5 or later; Python 3 is not supportet yet.
 """
