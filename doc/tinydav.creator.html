@@ -12,6 +12,53 @@
     <p><tt>Module&nbsp;with&nbsp;helper&nbsp;functions&nbsp;that&nbsp;generate&nbsp;XML&nbsp;requests.</tt></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="creator.html#DigestCreator">DigestCreator</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="DigestCreator">class <strong>DigestCreator</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="DigestCreator-H"><strong>H</strong></a>(self, value)</dt></dl>
+
+<dl><dt><a name="DigestCreator-KD"><strong>KD</strong></a>(self, value1, value2)</dt></dl>
+
+<dl><dt><a name="DigestCreator-__getattr__"><strong>__getattr__</strong></a>(self, name)</dt></dl>
+
+<dl><dt><a name="DigestCreator-__getitem__"><strong>__getitem__</strong></a>(self, name)</dt></dl>
+
+<dl><dt><a name="DigestCreator-__init__"><strong>__init__</strong></a>(self, client, method, uri, body)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>entity_digest</strong></dt>
+</dl>
+<dl><dt><strong>entity_info</strong></dt>
+</dl>
+<dl><dt><strong>response_digest</strong></dt>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#eeaa77">
 <td colspan=3 valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
@@ -44,5 +91,12 @@ delprops&nbsp;--&nbsp;Iterable&nbsp;with&nbsp;element&nbsp;names&nbsp;to&nbsp;re
 namespaces&nbsp;--&nbsp;Mapping&nbsp;(prefix-&gt;namespace)&nbsp;with&nbsp;additional&nbsp;namespaces,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;necessary.</tt></dd></dl>
  <dl><dt><a name="-create_report"><strong>create_report</strong></a>(properties<font color="#909090">=None</font>, elements<font color="#909090">=None</font>, namespaces<font color="#909090">=None</font>)</dt><dd><tt>Construct&nbsp;and&nbsp;return&nbsp;XML&nbsp;for&nbsp;REPORT.</tt></dd></dl>
-</td></tr></table>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>digest_response</strong> = ('realm', 'nonce', 'uri', 'response', 'digest', 'algorithm', 'opaque')</td></tr></table>
 </body></html>

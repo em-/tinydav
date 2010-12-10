@@ -1,12 +1,12 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html><head><title>Python: package tinydav</title>
+<html><head><title>Python: module __init__</title>
 </head><body bgcolor="#f0f0f8">
 
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>tinydav</strong></big></big> (version 0.6.2)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>__init__</strong></big></big> (version 0.6.3)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/hermann/Entwürfe/hg/tinydav/tinydav/__init__.py">/home/hermann/Entwürfe/hg/tinydav/tinydav/__init__.py</a></font></td></tr></table>
     <p><tt>The&nbsp;tinydav&nbsp;WebDAV&nbsp;client.</tt></p>
@@ -14,12 +14,15 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#aa55cc">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Package Contents</strong></big></font></td></tr>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
     
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="tinydav.creator.html">creator</a><br>
-</td><td width="25%" valign=top><a href="tinydav.exception.html">exception</a><br>
-</td><td width="25%" valign=top><a href="tinydav.util.html">util</a><br>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="tinydav.creator.html">tinydav.creator</a><br>
+<a href="hashlib.html">hashlib</a><br>
+</td><td width="25%" valign=top><a href="httplib.html">httplib</a><br>
+<a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top><a href="urllib.html">urllib</a><br>
+<a href="tinydav.util.html">tinydav.util</a><br>
 </td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ee77aa">
@@ -31,7 +34,13 @@
 <dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
 </font></dt><dd>
 <dl>
-<dt><font face="helvetica, arial"><a href="tinydav.html#HTTPClient">HTTPClient</a>
+<dt><font face="helvetica, arial"><a href="__init__.html#HTTPClient">HTTPClient</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="__init__.html#ExtendedWebDAVClient">ExtendedWebDAVClient</a>(<a href="__init__.html#CoreWebDAVClient">CoreWebDAVClient</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="__init__.html#WebDAVClient">WebDAVClient</a>
 </font></dt></dl>
 </dd>
 <dt><font face="helvetica, arial"><a href="exceptions.html#Exception">exceptions.Exception</a>(<a href="exceptions.html#BaseException">exceptions.BaseException</a>)
@@ -45,12 +54,6 @@
 </font></dt></dl>
 </dd>
 </dl>
-</dd>
-<dt><font face="helvetica, arial"><a href="tinydav.html#ExtendedWebDAVClient">ExtendedWebDAVClient</a>(<a href="tinydav.html#CoreWebDAVClient">CoreWebDAVClient</a>)
-</font></dt><dd>
-<dl>
-<dt><font face="helvetica, arial"><a href="tinydav.html#WebDAVClient">WebDAVClient</a>
-</font></dt></dl>
 </dd>
 </dl>
  <p>
@@ -140,7 +143,7 @@ headers&nbsp;--&nbsp;Optional&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;s
 Raise&nbsp;<a href="#HTTPUserError">HTTPUserError</a>&nbsp;on&nbsp;4xx&nbsp;HTTP&nbsp;status&nbsp;codes.<br>
 Raise&nbsp;<a href="#HTTPServerError">HTTPServerError</a>&nbsp;on&nbsp;5xx&nbsp;HTTP&nbsp;status&nbsp;codes.</tt></dd></dl>
 
-<dl><dt><a name="HTTPClient-post"><strong>post</strong></a>(self, uri, content<font color="#909090">=''</font>, headers<font color="#909090">=None</font>, query<font color="#909090">=None</font>, as_multipart<font color="#909090">=False</font>, encoding<font color="#909090">='utf-8'</font>)</dt><dd><tt>Make&nbsp;POST&nbsp;request&nbsp;and&nbsp;return&nbsp;HTTPResponse.<br>
+<dl><dt><a name="HTTPClient-post"><strong>post</strong></a>(self, uri, content<font color="#909090">=''</font>, headers<font color="#909090">=None</font>, query<font color="#909090">=None</font>, as_multipart<font color="#909090">=False</font>, encoding<font color="#909090">='ascii'</font>, with_filenames<font color="#909090">=False</font>)</dt><dd><tt>Make&nbsp;POST&nbsp;request&nbsp;and&nbsp;return&nbsp;HTTPResponse.<br>
 &nbsp;<br>
 uri&nbsp;--&nbsp;Path&nbsp;to&nbsp;post&nbsp;data&nbsp;to.<br>
 content&nbsp;--&nbsp;File&nbsp;descriptor,&nbsp;string&nbsp;or&nbsp;dict&nbsp;with&nbsp;content&nbsp;to&nbsp;POST.&nbsp;If&nbsp;it<br>
@@ -154,7 +157,10 @@ as_multipart&nbsp;--&nbsp;Send&nbsp;post&nbsp;data&nbsp;as&nbsp;multipart/form-d
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2-tuple&nbsp;containing&nbsp;the&nbsp;actual&nbsp;value&nbsp;(or&nbsp;file-like&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="__builtin__.html#object">object</a>)&nbsp;and&nbsp;an&nbsp;encoding&nbsp;for&nbsp;this&nbsp;value&nbsp;(or&nbsp;the<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;content-type&nbsp;in&nbsp;case&nbsp;of&nbsp;a&nbsp;file-like&nbsp;<a href="__builtin__.html#object">object</a>).<br>
-encoding&nbsp;--&nbsp;Send&nbsp;multipart&nbsp;content&nbsp;encoding&nbsp;with&nbsp;this&nbsp;encoding.<br>
+encoding&nbsp;--&nbsp;Send&nbsp;multipart&nbsp;content&nbsp;encoding&nbsp;with&nbsp;this&nbsp;encoding.&nbsp;Default<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;ASCII.<br>
+with_filenames&nbsp;--&nbsp;If&nbsp;True,&nbsp;a&nbsp;multipart's&nbsp;files&nbsp;will&nbsp;be&nbsp;sent&nbsp;with&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;paramenter&nbsp;set.&nbsp;Default&nbsp;is&nbsp;False.<br>
 &nbsp;<br>
 Raise&nbsp;<a href="#HTTPUserError">HTTPUserError</a>&nbsp;on&nbsp;4xx&nbsp;HTTP&nbsp;status&nbsp;codes.<br>
 Raise&nbsp;<a href="#HTTPServerError">HTTPServerError</a>&nbsp;on&nbsp;5xx&nbsp;HTTP&nbsp;status&nbsp;codes.</tt></dd></dl>
@@ -213,7 +219,7 @@ Data descriptors defined here:<br>
 </dl>
 <hr>
 Data and other attributes defined here:<br>
-<dl><dt><strong>ResponseType</strong> = &lt;class 'tinydav.HTTPResponse'&gt;<dd><tt>Result&nbsp;from&nbsp;HTTP&nbsp;request.<br>
+<dl><dt><strong>ResponseType</strong> = &lt;class '__init__.HTTPResponse'&gt;<dd><tt>Result&nbsp;from&nbsp;HTTP&nbsp;request.<br>
 &nbsp;<br>
 An&nbsp;HTTPResponse&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;is&nbsp;a&nbsp;subclass&nbsp;of&nbsp;int.&nbsp;The&nbsp;int&nbsp;value&nbsp;of&nbsp;such&nbsp;an<br>
 <a href="__builtin__.html#object">object</a>&nbsp;is&nbsp;the&nbsp;HTTP&nbsp;status&nbsp;number&nbsp;from&nbsp;the&nbsp;response.<br>
@@ -438,7 +444,7 @@ Data descriptors inherited from <a href="exceptions.html#BaseException">exceptio
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="WebDAVClient">class <strong>WebDAVClient</strong></a>(<a href="tinydav.html#ExtendedWebDAVClient">ExtendedWebDAVClient</a>)</font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="WebDAVClient">class <strong>WebDAVClient</strong></a>(<a href="__init__.html#ExtendedWebDAVClient">ExtendedWebDAVClient</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
 <td colspan=2><tt>Mini&nbsp;WebDAV&nbsp;client.<br>
@@ -453,14 +459,14 @@ headers&nbsp;--&nbsp;Dictionary&nbsp;with&nbsp;headers&nbsp;to&nbsp;send&nbsp;wi
 cookie&nbsp;--&nbsp;If&nbsp;set&nbsp;with&nbsp;setcookie:&nbsp;the&nbsp;given&nbsp;<a href="__builtin__.html#object">object</a>.<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%"><dl><dt>Method resolution order:</dt>
-<dd><a href="tinydav.html#WebDAVClient">WebDAVClient</a></dd>
-<dd><a href="tinydav.html#ExtendedWebDAVClient">ExtendedWebDAVClient</a></dd>
-<dd><a href="tinydav.html#CoreWebDAVClient">CoreWebDAVClient</a></dd>
-<dd><a href="tinydav.html#HTTPClient">HTTPClient</a></dd>
+<dd><a href="__init__.html#WebDAVClient">WebDAVClient</a></dd>
+<dd><a href="__init__.html#ExtendedWebDAVClient">ExtendedWebDAVClient</a></dd>
+<dd><a href="__init__.html#CoreWebDAVClient">CoreWebDAVClient</a></dd>
+<dd><a href="__init__.html#HTTPClient">HTTPClient</a></dd>
 <dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
 </dl>
 <hr>
-Methods inherited from <a href="tinydav.html#ExtendedWebDAVClient">ExtendedWebDAVClient</a>:<br>
+Methods inherited from <a href="__init__.html#ExtendedWebDAVClient">ExtendedWebDAVClient</a>:<br>
 <dl><dt><a name="WebDAVClient-report"><strong>report</strong></a>(self, uri, depth<font color="#909090">=0</font>, properties<font color="#909090">=None</font>, elements<font color="#909090">=None</font>, namespaces<font color="#909090">=None</font>, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;a&nbsp;REPORT&nbsp;request&nbsp;and&nbsp;return&nbsp;status.<br>
 &nbsp;<br>
 uri&nbsp;--&nbsp;Resource&nbsp;or&nbsp;collection&nbsp;to&nbsp;get&nbsp;report&nbsp;for.<br>
@@ -477,7 +483,7 @@ Raise&nbsp;<a href="#HTTPUserError">HTTPUserError</a>&nbsp;on&nbsp;4xx&nbsp;HTTP
 Raise&nbsp;<a href="#HTTPServerError">HTTPServerError</a>&nbsp;on&nbsp;5xx&nbsp;HTTP&nbsp;status&nbsp;codes.</tt></dd></dl>
 
 <hr>
-Methods inherited from <a href="tinydav.html#CoreWebDAVClient">CoreWebDAVClient</a>:<br>
+Methods inherited from <a href="__init__.html#CoreWebDAVClient">CoreWebDAVClient</a>:<br>
 <dl><dt><a name="WebDAVClient-__init__"><strong>__init__</strong></a>(self, host, port<font color="#909090">=80</font>, protocol<font color="#909090">=None</font>)</dt><dd><tt>Initialize&nbsp;the&nbsp;WebDAV&nbsp;client.<br>
 &nbsp;<br>
 host&nbsp;--&nbsp;WebDAV&nbsp;server&nbsp;host.<br>
@@ -588,8 +594,8 @@ Raise&nbsp;<a href="#HTTPUserError">HTTPUserError</a>&nbsp;on&nbsp;4xx&nbsp;HTTP
 Raise&nbsp;<a href="#HTTPServerError">HTTPServerError</a>&nbsp;on&nbsp;5xx&nbsp;HTTP&nbsp;status&nbsp;codes.</tt></dd></dl>
 
 <hr>
-Data and other attributes inherited from <a href="tinydav.html#CoreWebDAVClient">CoreWebDAVClient</a>:<br>
-<dl><dt><strong>ResponseType</strong> = &lt;class 'tinydav.WebDAVResponse'&gt;<dd><tt>Result&nbsp;from&nbsp;WebDAV&nbsp;request.<br>
+Data and other attributes inherited from <a href="__init__.html#CoreWebDAVClient">CoreWebDAVClient</a>:<br>
+<dl><dt><strong>ResponseType</strong> = &lt;class '__init__.WebDAVResponse'&gt;<dd><tt>Result&nbsp;from&nbsp;WebDAV&nbsp;request.<br>
 &nbsp;<br>
 A&nbsp;WebDAVResponse&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;is&nbsp;a&nbsp;subclass&nbsp;of&nbsp;int.&nbsp;The&nbsp;int&nbsp;value&nbsp;of&nbsp;such&nbsp;an<br>
 <a href="__builtin__.html#object">object</a>&nbsp;is&nbsp;the&nbsp;HTTP&nbsp;status&nbsp;number&nbsp;from&nbsp;the&nbsp;response.<br>
@@ -613,7 +619,7 @@ responses.&nbsp;The&nbsp;length&nbsp;will&nbsp;then&nbsp;be&nbsp;the&nbsp;number
 multi-status.</tt></dl>
 
 <hr>
-Methods inherited from <a href="tinydav.html#HTTPClient">HTTPClient</a>:<br>
+Methods inherited from <a href="__init__.html#HTTPClient">HTTPClient</a>:<br>
 <dl><dt><a name="WebDAVClient-connect"><strong>connect</strong></a>(self, uri, headers<font color="#909090">=None</font>)</dt><dd><tt>Make&nbsp;CONNECT&nbsp;request&nbsp;and&nbsp;return&nbsp;HTTPResponse.<br>
 &nbsp;<br>
 uri&nbsp;--&nbsp;Path&nbsp;to&nbsp;post&nbsp;data&nbsp;to.<br>
@@ -648,7 +654,7 @@ headers&nbsp;--&nbsp;Optional&nbsp;mapping&nbsp;with&nbsp;headers&nbsp;to&nbsp;s
 Raise&nbsp;<a href="#HTTPUserError">HTTPUserError</a>&nbsp;on&nbsp;4xx&nbsp;HTTP&nbsp;status&nbsp;codes.<br>
 Raise&nbsp;<a href="#HTTPServerError">HTTPServerError</a>&nbsp;on&nbsp;5xx&nbsp;HTTP&nbsp;status&nbsp;codes.</tt></dd></dl>
 
-<dl><dt><a name="WebDAVClient-post"><strong>post</strong></a>(self, uri, content<font color="#909090">=''</font>, headers<font color="#909090">=None</font>, query<font color="#909090">=None</font>, as_multipart<font color="#909090">=False</font>, encoding<font color="#909090">='utf-8'</font>)</dt><dd><tt>Make&nbsp;POST&nbsp;request&nbsp;and&nbsp;return&nbsp;HTTPResponse.<br>
+<dl><dt><a name="WebDAVClient-post"><strong>post</strong></a>(self, uri, content<font color="#909090">=''</font>, headers<font color="#909090">=None</font>, query<font color="#909090">=None</font>, as_multipart<font color="#909090">=False</font>, encoding<font color="#909090">='ascii'</font>, with_filenames<font color="#909090">=False</font>)</dt><dd><tt>Make&nbsp;POST&nbsp;request&nbsp;and&nbsp;return&nbsp;HTTPResponse.<br>
 &nbsp;<br>
 uri&nbsp;--&nbsp;Path&nbsp;to&nbsp;post&nbsp;data&nbsp;to.<br>
 content&nbsp;--&nbsp;File&nbsp;descriptor,&nbsp;string&nbsp;or&nbsp;dict&nbsp;with&nbsp;content&nbsp;to&nbsp;POST.&nbsp;If&nbsp;it<br>
@@ -662,7 +668,10 @@ as_multipart&nbsp;--&nbsp;Send&nbsp;post&nbsp;data&nbsp;as&nbsp;multipart/form-d
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2-tuple&nbsp;containing&nbsp;the&nbsp;actual&nbsp;value&nbsp;(or&nbsp;file-like&nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="__builtin__.html#object">object</a>)&nbsp;and&nbsp;an&nbsp;encoding&nbsp;for&nbsp;this&nbsp;value&nbsp;(or&nbsp;the<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;content-type&nbsp;in&nbsp;case&nbsp;of&nbsp;a&nbsp;file-like&nbsp;<a href="__builtin__.html#object">object</a>).<br>
-encoding&nbsp;--&nbsp;Send&nbsp;multipart&nbsp;content&nbsp;encoding&nbsp;with&nbsp;this&nbsp;encoding.<br>
+encoding&nbsp;--&nbsp;Send&nbsp;multipart&nbsp;content&nbsp;encoding&nbsp;with&nbsp;this&nbsp;encoding.&nbsp;Default<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is&nbsp;ASCII.<br>
+with_filenames&nbsp;--&nbsp;If&nbsp;True,&nbsp;a&nbsp;multipart's&nbsp;files&nbsp;will&nbsp;be&nbsp;sent&nbsp;with&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;paramenter&nbsp;set.&nbsp;Default&nbsp;is&nbsp;False.<br>
 &nbsp;<br>
 Raise&nbsp;<a href="#HTTPUserError">HTTPUserError</a>&nbsp;on&nbsp;4xx&nbsp;HTTP&nbsp;status&nbsp;codes.<br>
 Raise&nbsp;<a href="#HTTPServerError">HTTPServerError</a>&nbsp;on&nbsp;5xx&nbsp;HTTP&nbsp;status&nbsp;codes.</tt></dd></dl>
@@ -712,7 +721,7 @@ Raise&nbsp;<a href="#HTTPUserError">HTTPUserError</a>&nbsp;on&nbsp;4xx&nbsp;HTTP
 Raise&nbsp;<a href="#HTTPServerError">HTTPServerError</a>&nbsp;on&nbsp;5xx&nbsp;HTTP&nbsp;status&nbsp;codes.</tt></dd></dl>
 
 <hr>
-Data descriptors inherited from <a href="tinydav.html#HTTPClient">HTTPClient</a>:<br>
+Data descriptors inherited from <a href="__init__.html#HTTPClient">HTTPClient</a>:<br>
 <dl><dt><strong>__dict__</strong></dt>
 <dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
 </dl>
@@ -729,7 +738,7 @@ Data descriptors inherited from <a href="tinydav.html#HTTPClient">HTTPClient</a>
 <td width="100%"><strong>__all__</strong> = ('HTTPError', 'HTTPUserError', 'HTTPServerError', 'HTTPClient', 'WebDAVClient')<br>
 <strong>__author__</strong> = 'Manuel Hermann &lt;manuel-hermann@gmx.net&gt;'<br>
 <strong>__license__</strong> = 'LGPL'<br>
-<strong>__version__</strong> = '0.6.2'</td></tr></table><p>
+<strong>__version__</strong> = '0.6.3'</td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#7799ee">
 <td colspan=3 valign=bottom>&nbsp;<br>

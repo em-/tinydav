@@ -17,8 +17,10 @@
 <font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
     
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="urlparse.html">urlparse</a><br>
-</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="posixpath.html">posixpath</a><br>
+</td><td width="25%" valign=top><a href="re.html">re</a><br>
+</td><td width="25%" valign=top><a href="urlparse.html">urlparse</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ee77aa">
 <td colspan=3 valign=bottom>&nbsp;<br>
@@ -93,12 +95,14 @@ Raise&nbsp;ValueError,&nbsp;if&nbsp;an&nbsp;illegal&nbsp;depth&nbsp;was&nbsp;giv
 &nbsp;<br>
 httpclient&nbsp;--&nbsp;HTTPClient&nbsp;instance&nbsp;with&nbsp;protocol,&nbsp;host&nbsp;and&nbsp;port&nbsp;attribute.<br>
 uri&nbsp;--&nbsp;The&nbsp;destination&nbsp;path.</tt></dd></dl>
- <dl><dt><a name="-make_multipart"><strong>make_multipart</strong></a>(content, default_encoding)</dt><dd><tt>Return&nbsp;the&nbsp;headers&nbsp;and&nbsp;content&nbsp;for&nbsp;multipart/form-data.<br>
+ <dl><dt><a name="-make_multipart"><strong>make_multipart</strong></a>(content, default_encoding<font color="#909090">='ascii'</font>, with_filenames<font color="#909090">=False</font>)</dt><dd><tt>Return&nbsp;the&nbsp;headers&nbsp;and&nbsp;content&nbsp;for&nbsp;multipart/form-data.<br>
 &nbsp;<br>
 content&nbsp;--&nbsp;Dict&nbsp;with&nbsp;content&nbsp;to&nbsp;POST.&nbsp;The&nbsp;dict&nbsp;values&nbsp;are&nbsp;expected&nbsp;to<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;be&nbsp;unicode&nbsp;or&nbsp;decodable&nbsp;with&nbsp;us-ascii.<br>
 default_encoding&nbsp;--&nbsp;Send&nbsp;multipart&nbsp;with&nbsp;this&nbsp;encoding,&nbsp;if&nbsp;no&nbsp;special&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;encoding&nbsp;was&nbsp;given&nbsp;with&nbsp;the&nbsp;content.</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;encoding&nbsp;was&nbsp;given&nbsp;with&nbsp;the&nbsp;content.&nbsp;Default&nbsp;is&nbsp;ascii.<br>
+with_filenames&nbsp;--&nbsp;If&nbsp;True,&nbsp;a&nbsp;multipart's&nbsp;files&nbsp;will&nbsp;be&nbsp;sent&nbsp;with&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;paramenter&nbsp;set.&nbsp;Default&nbsp;is&nbsp;False.</tt></dd></dl>
 </td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#55aa55">
