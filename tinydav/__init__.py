@@ -711,23 +711,6 @@ class HTTPClient(object):
         auth = userpw.encode("base64").rstrip()
         self.headers["Authorization"] = "Basic %s" % auth
 
-    def setdigestauth(self, user, password, auth_response):
-        """Set next request to authenticate via digest auth.
-
-        user -- Username
-        password -- Password for user.
-        auth_response -- Either a HTTPResonse object with status 401 or the
-                         corresponding HTTPError object.
-
-        """
-        if isinstance(auth_response, HTTPError):
-            auth_response = auth_response.response
-        if response != UNAUTHORIZED:
-            raise ValueError("need 401 Unauthorized response")
-        self._user = None
-        self._password = None
-        self._response = auth_response
-
     def setcookie(self, cookie):
         """Set cookie class to be used in requests.
 

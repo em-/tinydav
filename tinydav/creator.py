@@ -39,10 +39,6 @@ digest_response = (
     "realm", "nonce", "uri", "response", "digest", "algorithm", "opaque"
 )
 
-#For the "MD5" algorithm
-#    H(data) = MD5(data)
-#and
-#    KD(secret, data) = H(concat(secret, ":", data))
 
 class DigestCreator(object):
     def __init__(self, client, method, uri, body):
