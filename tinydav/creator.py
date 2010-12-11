@@ -35,10 +35,6 @@ def _addnamespaces(elem, namespaces):
         attrname = "xmlns:%s" % nsname
         elem.attrib[attrname] = ns
 
-digest_response = (
-    "realm", "nonce", "uri", "response", "digest", "algorithm", "opaque"
-)
-
 
 class DigestCreator(object):
     def __init__(self, client, method, uri, body):
