@@ -652,7 +652,7 @@ class MultiStatusResponseTestCase(unittest.TestCase):
                   ('{DC:}resource', None),
                   ('{DC:}author', 'Me')]
         expect.sort()
-        items = self.msr.items()
+        items = list((k, v.text) for (k, v) in self.msr.iteritems())
         items.sort()
         self.assertEqual(items, expect)
 
@@ -663,7 +663,7 @@ class MultiStatusResponseTestCase(unittest.TestCase):
                   ('{DC:}resource', None),
                   ('{DC:}author', 'Me')]
         expect.sort()
-        items = list(self.msr.iteritems())
+        items = list((k, v.text) for (k, v) in self.msr.iteritems())
         items.sort()
         self.assertEqual(items, expect)
 
@@ -687,3 +687,11 @@ class MultiStatusResponseTestCase(unittest.TestCase):
         expect = set(["DC:", "DAV:"])
         self.msr.iterkeys = lambda b: ["foo", "bar", "{DC:}x", "{DAV:}y"]
         self.assertEqual(self.msr.namespaces, expect)
+
+
+def run():
+    unittest.main()
+
+if __name__ == "__main__":
+    run()
+

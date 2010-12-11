@@ -73,8 +73,9 @@ class TestCreatePropPatch(unittest.TestCase):
                               '<propertyupdate xmlns="DAV:" xmlns:CADN="CADN:">'
                               '<set>'
                               '<prop>'
-                              '<CADN:created>2009-09-09 13:31</CADN:created>'
+                              '<CADN:created>2009-09-09 13:31'
                               '<CADN:author>me</CADN:author>'
+                              '</CADN:created>'
                               '</prop>'
                               '</set>'
                               '</propertyupdate>')
@@ -104,8 +105,9 @@ class TestCreatePropPatch(unittest.TestCase):
                               ' xmlns:DEL="DEL:">'
                               '<set>'
                               '<prop>'
-                              '<CADN:created>2009-09-09 13:31</CADN:created>'
+                              '<CADN:created>2009-09-09 13:31'
                               '<CADN:author>me</CADN:author>'
+                              '</CADN:created>'
                               '</prop>'
                               '</set>'
                               '<remove>'
@@ -167,3 +169,11 @@ class TestCreateReport(unittest.TestCase):
         self.assertEqual(xml, "<?xml version='1.0' encoding='UTF-8'?>\n"
                               '<version-tree xmlns="DAV:">'
                               '<foo bar="1" /></version-tree>')
+
+
+def run():
+    unittest.main()
+
+if __name__ == "__main__":
+    run()
+

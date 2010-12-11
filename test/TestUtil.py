@@ -35,3 +35,10 @@ class UtilTestCase(unittest.TestCase):
         expect = "http://localhost:80/foo/bar"
         self.assertEqual(util.make_absolute(mockclient, "/foo/bar"), expect)
 
+
+def run():
+    unittest.main()
+
+if __name__ == "__main__":
+    run()
+

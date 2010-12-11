@@ -195,7 +195,7 @@ class WebDAVResponse(HTTPResponse):
 
         """
         try:
-            if self._content is None:
+            if self.content is None:
                 parse_me = self.response
             else:
                 parse_me = StringIO(self.content)
