@@ -19,6 +19,7 @@
 
 from collections import defaultdict
 from contextlib import contextmanager
+from email.mime.multipart import MIMEMultipart
 from functools import partial
 from StringIO import StringIO
 import urllib2
@@ -111,6 +112,18 @@ class Omnivore(object):
 
     def __call__(self, *args, **kwargs):
         return self.method("__call__", *args, **kwargs)
+
+
+class FakeMIMEMultipart(object):
+    """Subclass of MIMEMultipart."""
+    def __init__(self, boundary="foobar"):
+        self.boundary = boundary
+
+    def __call__(self, subtype):
+        boundary = self.boundary
+        if subtype == "mixed":
+            boundary += "-mixed"
+        return MIMEMultipart(subtype, boundary)
 
 
 class HTTPConnection(object):

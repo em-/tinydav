@@ -41,8 +41,8 @@ authparser = re.compile("""
         (?:domain="(?P<domain>[^"]*)")?
         (?:nonce="(?P<nonce>[^"]*)")?
         (?:opaque="(?P<opaque>[^"]*)")?
-        (?:stale=(?P<stale>true|false|TRUE|FALSE))?
-        (?:algorithm=(?P<algorithm>\w+))?
+        (?:stale=(?P<stale>(true|false|TRUE|FALSE)))?
+        (?:algorithm="(?P<algorithm>\w+)")?
     )+
 """, re.VERBOSE)
 

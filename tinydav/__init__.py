@@ -115,7 +115,7 @@ class HTTPResponse(int):
         self.nonce = auth.get("nonce")
         self.opaque = auth.get("opaque")
         stale = auth.get("stale", "false")
-        self.stale = (state.lower() == "true")
+        self.stale = (stale.lower() == "true")
         algorithm = auth.get("algoritm", "MD5")
         self.algorithm = getattr(hashlib, algorithm.lower())
 

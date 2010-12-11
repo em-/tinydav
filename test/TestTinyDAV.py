@@ -22,6 +22,7 @@ from __future__ import with_statement
 from StringIO import StringIO
 from xml.etree.ElementTree import ElementTree
 from xml.parsers.expat import ExpatError
+import hashlib
 import httplib
 import socket
 import sys
@@ -122,15 +123,6 @@ RESPONSE = """\
 </D:propstat>
 </D:response>
 """
-
-
-#class HTTPErrorTestCase(unittest.TestCase):
-#    """Test the HTTPError exception."""
-#    def test_normal(self):
-#        """Test HTTPError exception."""
-#        valueerror = ValueError("foo")
-#        exc = HTTPError(valueerror)
-#        self.assertEqual(exc.carry, valueerror)
 
 
 class HTTPClientTestCase(unittest.TestCase):
@@ -532,18 +524,40 @@ class HTTPResponseTestCase(unittest.TestCase):
         self.response.status = 207
         self.response.content = MULTISTATUS
         self.httpresponse = HTTPResponse(self.response)
+        # 401
+        self.response = Mock.Response()
+        digest = 'Digest realm="restricted" domain="foo.de" nonce="abcd1234"'\
+                 'opaque="qwer4321" stale=false algorithm="MD5"'
+        self.response.headers["www-authenticate"] = digest
+        self.response.status = 401
+        self.response.content = ""
+        self.httpresponse401 = HTTPResponse(self.response)
 
     def test_init(self):
         """Test Initializing the HTTPResponse."""
         self.assertEqual(self.httpresponse.content, MULTISTATUS)
+        self.assertEqual(self.httpresponse.statusline,
+                         "HTTP/1.1 207 The reason")
+        self.assertEqual(self.httpresponse401.content, "")
+        self.assertEqual(self.httpresponse401.statusline,
+                         "HTTP/1.1 401 The reason")
+        self.assertEqual(self.httpresponse401.schema, "Digest")
+        self.assertEqual(self.httpresponse401.realm, "restricted")
+        self.assertEqual(self.httpresponse401.domain, "foo.de")
+        self.assertEqual(self.httpresponse401.nonce, "abcd1234")
+        self.assertEqual(self.httpresponse401.opaque, "qwer4321")
+        self.assertFalse(self.httpresponse401.stale)
+        self.assertEqual(self.httpresponse401.algorithm, hashlib.md5)
 
     def test_repr(self):
         """Test HTTPResponse.__repr__."""
         self.assertEqual(repr(self.httpresponse), "<HTTPResponse: 207>")
+        self.assertEqual(repr(self.httpresponse401), "<HTTPResponse: 401>")
 
     def test_status(self):
         """Test HTTPResponse.status property."""
         self.assertEqual(self.httpresponse, 207)
+        self.assertEqual(self.httpresponse401, 401)
 
 
 class WebDAVResponseTestCase(unittest.TestCase):
