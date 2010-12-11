@@ -3,11 +3,20 @@ Tinydav - WebDAV client libaray
 ===============================
 
 -------------
+Version 0.6.5
+-------------
+FIXES
+* Fix HTTPResponse bug on 401 statuses.
+
+CHANGES
+* More unittests.
+
+
+-------------
 Version 0.6.4
 -------------
 FIXES
 * Fix WebDAVResponse bug causing the whole thing not to work.
-
 
 CHANGES
 * Updated unittests.
