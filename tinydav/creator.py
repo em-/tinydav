@@ -36,59 +36,6 @@ def _addnamespaces(elem, namespaces):
         elem.attrib[attrname] = ns
 
 
-class DigestCreator(object):
-    def __init__(self, client, method, uri, body):
-        self._response = client._response
-        self._headers = client.headers
-        self.user = client._user
-        self.password = client._password
-        self.method = method
-        self.uri = uri
-        self.entity_body = body
-        self.content_length = len(body)
-        self.A1 = "%s:%s:%s" % (self.user, self.realm, self.password)
-        self.A2 = "%s:%s" % (self.method, self.uri)
-
-    def __getattr__(self, name):
-        return getattr(self._response, name)
-
-    def __getitem__(self, name):
-        name = name.lower()
-        for key in self._headers:
-            if key.lower() == name:
-                return self._headers[key]
-        return ""
-
-    def H(self, value):
-        return self.algorithm(value).hexdigest()
-
-    def KD(self, value1, value2):
-        return self.H("%s:%s" % (value1, value2))
-
-    @property
-    def response_digest(self):
-        return self.KD(self.H(self.A1), "%s:%s" % (self.nonce, self.H(self.A2)))
-
-    @property
-    def entity_info(self):
-        content_type = self["Content-Type"]
-        content_length = self.content_length
-        content_encoding = self["Content-Encoding"]
-        last_modified = self["Last-modified"]
-        expires = self["Expires"]
-        info = "%s:%s:%s:%s:%s:%s" % (self.uri, content_type, content_length,
-                                      content_encoding, last_modified, expires)
-        return self.H(self.uri)
-
-    @property
-    def entity_digest(self):
-        date = self["Date"]
-        info = self.entity_info
-        body = self.H(self.entity_body)
-        digest = "%s:%s:%s:%s:%s" % (self.nonce, self.method, date, info, body)
-        return self.KD(self.H(self.A1), digest)
-
-
 def create_propfind(names=False, properties=None,
                     include=None, namespaces=None):
     """Construct and return XML string for PROPFIND.
