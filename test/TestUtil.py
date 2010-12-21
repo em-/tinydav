@@ -256,6 +256,9 @@ class UtilTestCase(unittest.TestCase):
         self.assertEqual(authdata.get("opaque"), "qwer4321")
         self.assertEqual(authdata.get("stale"), None)
         self.assertEqual(authdata.get("algorithm"), "MD5")
+        # broken authenticate header
+        authdata = util.parse_authenticate("Nothing")
+        self.assertEqual(authdata, dict())
 
     def test_make_multipart(self):
         """Test util.make_multipart."""
@@ -336,12 +339,3 @@ class UtilTestCase(unittest.TestCase):
                 'multipart/form-data; boundary="foobar"'
             )
             self.assertEqual(multi, MIME_FILES)
-
-
-def run():
-    unittest.main()
-
-
-if __name__ == "__main__":
-    run()
-

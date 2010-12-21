@@ -195,10 +195,7 @@ class WebDAVResponse(HTTPResponse):
 
         """
         try:
-            if self.content is None:
-                parse_me = self.response
-            else:
-                parse_me = StringIO(self.content)
+            parse_me = StringIO(self.content)
             self._etree.parse(parse_me)
         except ExpatError, e:
             self.parse_error = e
@@ -344,6 +341,7 @@ class WebDAVLockResponse(WebDAVResponse):
         if "If" in self._client.headers:
             if self._previous_if is not None:
                 self._client.headers["If"] = self._previous_if
+                self._previous_if = None
             else:
                 del self._client.headers["If"]
 
@@ -393,8 +391,8 @@ class WebDAVLockResponse(WebDAVResponse):
 
     @property
     def timeout(self):
-        """Return the timeout of this lock or None, if no owner is available."""
-        if self._owner is None:
+        """Return the timeout of this lock or None, if not available."""
+        if self._timeout is None:
             # RFC 2518, 12.1.3 timeout XML Element
             # <!ELEMENT timeout (#PCDATA) >
             timeout = ACTIVELOCK + "/{DAV:}timeout"

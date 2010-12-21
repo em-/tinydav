@@ -19,6 +19,7 @@
 """Unittests for tinydav lib."""
 
 from __future__ import with_statement
+from cookielib import CookieJar
 from StringIO import StringIO
 from xml.etree.ElementTree import ElementTree
 from xml.parsers.expat import ExpatError
@@ -29,7 +30,7 @@ import sys
 import tinydav
 import unittest
 
-from tinydav import HTTPError
+from tinydav import HTTPError, HTTPUserError, HTTPServerError
 from tinydav import HTTPClient
 from tinydav import HTTPResponse
 from tinydav import CoreWebDAVClient
@@ -149,11 +150,98 @@ class HTTPClientTestCase(unittest.TestCase):
         con = http._getconnection()
         self.assertTrue(isinstance(con, httplib.HTTPSConnection))
 
+
+        http = HTTPClient("127.0.0.1", timeout=300, source_address="here.loc")
+        # Python2.5
+        mockhttplib = Mock.Omnivore(HTTPConnection=[None])
+        context = dict(
+            PYTHON2_6=False,
+            PYTHON2_7=False,
+            httplib=mockhttplib,
+        )
+        with injected(http._getconnection, **context):
+            http._getconnection()
+            call_log = mockhttplib.called["HTTPConnection"][0][1]
+            self.assertFalse(call_log["strict"])
+            self.assertEqual(call_log.get("timeout"), None)
+            self.assertEqual(call_log.get("source_address"), None)
+        # Python2.6
+        mockhttplib = Mock.Omnivore(HTTPConnection=[None])
+        context = dict(
+            PYTHON2_6=True,
+            PYTHON2_7=False,
+            httplib=mockhttplib,
+        )
+        with injected(http._getconnection, **context):
+            http._getconnection()
+            call_log = mockhttplib.called["HTTPConnection"][0][1]
+            self.assertFalse(call_log["strict"])
+            self.assertEqual(call_log["timeout"], 300)
+            self.assertEqual(call_log.get("source_address"), None)
+        # Python2.7
+        mockhttplib = Mock.Omnivore(HTTPConnection=[None])
+        context = dict(
+            PYTHON2_6=True,
+            PYTHON2_7=True,
+            httplib=mockhttplib,
+        )
+        with injected(http._getconnection, **context):
+            http._getconnection()
+            call_log = mockhttplib.called["HTTPConnection"][0][1]
+            self.assertFalse(call_log["strict"])
+            self.assertEqual(call_log["timeout"], 300)
+            self.assertEqual(call_log.get("source_address"), "here.loc")
+
     def test_request(self):
         """Test HTTPClient._request."""
         headers = {"X-Test": "Hello"}
         resp = self.http._request("POST", "/foo", "my content", headers)
         self.assertEqual(resp, 200)
+        # relative path to absolute path
+        resp = self.http._request("POST", "foo", "my content", headers)
+        self.assertTrue(self.con.path.startswith("/"))
+        self.assertEqual(resp, 200)
+        # cookies
+        self.http.cookie = Mock.Omnivore()
+        resp = self.http._request("POST", "/foo", "my content", headers)
+        self.assertTrue("add_cookie_header" in self.http.cookie.called)
+        # errors
+        self.con.response.status = 400
+        self.assertRaises(HTTPUserError, self.http._request, "POST", "/foo")
+        self.con.response.status = 500
+        self.assertRaises(HTTPServerError, self.http._request, "POST", "/foo")
+
+    def test_setcookie(self):
+        """Test HTTPClient.setcookie."""
+        self.http.setcookie(CookieJar())
+        self.assertTrue(isinstance(self.http.cookie, CookieJar))
+
+    def test_setssl(self):
+        """Test HTTPClient.setssl."""
+        # set nothing
+        self.http.setssl(None, None)
+        self.assertEqual(self.http.protocol, "http")
+        self.assertEqual(self.http.key_file, None)
+        self.assertEqual(self.http.cert_file, None)
+        # set key file only
+        self.http.setssl("Foo", None)
+        self.assertEqual(self.http.protocol, "https")
+        self.assertEqual(self.http.key_file, "Foo")
+        self.assertEqual(self.http.cert_file, None)
+        self.http.protocol = "http"
+        self.http.key_file = None
+        # set cert file only
+        self.http.setssl(None, "Foo")
+        self.assertEqual(self.http.protocol, "https")
+        self.assertEqual(self.http.key_file, None)
+        self.assertEqual(self.http.cert_file, "Foo")
+        self.http.protocol = "http"
+        self.http.key_file = None
+        # set key file and cert file
+        self.http.setssl("Foo", "Bar")
+        self.assertEqual(self.http.protocol, "https")
+        self.assertEqual(self.http.key_file, "Foo")
+        self.assertEqual(self.http.cert_file, "Bar")
 
     def test_prepare(self):
         """Test HTTPClient._prepare."""
@@ -206,6 +294,16 @@ class HTTPClientTestCase(unittest.TestCase):
         self.assertEqual(self.con.method, "POST")
         self.assertEqual(self.con.path, "/index")
         self.assertTrue(self.con.closed)
+
+    def test_post_form_data(self):
+        """Test HTTPClient.post form-data."""
+        data = dict(a="foo", b="bar")
+        # prepare mock connection
+        mockurllib = Mock.Omnivore()
+        with injected(self.http.post, urllib=mockurllib):
+            resp = self.http.post("/index", data)
+            self.assertTrue("urlencode" in mockurllib.called)
+            self.assertEqual(resp, 200)
 
     def test_options(self):
         """Test HTTPClient.options."""
@@ -549,6 +647,11 @@ class HTTPResponseTestCase(unittest.TestCase):
         self.assertFalse(self.httpresponse401.stale)
         self.assertEqual(self.httpresponse401.algorithm, hashlib.md5)
 
+    def test_str(self):
+        """Test HTTPResponse.__str__."""
+        self.assertEqual(str(self.httpresponse), "HTTP/1.1 207 The reason")
+        self.assertEqual(str(self.httpresponse401), "HTTP/1.1 401 The reason")
+
     def test_repr(self):
         """Test HTTPResponse.__repr__."""
         self.assertEqual(repr(self.httpresponse), "<HTTPResponse: 207>")
@@ -666,7 +769,7 @@ class MultiStatusResponseTestCase(unittest.TestCase):
                   ('{DC:}resource', None),
                   ('{DC:}author', 'Me')]
         expect.sort()
-        items = list((k, v.text) for (k, v) in self.msr.iteritems())
+        items = list((k, v.text) for (k, v) in self.msr.items())
         items.sort()
         self.assertEqual(items, expect)
 
@@ -701,11 +804,3 @@ class MultiStatusResponseTestCase(unittest.TestCase):
         expect = set(["DC:", "DAV:"])
         self.msr.iterkeys = lambda b: ["foo", "bar", "{DC:}x", "{DAV:}y"]
         self.assertEqual(self.msr.namespaces, expect)
-
-
-def run():
-    unittest.main()
-
-if __name__ == "__main__":
-    run()
-

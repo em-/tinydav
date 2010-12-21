@@ -169,11 +169,3 @@ class TestCreateReport(unittest.TestCase):
         self.assertEqual(xml, "<?xml version='1.0' encoding='UTF-8'?>\n"
                               '<version-tree xmlns="DAV:">'
                               '<foo bar="1" /></version-tree>')
-
-
-def run():
-    unittest.main()
-
-if __name__ == "__main__":
-    run()
-

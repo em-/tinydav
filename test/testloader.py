@@ -20,22 +20,42 @@ from os import path
 import sys
 import unittest
 
+try:
+    import coverage
+except ImportError:
+    coverage = None
+else:
+    cov = coverage.coverage(cover_pylib=False)
+    cov.start()
+
 import Mock
 
 TESTDIR = path.dirname(Mock.__file__)
 TINYDAV = path.join(TESTDIR, "..")
 sys.path.insert(0, TINYDAV)
 
+from tinydav import creator, exception, util
+import tinydav
+
 import TestTinyDAV
 import TestCreator
 import TestUtil
+import TestException
+
+MODULES = [tinydav, creator, exception, util]
 
 
 def run():
     suite = unittest.TestSuite()
-    for testclass in (TestTinyDAV, TestCreator, TestUtil):
+    for testclass in (TestTinyDAV, TestCreator, TestUtil, TestException):
         suite.addTests(unittest.findTestCases(testclass))
     unittest.TextTestRunner(verbosity=2).run(suite)
+
+    if coverage:
+        cov.stop()
+        print "\nTest coverage report:"
+        print "====================="
+        cov.report(MODULES)
 
 
 if __name__ == "__main__":
