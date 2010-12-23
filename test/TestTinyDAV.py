@@ -25,6 +25,7 @@ from xml.etree.ElementTree import ElementTree
 from xml.parsers.expat import ExpatError
 import hashlib
 import httplib
+import urllib
 import socket
 import sys
 import tinydav
@@ -298,11 +299,17 @@ class HTTPClientTestCase(unittest.TestCase):
     def test_post_form_data(self):
         """Test HTTPClient.post form-data."""
         data = dict(a="foo", b="bar")
+        def urlencode(data):
+            urlencode.count += 1
+            return urllib.urlencode(data)
+        urlencode.count = 0
         # prepare mock connection
         mockurllib = Mock.Omnivore()
+        mockurllib.quote = urllib.quote
+        mockurllib.urlencode = urlencode
         with injected(self.http.post, urllib=mockurllib):
             resp = self.http.post("/index", data)
-            self.assertTrue("urlencode" in mockurllib.called)
+            self.assertEqual(urlencode.count, 1)
             self.assertEqual(resp, 200)
 
     def test_options(self):

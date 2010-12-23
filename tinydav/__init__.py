@@ -292,12 +292,12 @@ class WebDAVLockResponse(WebDAVResponse):
             self._client = client
             self._uri = uri
             self._tag = util.make_absolute(self._client, uri)
+        # RFC 2518, 8.10.4 Depth and Locking
+        # If the lock cannot be granted to all resources, a 409 (Conflict)
+        # status code MUST be returned with a response entity body
+        # containing a multistatus XML element describing which resource(s)
+        # prevented the lock from being granted.
         elif self == CONFLICT:
-            # RFC 2518, 8.10.4 Depth and Locking
-            # If the lock cannot be granted to all resources, a 409 (Conflict)
-            # status code MUST be returned with a response entity body
-            # containing a multistatus XML element describing which resource(s)
-            # prevented the lock from being granted.
             self._set_multistatus()
 
     def __repr__(self):
@@ -458,7 +458,7 @@ class MultiStatusResponse(int):
                 DAV properties.
 
         """
-        # check, whether its a default DAV property name
+        # check, whether it's a default DAV property name
         if not name.startswith("{"):
             name = "{DAV:}%s" % name
         # RFC 2518, 12.9.1.1 propstat XML Element
@@ -819,7 +819,7 @@ class HTTPClient(object):
         """Make PUT request and return status.
 
         uri -- Path for PUT.
-        fileobject -- File-like object with content to PUT.
+        fileobject -- File-like object or string with content to PUT.
         content_type -- The content-type of the file. Default value is
                         application/octet-stream.
         headers -- If given, must be a dict with headers to send.

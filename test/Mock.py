@@ -33,7 +33,7 @@ def injected(func, **kwargs):
         func = func.im_func
     # save and replace current function globals as to kwargs
     func_globals = func.func_globals
-    saved = dict((k, func_globals[k]) for k in kwargs)
+    saved = dict((k, func_globals[k]) for k in kwargs if k in func_globals)
     func_globals.update(kwargs)
     # context is now ready to be used
     yield
@@ -45,7 +45,7 @@ def injected(func, **kwargs):
 def replaced(obj, **attrs):
     """Replace attribute in object while in context mode."""
     # save and replace current attributes
-    saved = dict((k, getattr(obj,k)) for k in attrs)
+    saved = dict((k, getattr(obj, k)) for k in attrs)
     obj.__dict__.update(attrs)
     # context is ready
     yield
