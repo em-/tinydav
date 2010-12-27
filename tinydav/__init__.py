@@ -189,7 +189,7 @@ class WebDAVResponse(HTTPResponse):
 
     def _parse_xml_content(self):
         """Parse the XML content.
-        
+
         If the response content cannot be parsed as XML content, 
         <root><empty/></root> will be taken as content instead.
 
@@ -357,7 +357,7 @@ class WebDAVLockResponse(WebDAVResponse):
             # <!ELEMENT shared EMPTY >
             scope = ACTIVELOCK + "/{DAV:}lockscope/*"
             self._lockscope = self._etree.find(scope)
-        return self._locktype
+        return self._lockscope
 
     @property
     def locktype(self):
@@ -396,7 +396,7 @@ class WebDAVLockResponse(WebDAVResponse):
             # RFC 2518, 12.1.3 timeout XML Element
             # <!ELEMENT timeout (#PCDATA) >
             timeout = ACTIVELOCK + "/{DAV:}timeout"
-            self._timeout = self._etree.findtext(timeout)
+            self._timeout = self._etree.findtext(timeout).strip()
         return self._timeout
 
     @property
@@ -406,7 +406,8 @@ class WebDAVLockResponse(WebDAVResponse):
             # RFC 2518, 12.1.2 locktoken XML Element
             # <!ELEMENT locktoken (href+) >
             token = ACTIVELOCK + "/{DAV:}locktoken/{DAV:}href"
-            self._locktokens = [t.text for t in self._etree.findall(token)]
+            self._locktokens = [t.text.strip()
+                                for t in self._etree.findall(token)]
         return self._locktokens
 
 

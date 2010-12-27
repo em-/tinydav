@@ -46,11 +46,13 @@ def replaced(obj, **attrs):
     """Replace attribute in object while in context mode."""
     # save and replace current attributes
     saved = dict((k, getattr(obj, k)) for k in attrs)
-    obj.__dict__.update(attrs)
+    for (name, attr) in attrs.iteritems():
+        setattr(obj, name, attr)
     # context is ready
     yield
     # restore previous state
-    obj.__dict__.update(saved)
+    for (name, attr) in saved.iteritems():
+        setattr(obj, name, attr)
 
 
 def omnivore_func(retval=None, exception=None):

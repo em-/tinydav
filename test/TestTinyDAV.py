@@ -37,8 +37,9 @@ from tinydav import HTTPResponse
 from tinydav import CoreWebDAVClient
 from tinydav import ExtendedWebDAVClient
 from tinydav import WebDAVResponse
+from tinydav import WebDAVLockResponse
 from tinydav import MultiStatusResponse
-from Mock import injected
+from Mock import injected, replaced
 import Mock
 
 PYTHONVERSION = sys.version_info[:2] # (2, 5) or (2, 6)
@@ -124,6 +125,30 @@ RESPONSE = """\
 <D:status>HTTP/1.1 200 OK</D:status>
 </D:propstat>
 </D:response>
+"""
+
+LOCKDISCOVERY = """\
+<?xml version="1.0" encoding="utf-8" ?>
+<D:prop xmlns:D="DAV:">
+<D:lockdiscovery>
+<D:activelock>
+<D:locktype><D:write/></D:locktype>
+<D:lockscope><D:exclusive/></D:lockscope>
+<D:depth>Infinity</D:depth>
+<D:owner>
+<D:href>
+http://localhost/me.html
+</D:href>
+</D:owner>
+<D:timeout>Second-604800</D:timeout>
+<D:locktoken>
+<D:href>
+opaquelocktoken:e71d4fae-5dec-22d6-fea5-00a0c91e6be4
+</D:href>
+</D:locktoken>
+</D:activelock>
+</D:lockdiscovery>
+</D:prop>
 """
 
 
@@ -532,6 +557,7 @@ class CoreWebDAVClientTestCase(unittest.TestCase):
         """Test CoreWebDAVClient.lock."""
         self.con.response.status = 200
         resp = self.dav.lock("/foo")
+        self.assertTrue(isinstance(resp, WebDAVLockResponse))
         self.assertEqual(resp, 200)
 
     def test_lock_timeout(self):
@@ -722,6 +748,115 @@ class WebDAVResponseTestCase(unittest.TestCase):
         response.status = 207
         davresponse = WebDAVResponse(response)
         self.assertEqual(list(davresponse)[0], 200)
+
+    def test_parse_xml_content(self):
+        """Test WebDAVResponse._parse_xml_content."""
+        response = Mock.Response()
+        response.content = MULTISTATUS
+        response.status = 207
+        with replaced(WebDAVResponse, _parse_xml_content=Mock.omnivore_func()):
+            davresponse = WebDAVResponse(response)
+        davresponse._parse_xml_content()
+        href = davresponse._etree.findtext("/{DAV:}response/{DAV:}href")
+        self.assertEquals(href, "/3/38/38f/38fa476aa97a4b2baeb41a481fdca00b")
+
+    def test_parse_xml_content_broken(self):
+        """Test WebDAVResponse._parse_xml_content with broken XML."""
+        response = Mock.Response()
+        response.content = MULTISTATUS_BROKEN
+        response.status = 207
+        with replaced(WebDAVResponse, _parse_xml_content=Mock.omnivore_func()):
+            davresponse = WebDAVResponse(response)
+        davresponse._parse_xml_content()
+        empty = davresponse._etree.getroot().getchildren()[0]
+        self.assertEquals(empty.tag, "empty")
+
+    def test_set_multistatus(self):
+        """Test WebDAVResponse._set_multistatus."""
+        response = Mock.Response()
+        response.content = MULTISTATUS
+        response.status = 200
+        davresponse = WebDAVResponse(response)
+        mockparser = Mock.Omnivore()
+        with replaced(davresponse, _parse_xml_content=mockparser):
+            self.assertFalse(davresponse.is_multistatus)
+            self.assertEquals(len(mockparser.called["__call__"]), 0)
+            davresponse._set_multistatus()
+            self.assertTrue(davresponse.is_multistatus)
+            self.assertEquals(len(mockparser.called["__call__"]), 1)
+
+
+class WebDAVLockResponseTestCase(unittest.TestCase):
+    """Test the WebDAVLockResponse class."""
+    def setUp(self):
+        """Setup the tests"""
+        self.client = CoreWebDAVClient("localhost")
+        response = Mock.Response()
+        response.content = LOCKDISCOVERY
+        response.status = 200
+        self.lock = WebDAVLockResponse(self.client, "/", response)
+
+    def test_init_200(self):
+        """Test WebDAVLockResponse.__init__ with 200 status."""
+        lock = self.lock
+        self.assertEqual(lock.lockscope.tag, "{DAV:}exclusive")
+        self.assertEqual(lock.locktype.tag, "{DAV:}write")
+        self.assertEqual(lock.depth, "Infinity")
+        href = "http://localhost/me.html"
+        self.assertEqual(lock.owner.findtext("{DAV:}href").strip(), href)
+        self.assertEqual(lock.timeout, "Second-604800")
+        token = "opaquelocktoken:e71d4fae-5dec-22d6-fea5-00a0c91e6be4"
+        self.assertEqual(lock.locktokens[0], token)
+
+    def test_init_409(self):
+        """Test WebDAVLockResponse.__init__ with 409 status."""
+        client = CoreWebDAVClient("localhost")
+        response = Mock.Response()
+        response.content = MULTISTATUS
+        response.status = 409
+        lock = WebDAVLockResponse(client, "/", response)
+        self.assertTrue(lock._etree.find("/{DAV:}response") is not None)
+        self.assertTrue(lock.is_multistatus)
+
+    def test_repr(self):
+        """Test WebDAVLockResponse.__repr__."""
+        lrepr = "<WebDAVLockResponse: <%s> 200>" % self.lock._tag
+        self.assertEqual(repr(self.lock), lrepr)
+
+    def test_call(self):
+        """Test WebDAVLockResponse.__call__."""
+        self.assertTrue(self.lock._tagged)
+        self.lock(False)
+        self.assertFalse(self.lock._tagged)
+        self.lock()
+        self.assertTrue(self.lock._tagged)
+        self.lock(False)
+        self.lock(True)
+        self.assertTrue(self.lock._tagged)
+
+    def test_contextmanager(self):
+        """Test contextmanager on WebDAVLockResponse."""
+        self.client.headers["If"] = "My previous if"
+        # tagged
+        with self.lock:
+            expect = "<http://localhost:80/> "\
+                     "(<opaquelocktoken:e71d4fae-5dec-22d6-fea5-00a0c91e6be4>)"
+            if_header = self.client.headers["If"]
+            self.assertEqual(expect, if_header)
+        self.assertEqual("My previous if", self.client.headers["If"])
+        # untagged
+        with self.lock(False):
+            expect = "(<opaquelocktoken:e71d4fae-5dec-22d6-fea5-00a0c91e6be4>)"
+            if_header = self.client.headers["If"]
+            self.assertEqual(expect, if_header)
+        self.assertEqual("My previous if", self.client.headers["If"])
+        # untagged, no previous if header
+        del self.client.headers["If"]
+        with self.lock(False):
+            expect = "(<opaquelocktoken:e71d4fae-5dec-22d6-fea5-00a0c91e6be4>)"
+            if_header = self.client.headers["If"]
+            self.assertEqual(expect, if_header)
+        self.assertTrue("If" not in self.client.headers)
 
 
 class MultiStatusResponseTestCase(unittest.TestCase):
