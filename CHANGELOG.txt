@@ -3,6 +3,16 @@ Tinydav - WebDAV client libaray
 ===============================
 
 -------------
+Version 0.6.6
+-------------
+FIXES
+* Fix timeout property of WebDAVLockResponse.
+
+CHANGES
+* Update unittests to get 100% coverage.
+
+
+-------------
 Version 0.6.5
 -------------
 FIXES
