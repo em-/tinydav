@@ -26,6 +26,13 @@ python setup.py build
 python setup.py install
 
 
+Run unittests
+-------------
+To run the unittests unpack the tar.gz and call:
+
+python test/testloader.py
+
+
 Documentation
 -------------
 Tutorial: http://code.google.com/p/tinydav/wiki/Tutorial

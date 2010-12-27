@@ -43,5 +43,5 @@ class HTTTPErrorTestCase(unittest.TestCase):
         response = Mock.Response()
         response.statusline = "HTTP/1.1 400 Some error"
         err = HTTPError(response)
-        self.assertEqual(str(self.err), "HTTP/1.1 400 Some error")
+        self.assertEqual(str(err), "HTTP/1.1 400 Some error")
 
