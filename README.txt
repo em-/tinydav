@@ -28,7 +28,7 @@ python setup.py install
 
 Run unittests
 -------------
-To run the unittests unpack the tar.gz and call:
+To run the unittests checkout sources and run:
 
 python test/testloader.py
 
