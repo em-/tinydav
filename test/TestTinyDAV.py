@@ -417,6 +417,10 @@ class CoreWebDAVClientTestCase(unittest.TestCase):
         self.dav.setbasicauth("test", "passwd")
         self.con = Mock.HTTPConnection()
         self.dav._getconnection = lambda: self.con
+        response = Mock.Response()
+        response.content = LOCKDISCOVERY
+        response.status = 200
+        self.lock = WebDAVLockResponse(self.dav, "/", response)
 
     def test_preparecopymove(self):
         """Test CoreWebDAVClient._preparecopymove."""
@@ -628,6 +632,7 @@ class CoreWebDAVClientTestCase(unittest.TestCase):
         self.con.response.status = 200
         resp = self.dav.lock("/foo", depth=0)
         self.assertEqual(resp, 200)
+        self.assertEqual(self.con.headers["Depth"], "0")
 
     def test_lock_illegaldepth(self):
         """Test CoreWebDAVClient.lock with given illegal depth."""
@@ -637,6 +642,40 @@ class CoreWebDAVClientTestCase(unittest.TestCase):
             "/foo",
             depth=1
         )
+
+    def test_unlock_lock(self):
+        """Test CoreWebDAVClient.unlock with lock object."""
+        self.dav.locks[self.lock._tag] = self.lock
+        self.con.response.status = 204
+        resp = self.dav.unlock(self.lock)
+        self.assertEqual(self.con.method, "UNLOCK")
+        self.assertEqual(self.con.headers["Lock-Token"],
+                         "<%s>" % self.lock.locktokens[0])
+        self.assertTrue(self.lock._tag not in self.dav.locks)
+
+    def test_unlock_uri(self):
+        """Test CoreWebDAVClient.unlock with uri."""
+        self.dav.locks[self.lock._tag] = self.lock
+        self.con.response.status = 204
+        resp = self.dav.unlock("/")
+        self.assertEqual(self.con.method, "UNLOCK")
+        self.assertEqual(self.con.headers["Lock-Token"],
+                         "<%s>" % self.lock.locktokens[0])
+        self.assertTrue(self.lock._tag not in self.dav.locks)
+
+    def test_unlock_uri_no_token(self):
+        """Test CoreWebDAVClient.unlock with uri."""
+        self.con.response.status = 204
+        self.assertRaises(ValueError, self.dav.unlock, "/")
+
+    def test_unlock_lock_no_token(self):
+        """Test CoreWebDAVClient.unlock with lock object and no token."""
+        self.con.response.status = 204
+        resp = self.dav.unlock(self.lock)
+        self.assertEqual(self.con.method, "UNLOCK")
+        self.assertEqual(self.con.headers["Lock-Token"],
+                         "<%s>" % self.lock.locktokens[0])
+        self.assertTrue(self.lock._tag not in self.dav.locks)
 
 
 class ExtendedWebDAVClientTestCase(unittest.TestCase):
