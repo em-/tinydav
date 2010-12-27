@@ -301,6 +301,18 @@ class HTTPClientTestCase(unittest.TestCase):
         self.assertEqual(self.con.path, "/index?path=%2Ffoo%2Fbar")
         self.assertTrue(self.con.closed)
 
+    def test_post_py25(self):
+        """Test HTTPClient.post with Python 2.5."""
+        data = StringIO("Test data")
+        # prepare mock connection
+        self.con.response.status = 200
+        query = {"path": "/foo/bar"}
+        with injected(self.http.post, PYTHON2_6=False):
+            self.assertEqual(self.http.post("/index", data), 200)
+            self.assertEqual(self.con.method, "POST")
+            self.assertEqual(self.con.path, "/index")
+            self.assertTrue(self.con.closed)
+
     def test_post_content_none(self):
         """Test HTTPClient.post with None as content."""
         # prepare mock connection
@@ -336,6 +348,15 @@ class HTTPClientTestCase(unittest.TestCase):
             resp = self.http.post("/index", data)
             self.assertEqual(urlencode.count, 1)
             self.assertEqual(resp, 200)
+
+    def test_post_multipart(self):
+        """Test HTTPClient.post multipart/form-data."""
+        data = dict(a="foo", b="bar")
+        resp = self.http.post("/index", data, as_multipart=True)
+        self.assertEqual(resp, 200)
+        self.assertEqual(self.con.method, "POST")
+        self.assertEqual(self.con.path, "/index")
+        self.assertTrue(self.con.closed)
 
     def test_options(self):
         """Test HTTPClient.options."""
@@ -552,6 +573,18 @@ class CoreWebDAVClientTestCase(unittest.TestCase):
         headers = {"X-Test": "Hello"}
         resp = self.dav.move(source, dest, 0, False, headers)
         self.assertEqual(resp, 200)
+
+    def test_move_collection_illegal_depth(self):
+        """Test CoreWebDAVClient.move on collections with illegal depth."""
+        self.con.response.status = 200
+        source = "/foo bar/baz/"
+        dest = "/dest/in/ation"
+        headers = {"X-Test": "Hello"}
+        self.assertRaises(
+            ValueError,
+            self.dav.move,
+            source, dest, 0
+        )
 
     def test_lock(self):
         """Test CoreWebDAVClient.lock."""
