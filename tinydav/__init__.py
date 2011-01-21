@@ -109,14 +109,11 @@ class HTTPResponse(int):
     def _setauth(self):
         value = self.headers.get("www-authenticate", "")
         auth = util.parse_authenticate(value)
-        self.schema = auth.get("schema")
-        self.realm = auth.get("realm")
-        self.domain = auth.get("domain")
-        self.nonce = auth.get("nonce")
-        self.opaque = auth.get("opaque")
+        for attrname in ("schema", "realm", "domain", "nonce", "opaque"):
+            setattr(self, attrname, auth.get(attrname))
         stale = auth.get("stale", "false")
         self.stale = (stale.lower() == "true")
-        algorithm = auth.get("algoritm", "MD5")
+        algorithm = auth.get("algorithm", "MD5")
         self.algorithm = getattr(hashlib, algorithm.lower())
 
 
