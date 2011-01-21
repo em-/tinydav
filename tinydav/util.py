@@ -197,7 +197,7 @@ def make_multipart(content, default_encoding="ascii", with_filenames=False):
         # "multipart/mixed" format.
         mixed = MIMEMultipart("mixed")
         for filedata in files:
-            part = create_part(*filedata, multiple=True)
+            part = create_part(multiple=True, *filedata)
             mixed.attach(part)
         mime.attach(mixed)
 

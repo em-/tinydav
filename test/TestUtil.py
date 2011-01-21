@@ -18,6 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Unittests for util module."""
 
+from __future__ import with_statement
 from StringIO import StringIO
 import unittest
 
