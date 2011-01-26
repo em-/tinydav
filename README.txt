@@ -32,6 +32,8 @@ To run the unittests checkout sources and run:
 
 python test/testloader.py
 
+Unittests will fail with Python 2.7.
+
 
 Documentation
 -------------

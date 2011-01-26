@@ -3,6 +3,16 @@ Tinydav - WebDAV client libaray
 ===============================
 
 -------------
+Version 0.6.7
+-------------
+FIXES
+* Fix syntax error with Python 2.5
+
+CHANGES
+* Cleanup unittest's mock module.
+
+
+-------------
 Version 0.6.6
 -------------
 FIXES

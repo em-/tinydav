@@ -34,7 +34,7 @@ from tinydav.exception import HTTPError, HTTPUserError, HTTPServerError
 
 __author__ = "Manuel Hermann <manuel-hermann@gmx.net>"
 __license__ = "LGPL"
-__version__ = "0.6.6"
+__version__ = "0.6.7"
 
 __all__ = (
     "HTTPError", "HTTPUserError", "HTTPServerError",
@@ -1138,6 +1138,7 @@ class CoreWebDAVClient(HTTPClient):
         if depth is not None:
             headers["Depth"] = util.get_depth(depth, ("0", "infinity"))
         content = creator.create_lock(scope, type_, owner)
+        # set a specialized ResponseType as instance var
         self.ResponseType = partial(WebDAVLockResponse, self, uri)
         try:
             lock_response = self._request("LOCK", uri, content, headers)
@@ -1145,7 +1146,8 @@ class CoreWebDAVClient(HTTPClient):
                 self.locks[lock_response._tag] = lock_response
             return lock_response
         finally:
-            self.ResponseType = WebDAVResponse
+            # remove the formerly set ResponseType from the instance
+            del self.ResponseType
 
     def unlock(self, uri_or_lock, locktoken=None, headers=None):
         """Make UNLOCK request and return WebDAVResponse.
