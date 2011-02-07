@@ -34,7 +34,7 @@ from tinydav.exception import HTTPError, HTTPUserError, HTTPServerError
 
 __author__ = "Manuel Hermann <manuel-hermann@gmx.net>"
 __license__ = "LGPL"
-__version__ = "0.6.7"
+__version__ = "0.6.8"
 
 __all__ = (
     "HTTPError", "HTTPUserError", "HTTPServerError",
@@ -784,10 +784,12 @@ class HTTPClient(object):
         query -- Mapping with key/value-pairs to be added as query to the URI.
         as_multipart -- Send post data as multipart/form-data. content must be
                         a dict, then. If content is not a dict, then this 
-                        argument is ignored. The values of the dict may be a
-                        2-tuple containing the actual value (or file-like 
-                        object) and an encoding for this value (or the
-                        content-type in case of a file-like object).
+                        argument will be ignored. The values of the dict may be
+                        a subclass of email.mime.base.MIMEBase, which will be
+                        attached to the multipart as is, a 2-tuple containing
+                        the actual value (or file-like object) and an encoding
+                        for this value (or the content-type in case of a 
+                        file-like object).
         encoding -- Send multipart content encoding with this encoding. Default
                     is ASCII.
         with_filenames -- If True, a multipart's files will be sent with the
@@ -832,10 +834,11 @@ class HTTPClient(object):
         data = fileobject if PYTHON2_6 else fileobject.read()
         return self._request("PUT", uri, data, headers)
 
-    def delete(self, uri, headers=None):
+    def delete(self, uri, content="", headers=None):
         """Make DELETE request and return HTTPResponse.
 
         uri -- Path to post data to.
+        content -- File descriptor or string with content.
         headers -- If given, must be a mapping with headers to set.
 
         Raise HTTPUserError on 4xx HTTP status codes.
@@ -843,7 +846,7 @@ class HTTPClient(object):
 
         """
         (uri, headers) = self._prepare(uri, headers)
-        return self._request("DELETE", uri, None, headers)
+        return self._request("DELETE", uri, content, headers)
 
     def trace(self, uri, maxforwards=None, via=None, headers=None):
         """Make TRACE request and return HTTPResponse.

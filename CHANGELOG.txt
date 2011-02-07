@@ -3,6 +3,17 @@ Tinydav - WebDAV client libaray
 ===============================
 
 -------------
+Version 0.6.8
+-------------
+FEATURES
+* Attach email.mime.base.MIMEBase instances to multiparts.
+* Send content along with DELETEs.
+
+CHANGES
+* HTTPClient.delete method may take a content argument, now.
+
+
+-------------
 Version 0.6.7
 -------------
 FIXES

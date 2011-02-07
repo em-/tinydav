@@ -179,8 +179,11 @@ def make_multipart(content, default_encoding="ascii", with_filenames=False):
             files.append((key, value, encoding))
         # no file-like object
         else:
-            encoding = encoding if encoding else default_encoding
-            part = MIMEText(value, "plain", encoding)
+            if isinstance(value, MIMEBase):
+                part = value
+            else:
+                encoding = encoding if encoding else default_encoding
+                part = MIMEText(value, "plain", encoding)
             add_disposition(part, key)
             mime.attach(part)
 
