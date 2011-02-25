@@ -16,18 +16,35 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """The tinydav WebDAV client."""
-
 from __future__ import with_statement
+import sys
+
+PYTHON2_6 = (sys.version_info >= (2, 6))
+PYTHON2_7 = (sys.version_info >= (2, 7))
+PYTHON2 = ((2, 5) <= sys.version_info <= (3, 0))
+PYTHON3 = (sys.version_info >= (3, 0))
+
 from contextlib import closing
 from functools import wraps, partial
-from httplib import MULTI_STATUS, OK, CONFLICT, NO_CONTENT, UNAUTHORIZED
-from StringIO import StringIO
+
+if PYTHON2:
+    from httplib import MULTI_STATUS, OK, CONFLICT, NO_CONTENT, UNAUTHORIZED
+    from urllib import quote as urllib_quote
+    from urllib import urlencode as urllib_urlencode
+    from StringIO import StringIO
+    import httplib
+else:
+    from http.client import MULTI_STATUS, OK, CONFLICT, NO_CONTENT
+    from http.client import UNAUTHORIZED
+    from io import StringIO
+    from urllib.parse import quote as urllib_quote
+    from urllib.parse import urlencode as urllib_urlencode
+    import base64
+    import http.client as httplib
+
 from xml.etree.ElementTree import ElementTree, Element, SubElement, tostring
 from xml.parsers.expat import ExpatError
 import hashlib
-import httplib
-import sys
-import urllib
 
 from tinydav import creator, util
 from tinydav.exception import HTTPError, HTTPUserError, HTTPServerError
@@ -40,9 +57,6 @@ __all__ = (
     "HTTPError", "HTTPUserError", "HTTPServerError",
     "HTTPClient", "WebDAVClient",
 )
-
-PYTHON2_6 = (sys.version_info >= (2, 6))
-PYTHON2_7 = (sys.version_info >= (2, 7))
 
 # RFC 2518, 9.8 Timeout Request Header
 # The timeout value for TimeType "Second" MUST NOT be greater than 2^32-1.
@@ -194,8 +208,10 @@ class WebDAVResponse(HTTPResponse):
         try:
             parse_me = StringIO(self.content)
             self._etree.parse(parse_me)
-        except ExpatError, e:
-            self.parse_error = e
+        except ExpatError:
+            # get the exception object this way to be compatible with Python
+            # versions 2.5 up to 3.x
+            self.parse_error = sys.exc_info()[1]
             # don't fail on further processing
             self._etree.parse(StringIO("<root><empty/></root>"))
 
@@ -466,9 +482,14 @@ class MultiStatusResponse(int):
             raise KeyError(name)
         return prop
 
-    def __iter__(self):
-        """Iterator over propertynames with their namespaces."""
-        return self.iterkeys()
+    if PYTHON2:
+        def __iter__(self):
+            """Iterator over propertynames with their namespaces."""
+            return self.iterkeys()
+    else:
+        def __iter__(self):
+            """Iterator over propertynames with their namespaces."""
+            return self.keys()
 
     def keys(self):
         """Return list of propertynames with their namespaces.
@@ -486,6 +507,10 @@ class MultiStatusResponse(int):
         """
         for (tagname, value) in self.iteritems(cut_dav_ns):
             yield tagname
+
+    if PYTHON3:
+        keys = iterkeys
+        del iterkeys
 
     def items(self):
         """Return list of 2-tuples with propertyname and ElementTree element."""
@@ -505,6 +530,10 @@ class MultiStatusResponse(int):
             if cut_dav_ns and tagname.startswith("{DAV:}"):
                 tagname = tagname[6:]
             yield (tagname, prop)
+
+    if PYTHON3:
+        items = iteritems
+        del iteritems
 
     def get(self, key, default=None, namespace=None):
         """Return value for requested property.
@@ -543,14 +572,24 @@ class MultiStatusResponse(int):
             self._href = self.response.findtext("{DAV:}href")
         return self._href
 
-    @property
-    def namespaces(self):
-        """Return frozenset of namespaces."""
-        if self._namespaces is None:
-            self._namespaces = frozenset(util.extract_namespace(key)
-                                         for key in self.iterkeys(False)
-                                         if util.extract_namespace(key))
-        return self._namespaces
+    if PYTHON2:
+        @property
+        def namespaces(self):
+            """Return frozenset of namespaces."""
+            if self._namespaces is None:
+                self._namespaces = frozenset(util.extract_namespace(key)
+                                             for key in self.iterkeys(False)
+                                             if util.extract_namespace(key))
+            return self._namespaces
+    else:
+        @property
+        def namespaces(self):
+            """Return frozenset of namespaces."""
+            if self._namespaces is None:
+                self._namespaces = frozenset(util.extract_namespace(key)
+                                             for key in self.keys(False)
+                                             if util.extract_namespace(key))
+            return self._namespaces
 
 
 # Clients
@@ -610,8 +649,11 @@ class HTTPClient(object):
         self.strict = strict
         self.timeout = timeout
         self.source_address = source_address
-        self.key_file = None
-        self.cert_file = None
+        if PYTHON2:
+            self.key_file = None
+            self.cert_file = None
+        else:
+            self.context = None
         self.headers = dict()
         self.cookie = None
         self._do_digest_auth = False
@@ -627,8 +669,11 @@ class HTTPClient(object):
         if self.protocol == "http":
             return httplib.HTTPConnection(*args, **kwargs)
         # setup HTTPS
-        kwargs["key_file"] = self.key_file
-        kwargs["cert_file"] = self.cert_file
+        if PYTHON2:
+            kwargs["key_file"] = self.key_file
+            kwargs["cert_file"] = self.cert_file
+        else:
+            kwargs["context"] = self.context
         return httplib.HTTPSConnection(*args, **kwargs)
 
     def _request(self, method, uri, content=None, headers=None):
@@ -678,34 +723,56 @@ class HTTPClient(object):
         query -- Mapping with key/value-pairs to be added as query to the URI.
 
         """
-        uri = urllib.quote(uri)
+        uri = urllib_quote(uri)
         # collect headers
         sendheaders = dict(self.headers)
         if headers:
             sendheaders.update(headers)
         # construct query string
         if query:
-            querystr = urllib.urlencode(query)
+            querystr = urllib_urlencode(query, doseq=True)
             uri = "%s?%s" % (uri, querystr)
         return (uri, sendheaders)
 
-    def setbasicauth(self, user, password):
-        """Set authorization header for basic auth.
+    if PYTHON2:
+        def setbasicauth(self, user, password):
+            """Set authorization header for basic auth.
 
-        user -- Username
-        password -- Password for user.
+            user -- Username
+            password -- Password for user.
 
-        """
-        # RFC 2068, 11.1 Basic Authentication Scheme
-        # basic-credentials = "Basic" SP basic-cookie
-        # basic-cookie   = <base64 [7] encoding of user-pass,
-        # except not limited to 76 char/line>
-        # user-pass   = userid ":" password
-        # userid      = *<TEXT excluding ":">
-        # password    = *TEXT
-        userpw = "%s:%s" % (user, password)
-        auth = userpw.encode("base64").rstrip()
-        self.headers["Authorization"] = "Basic %s" % auth
+            """
+            # RFC 2068, 11.1 Basic Authentication Scheme
+            # basic-credentials = "Basic" SP basic-cookie
+            # basic-cookie   = <base64 [7] encoding of user-pass,
+            # except not limited to 76 char/line>
+            # user-pass   = userid ":" password
+            # userid      = *<TEXT excluding ":">
+            # password    = *TEXT
+            userpw = "%s:%s" % (user, password)
+            auth = userpw.encode("base64").rstrip()
+            self.headers["Authorization"] = "Basic %s" % auth
+    else:
+        def setbasicauth(self, user, password,
+                         b64encoder=base64.standard_b64encode):
+            """Set authorization header for basic auth.
+
+            user -- Username as bytes string.
+            password -- Password for user as bytes.
+            encoder -- Base64 encoder function. Default is the standard 
+                       encoder. Should not be changed.
+
+            """
+            # RFC 2068, 11.1 Basic Authentication Scheme
+            # basic-credentials = "Basic" SP basic-cookie
+            # basic-cookie   = <base64 [7] encoding of user-pass,
+            # except not limited to 76 char/line>
+            # user-pass   = userid ":" password
+            # userid      = *<TEXT excluding ":">
+            # password    = *TEXT
+            userpw = user + b":" + password
+            auth = b64encoder(userpw).decode("ascii")
+            self.headers["Authorization"] = "Basic {0}".format(auth)
 
     def setcookie(self, cookie):
         """Set cookie class to be used in requests.
@@ -715,21 +782,35 @@ class HTTPClient(object):
         """
         self.cookie = cookie
 
-    def setssl(self, key_file=None, cert_file=None):
-        """Set SSL key file and/or certificate chain file for HTTPS.
+    if PYTHON2:
+        def setssl(self, key_file=None, cert_file=None):
+            """Set SSL key file and/or certificate chain file for HTTPS.
 
-        Calling this method has the side effect of setting the protocol to
-        https.
+            Calling this method has the side effect of setting the protocol to
+            https.
 
-        key_file -- The name of a PEM formatted file that contains your
-                    private key.
-        cert_file -- PEM formatted certificate chain file (see Python doc for
-                     httplib).
-        """
-        self.key_file = key_file
-        self.cert_file = cert_file
-        if any((key_file, cert_file)):
+            key_file -- The name of a PEM formatted file that contains your
+                        private key.
+            cert_file -- PEM formatted certificate chain file (see Python doc
+                         for httplib).
+            """
+            self.key_file = key_file
+            self.cert_file = cert_file
+            if any((key_file, cert_file)):
+                self.protocol = "https"
+    else:
+        def setssl(self, context):
+            """Set SSLContext for this connection.
+
+            Calling this method has the side effect of setting the protocol to
+            https.
+
+            context -- ssl.SSLContext instance describing the various SSL
+                       options.
+
+            """
             self.protocol = "https"
+            self.context = context
 
     def options(self, uri, headers=None):
         """Make OPTIONS request and return status.
@@ -808,7 +889,7 @@ class HTTPClient(object):
                 headers.update(multihead)
             else:
                 headers["content-type"] = "application/x-www-form-urlencoded"
-                content = urllib.urlencode(content)
+                content = urllib_urlencode(content)
         if hasattr(content, "read") and not PYTHON2_6:
             # python 2.5 httlib cannot handle file-like objects
             content = content.read()

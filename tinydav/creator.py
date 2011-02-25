@@ -16,10 +16,11 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Module with helper functions that generate XML requests."""
-
 from xml.etree.ElementTree import Element, SubElement, tostring
+import sys
 
-
+PYTHON2 = ((2, 5) <= sys.version_info <= (3, 0))
+STRING_TYPE = basestring if PYTHON2 else str
 _NS = {"xmlns": "DAV:"}
 
 
@@ -31,9 +32,9 @@ def _addnamespaces(elem, namespaces):
                   if necessary.
 
     """
-    for (nsname, ns) in namespaces.iteritems():
+    for nsname in namespaces:
         attrname = "xmlns:%s" % nsname
-        elem.attrib[attrname] = ns
+        elem.attrib[attrname] = namespaces[nsname]
 
 
 def create_propfind(names=False, properties=None,
@@ -101,7 +102,8 @@ def create_proppatch(setprops, delprops, namespaces=None):
     if setprops:
         set_ = SubElement(propertyupdate, "set")
         prop = SubElement(set_, "prop")
-        for (propname, propvalue) in setprops.iteritems():
+        items_iterator = setprops.iteritems if PYTHON2 else setprops.items
+        for (propname, propvalue) in items_iterator:
             prop = SubElement(prop, propname)
             prop.text = propvalue
     # RFC 2518, 12.13.1 set XML element
@@ -148,7 +150,7 @@ def create_lock(scope="exclusive", type_="write", owner=None):
         # RFC 2518, 12.10 owner XML Element
         # <!ELEMENT owner ANY>
         owner_elem = SubElement(lockinfo, "owner")
-        if isinstance(owner, basestring):
+        if isinstance(owner, STRING_TYPE):
             owner_elem.text = owner
         else:
             owner_elem.append(owner)

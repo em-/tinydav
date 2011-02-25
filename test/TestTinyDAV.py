@@ -344,7 +344,11 @@ class HTTPClientTestCase(unittest.TestCase):
         mockurllib = Mock.Omnivore()
         mockurllib.quote = urllib.quote
         mockurllib.urlencode = urlencode
-        with injected(self.http.post, urllib=mockurllib):
+        context = dict(
+            urllib_quote=mockurllib.quote,
+            urllib_urlencode=mockurllib.urlencode,
+        )        
+        with injected(self.http.post, **context):
             resp = self.http.post("/index", data)
             self.assertEqual(urlencode.count, 1)
             self.assertEqual(resp, 200)

@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Utility functions and classes for tinydav WebDAV client."""
+import sys
+PYTHON2 = ((2, 5) <= sys.version_info <= (3, 0))
 
 from email.encoders import encode_base64
 from email.mime.application import MIMEApplication
@@ -24,7 +26,11 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from os import path
 import re
-import urlparse
+
+if PYTHON2:
+    from urlparse import urlunsplit
+else:
+    from urllib.parse import urlunsplit
 
 from tinydav.exception import HTTPError
 
@@ -166,7 +172,8 @@ def make_multipart(content, default_encoding="ascii", with_filenames=False):
     # RFC 2388 Returning Values from Forms: multipart/form-data
     mime = MIMEMultipart("form-data")
     files = list()
-    for (key, data) in content.iteritems():
+    items_iterator = content.iteritems if PYTHON2 else content.items
+    for (key, data) in items_iterator:
         # Are there explicit encodings/content-types given?
         # Note: Cannot do a (value, encoding) = value here as fileobjects then
         # would get iterated, which is not what we want.
