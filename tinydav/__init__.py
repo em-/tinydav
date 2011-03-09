@@ -25,6 +25,7 @@ PYTHON2 = ((2, 5) <= sys.version_info <= (3, 0))
 PYTHON3 = (sys.version_info >= (3, 0))
 
 from contextlib import closing
+from email.headers import Header
 from functools import wraps, partial
 
 if PYTHON2:
@@ -71,6 +72,10 @@ PROTOCOL = {
     8080: "http",
     8081: "http",
 }
+
+
+default_header_encoding = "utf-8"
+separate_query_sequences = True
 
 
 # Responses
@@ -719,7 +724,10 @@ class HTTPClient(object):
         The headers will contain the authorization headers, if given.
 
         uri -- URI the request is for.
-        headers -- Mapping with additional headers to send.
+        headers -- Mapping with additional headers to send. Unicode values that
+                   are no ASCII will be MIME-encoded with UTF-8. Set 
+                   tinydav.default_header_encoding to another encoding, if
+                   UTF-8 doesn't suit you.
         query -- Mapping with key/value-pairs to be added as query to the URI.
 
         """
@@ -728,9 +736,11 @@ class HTTPClient(object):
         sendheaders = dict(self.headers)
         if headers:
             sendheaders.update(headers)
+        for (key, value) in sendheaders.items():
+            sendheaders[key] = str(Header(value, default_header_encoding))
         # construct query string
         if query:
-            querystr = urllib_urlencode(query, doseq=True)
+            querystr = urllib_urlencode(query, doseq=separate_query_sequences)
             uri = "%s?%s" % (uri, querystr)
         return (uri, sendheaders)
 
@@ -871,8 +881,8 @@ class HTTPClient(object):
                         the actual value (or file-like object) and an encoding
                         for this value (or the content-type in case of a 
                         file-like object).
-        encoding -- Send multipart content encoding with this encoding. Default
-                    is ASCII.
+        encoding -- Send multipart content with this encoding. Default is
+                    ASCII.
         with_filenames -- If True, a multipart's files will be sent with the
                           filename paramenter set. Default is False.
 
