@@ -45,7 +45,12 @@ else:
     import http.client as httplib
 
 from xml.etree.ElementTree import ElementTree, Element, SubElement, tostring
-from xml.parsers.expat import ExpatError
+
+if PYTHON2_7 or PYTHON3:
+    from xml.etree.ElementTree import ParseError
+else:
+    from xml.parsers.expat import ExpatError as ParseError
+
 import hashlib
 
 from tinydav import creator, util
@@ -224,7 +229,7 @@ class WebDAVResponse(HTTPResponse):
             else:
                 parse_me = BytesIO(self.content)
             self._etree.parse(parse_me)
-        except ExpatError:
+        except ParseError:
             # get the exception object this way to be compatible with Python
             # versions 2.5 up to 3.x
             self.parse_error = sys.exc_info()[1]
