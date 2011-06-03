@@ -37,6 +37,7 @@ if PYTHON2:
 else:
     from http.client import MULTI_STATUS, OK, CONFLICT, NO_CONTENT
     from http.client import UNAUTHORIZED
+    from io import BytesIO
     from io import StringIO
     from urllib.parse import quote as urllib_quote
     from urllib.parse import urlencode as urllib_urlencode
@@ -63,7 +64,7 @@ __all__ = (
 # The timeout value for TimeType "Second" MUST NOT be greater than 2^32-1.
 MAX_TIMEOUT = 2**32-1
 
-ACTIVELOCK = "/{DAV:}lockdiscovery/{DAV:}activelock"
+ACTIVELOCK = "./{DAV:}lockdiscovery/{DAV:}activelock"
 
 # map with default ports mapped to http protocol
 PROTOCOL = {
@@ -119,7 +120,10 @@ class HTTPResponse(int):
 
     def __repr__(self):
         """Return representation."""
-        return "<%s: %d>" % (self.__class__.__name__, self)
+        if PYTHON2:
+            return "<%s: %d>" % (self.__class__.__name__, self)
+        else:
+            return "<{0}: {1}>".format(self.__class__.__name__, self)
 
     def __str__(self):
         """Return string representation."""
@@ -130,9 +134,13 @@ class HTTPResponse(int):
         auth = util.parse_authenticate(value)
         for attrname in ("schema", "realm", "domain", "nonce", "opaque"):
             setattr(self, attrname, auth.get(attrname))
-        stale = auth.get("stale", "false")
+        stale = auth.get("stale")
+        if stale is None:
+            stale = "false"
         self.stale = (stale.lower() == "true")
-        algorithm = auth.get("algorithm", "MD5")
+        algorithm = auth.get("algorithm")
+        if algorithm is None:
+            algorithm = "MD5"
         self.algorithm = getattr(hashlib, algorithm.lower())
 
 
@@ -184,7 +192,7 @@ class WebDAVResponse(HTTPResponse):
         if self.is_multistatus:
             # RFC 2518, 12.9 multistatus XML Element
             # <!ELEMENT multistatus (response+, responsedescription?) >
-            return len(self._etree.findall("/{DAV:}response"))
+            return len(self._etree.findall("./{DAV:}response"))
         return 1
 
     def __iter__(self):
@@ -198,7 +206,7 @@ class WebDAVResponse(HTTPResponse):
         if self.is_multistatus:
             # RFC 2518, 12.9 multistatus XML Element
             # <!ELEMENT multistatus (response+, responsedescription?) >
-            for response in self._etree.findall("/{DAV:}response"):
+            for response in self._etree.findall("./{DAV:}response"):
                 yield MultiStatusResponse(response)
         else:
             yield self
@@ -211,7 +219,10 @@ class WebDAVResponse(HTTPResponse):
 
         """
         try:
-            parse_me = StringIO(self.content)
+            if PYTHON2:
+                parse_me = StringIO(self.content)
+            else:
+                parse_me = BytesIO(self.content)
             self._etree.parse(parse_me)
         except ExpatError:
             # get the exception object this way to be compatible with Python
@@ -496,26 +507,32 @@ class MultiStatusResponse(int):
             """Iterator over propertynames with their namespaces."""
             return self.keys()
 
-    def keys(self):
-        """Return list of propertynames with their namespaces.
+    if PYTHON2:
+        def keys(self):
+            """Return list of propertynames with their namespaces.
 
-        No namespaces for DAV properties.
+            No namespaces for DAV properties.
 
-        """
-        return list(self.iterkeys())
+            """
+            return list(self.iterkeys())
 
-    def iterkeys(self, cut_dav_ns=True):
-        """Iterate over propertynames with their namespaces.
+        def iterkeys(self, cut_dav_ns=True):
+            """Iterate over propertynames with their namespaces.
 
-        cut_dav_ns -- No namespaces for DAV properties when this is True.
+            cut_dav_ns -- No namespaces for DAV properties when this is True.
 
-        """
-        for (tagname, value) in self.iteritems(cut_dav_ns):
-            yield tagname
+            """
+            for (tagname, value) in self.iteritems(cut_dav_ns):
+                yield tagname
+    else:
+        def keys(self, cut_dav_ns=True):
+            """Iterate over propertynames with their namespaces.
 
-    if PYTHON3:
-        keys = iterkeys
-        del iterkeys
+            cut_dav_ns -- No namespaces for DAV properties when this is True.
+
+            """
+            for (tagname, value) in self.items(cut_dav_ns):
+                yield tagname
 
     def items(self):
         """Return list of 2-tuples with propertyname and ElementTree element."""
@@ -737,7 +754,9 @@ class HTTPClient(object):
         if headers:
             sendheaders.update(headers)
         for (key, value) in sendheaders.items():
-            sendheaders[key] = str(Header(value, default_header_encoding))
+            if key.lower() != "authorization":
+                value = str(Header(value, default_header_encoding))
+            sendheaders[key] = value
         # construct query string
         if query:
             querystr = urllib_urlencode(query, doseq=separate_query_sequences)
