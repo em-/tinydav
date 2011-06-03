@@ -780,7 +780,7 @@ class HTTPClient(object):
             # user-pass   = userid ":" password
             # userid      = *<TEXT excluding ":">
             # password    = *TEXT
-            userpw = user + b":" + password
+            userpw = user + bytes(":", "ascii") + password
             auth = b64encoder(userpw).decode("ascii")
             self.headers["Authorization"] = "Basic {0}".format(auth)
 
@@ -1090,8 +1090,7 @@ class CoreWebDAVClient(HTTPClient):
         depth = util.get_depth(depth)
         # check mutually exclusive arguments
         if all([properties, include]):
-            raise ValueError("properties and include are "
-                                 "mutually exclusive")
+            raise ValueError("properties and include are mutually exclusive")
         (uri, headers) = self._prepare(uri, headers)
         # additional headers needed for PROPFIND
         headers["Depth"] = depth
