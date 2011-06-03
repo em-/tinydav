@@ -18,10 +18,12 @@
 """Unittests for creator module."""
 
 from xml.etree.ElementTree import Element
+import sys
 import unittest
 
 from tinydav import creator
 
+PYTHONVERSION = sys.version_info[:2] # (2, 5) or (2, 6)
 
 class TestAddNamespaces(unittest.TestCase):
     """Test creator._addnamespaces."""
@@ -48,10 +50,17 @@ class TestCreatePropFind(unittest.TestCase):
                               '<propfind xmlns="DAV:"><propname /></propfind>')
         # properties
         xml = creator.create_propfind(False, ["{DC:}author"], None, None)
-        self.assertEqual(xml, "<?xml version='1.0' encoding='UTF-8'?>\n"
-                              '<propfind xmlns="DAV:"><prop>'
-                              '<ns0:author xmlns:ns0="DC:" /></prop>'
-                              '</propfind>')
+        if PYTHONVERSION >= (2, 7):
+            self.assertEqual(xml, "<?xml version='1.0' encoding='UTF-8'?>\n"
+                                  '<propfind xmlns:ns0="DC:" '
+                                  'xmlns="DAV:"><prop>'
+                                  '<ns0:author /></prop>'
+                                  '</propfind>')
+        else:
+            self.assertEqual(xml, "<?xml version='1.0' encoding='UTF-8'?>\n"
+                                  '<propfind xmlns="DAV:"><prop>'
+                                  '<ns0:author xmlns:ns0="DC:" /></prop>'
+                                  '</propfind>')
         # include
         xml = creator.create_propfind(False, None,
                                       ["supported-report-set"], None)

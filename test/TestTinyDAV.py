@@ -22,7 +22,6 @@ from __future__ import with_statement
 from cookielib import CookieJar
 from StringIO import StringIO
 from xml.etree.ElementTree import ElementTree
-from xml.parsers.expat import ExpatError
 import hashlib
 import httplib
 import urllib
@@ -43,6 +42,11 @@ from Mock import injected, replaced
 import Mock
 
 PYTHONVERSION = sys.version_info[:2] # (2, 5) or (2, 6)
+
+if PYTHONVERSION >= (2, 7):
+    from xml.etree.ElementTree import ParseError
+else:
+    from xml.parsers.expat import ExpatError as ParseError
 
 MULTISTATUS = """\
 <?xml version="1.0" encoding="utf-8"?>
@@ -277,7 +281,10 @@ class HTTPClientTestCase(unittest.TestCase):
         http.setbasicauth("me", "secret")
         (uri, headers) = http._prepare("/foo bar/baz", headers, query)
         self.assertEqual(uri, "/foo%20bar/baz?foo=b%C3%A4r")
-        expect = {'Authorization': 'Basic bWU6c2VjcmV0', 'X-Test': 'Hello'}
+        expect = {
+            'Authorization': 'Basic bWU6c2VjcmV0',
+            'X-Test': '=?utf-8?q?Hello?=',
+        }
         self.assertEqual(headers, expect)
 
     def test_get(self):
@@ -441,7 +448,7 @@ class CoreWebDAVClientTestCase(unittest.TestCase):
             "Destination": "http://127.0.0.1:80/dest/in/ation",
             "Overwrite": "F",
             "Authorization": "Basic bWU6c2VjcmV0",
-            "X-Test": "Hello",
+            "X-Test": "=?utf-8?q?Hello?=",
         }
         self.assertEqual(headers, exp_headers)
 
@@ -461,7 +468,7 @@ class CoreWebDAVClientTestCase(unittest.TestCase):
             "Depth": "0",
             "Overwrite": "T",
             "Authorization": "Basic bWU6c2VjcmV0",
-            "X-Test": "Hello",
+            "X-Test": "=?utf-8?q?Hello?=",
         }
         self.assertEqual(headers, exp_headers)
 
@@ -791,7 +798,7 @@ class WebDAVResponseTestCase(unittest.TestCase):
         response.content = MULTISTATUS_BROKEN
         davresponse = WebDAVResponse(response)
         self.assertTrue(bool(davresponse._etree.getroot()))
-        self.assertTrue(isinstance(davresponse.parse_error, ExpatError))
+        self.assertTrue(isinstance(davresponse.parse_error, ParseError))
 
     def test_len(self):
         """Test WebDAVResponse.__len__."""
