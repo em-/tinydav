@@ -9,11 +9,9 @@ A simple to use library for contacting WebDAV servers.
 
 Requirements
 ------------
-* Python 2.5 or higher.
+* Python 2.5 or higher (including Python 3 series).
 * Setuptools
 * coverage (for unittests)
-
-Python 3 is not supported, yet.
 
 
 Installation
@@ -32,7 +30,7 @@ To run the unittests checkout sources and run:
 
 python test/testloader.py
 
-Unittests will fail with Python 2.7.
+Unittests will not run with Python 3.
 
 
 Documentation

@@ -23,7 +23,7 @@ Features:
  - SSL
  - Multipart/form-data and application/x-www-form-urlencoded POST requests
 
-This version requires Python 2.5 or later; Python 3 is not supportet yet.
+This version requires Python 2.5 or later (including Python 3.)
 """
 
 CLASSIFIERS = [
@@ -31,6 +31,7 @@ CLASSIFIERS = [
     "Programming Language :: Python :: 2.5",
     "Programming Language :: Python :: 2.6",
     "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3",
     "Development Status :: 4 - Beta",
     "Environment :: Web Environment",
     "Intended Audience :: Developers",

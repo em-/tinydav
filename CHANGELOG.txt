@@ -3,6 +3,17 @@ Tinydav - WebDAV client libaray
 ===============================
 
 -------------
+Version 0.7.0
+-------------
+FEATURES
+* Python 3 support.
+
+FIXES
+* Fix parsing error handling for Python 2.7.
+* Fix authorization response parsing.
+
+
+-------------
 Version 0.6.8
 -------------
 FEATURES
