@@ -104,7 +104,7 @@ def make_absolute(httpclient, uri):
     """
     netloc = "%s:%d" % (httpclient.host, httpclient.port)
     parts = (httpclient.protocol, netloc, uri, None, None)
-    return urlparse.urlunsplit(parts)
+    return urlunsplit(parts)
 
 
 def make_multipart(content, default_encoding="ascii", with_filenames=False):
@@ -172,7 +172,7 @@ def make_multipart(content, default_encoding="ascii", with_filenames=False):
     # RFC 2388 Returning Values from Forms: multipart/form-data
     mime = MIMEMultipart("form-data")
     files = list()
-    items_iterator = content.iteritems if PYTHON2 else content.items
+    items_iterator = content.iteritems() if PYTHON2 else content.items()
     for (key, data) in items_iterator:
         # Are there explicit encodings/content-types given?
         # Note: Cannot do a (value, encoding) = value here as fileobjects then

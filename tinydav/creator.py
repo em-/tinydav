@@ -102,7 +102,7 @@ def create_proppatch(setprops, delprops, namespaces=None):
     if setprops:
         set_ = SubElement(propertyupdate, "set")
         prop = SubElement(set_, "prop")
-        items_iterator = setprops.iteritems if PYTHON2 else setprops.items
+        items_iterator = setprops.iteritems() if PYTHON2 else setprops.items()
         for (propname, propvalue) in items_iterator:
             prop = SubElement(prop, propname)
             prop.text = propvalue
