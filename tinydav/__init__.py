@@ -25,7 +25,7 @@ PYTHON2 = ((2, 5) <= sys.version_info <= (3, 0))
 PYTHON3 = (sys.version_info >= (3, 0))
 
 from contextlib import closing
-from email.headers import Header
+from email.header import Header
 from functools import wraps, partial
 
 if PYTHON2:
