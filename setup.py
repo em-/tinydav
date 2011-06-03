@@ -53,7 +53,8 @@ if __name__ == "__main__":
         author_email="manuel-hermann@gmx.net",
         url="http://code.google.com/p/tinydav/",
         download_url=DOWNLOAD,
-        keywords = ["http", "https", "webdav", "library", "client"],
+        keywords = ["webdav", "https", "http", "library", "client", "lgpl",
+                    "rfc2518", "rfc2068", "rfc3253"],
         license="LGPL",
         classifiers=CLASSIFIERS,
     )
