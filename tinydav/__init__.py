@@ -759,7 +759,9 @@ class HTTPClient(object):
         if headers:
             sendheaders.update(headers)
         for (key, value) in sendheaders.items():
-            if key.lower() != "authorization":
+            try:
+                unicode(value).encode("ascii")
+            except UnicodeError:
                 value = str(Header(value, default_header_encoding))
             sendheaders[key] = value
         # construct query string
