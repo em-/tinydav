@@ -107,6 +107,63 @@ def make_absolute(httpclient, uri):
     return urlunsplit(parts)
 
 
+class Multipart(object):
+    def __init__(self, data, default_encoding="ascii", with_filenames=False):
+        self.data = data
+        self.default_encoding = default_encoding
+        self.with_filenames = with_filenames
+        self._mp = MIMEMultipart("form-data")
+        self._files = list()
+
+    def _create_non_file_parts(self):
+        items_iterator = self.data.iteritems() if PYTHON2 else self.data.items()
+        for (key, data) in items_iterator:
+            # Are there explicit encodings/content-types given?
+            # Note: Cannot do a (value, encoding) = value here as fileobjects 
+            # then would get iterated, which is not what we want.
+            if isinstance(data, tuple) and (len(data) == 2):
+                (value, encoding) = data
+            else:
+                (value, encoding) = (data, None)
+            # collect file-like objects
+            if hasattr(value, "read"):
+                self._files.append((key, value, encoding))
+            # no file-like object
+            else:
+                if isinstance(value, MIMEBase):
+                    part = value
+                else:
+                    encoding = encoding if encoding else default_encoding
+                    part = MIMEText(value, "plain", encoding)
+                add_disposition(part, key)
+                self._mp.attach(part)
+
+    def _add_disposition(self, part, name, filename=None,
+                         disposition="form-data"):
+        """Add a Content-Disposition header to the part.
+
+        part -- Part to add header to.
+        name -- Name of the part.
+        filename -- Add this filename as parameter, if given.
+        disposition -- Value of the content-disposition header.
+
+        """
+        # RFC 2388 Returning Values from Forms: multipart/form-data
+        # Each part is expected to contain a content-disposition header
+        # [RFC 2183] where the disposition type is "form-data", and where the
+        # disposition contains an (additional) parameter of "name", where the
+        # value of that parameter is the original field name in the form.
+        params = dict(name=name)
+        if self.with_filenames and (filename is not None):
+            # RFC 2388 Returning Values from Forms: multipart/form-data
+            # The original local file name may be supplied as well, either as
+            # a "filename" parameter either of the "content-disposition: 
+            # form-data" header or, in the case of multiple files, in a
+            # "content-disposition: file" header of the subpart.
+            params["filename"] = path.basename(filename)
+        part.add_header("Content-Disposition", disposition, **params)
+
+
 def make_multipart(content, default_encoding="ascii", with_filenames=False):
     """Return the headers and content for multipart/form-data.
 
