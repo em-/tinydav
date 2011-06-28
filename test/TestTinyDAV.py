@@ -275,7 +275,7 @@ class HTTPClientTestCase(unittest.TestCase):
 
     def test_prepare(self):
         """Test HTTPClient._prepare."""
-        headers = {"X-Test": "Hello"}
+        headers = {"X-Test": "Hello", "X-Test-2": "Umlaut ä"}
         query = {"foo": "bär"}
         http = HTTPClient("127.0.0.1", 80)
         http.setbasicauth("me", "secret")
@@ -283,7 +283,8 @@ class HTTPClientTestCase(unittest.TestCase):
         self.assertEqual(uri, "/foo%20bar/baz?foo=b%C3%A4r")
         expect = {
             'Authorization': 'Basic bWU6c2VjcmV0',
-            'X-Test': '=?utf-8?q?Hello?=',
+            'X-Test': 'Hello',
+            'X-Test-2': '=?utf-8?b?VW1sYXV0IMOk?=',
         }
         self.assertEqual(headers, expect)
 
@@ -437,7 +438,7 @@ class CoreWebDAVClientTestCase(unittest.TestCase):
         """Test CoreWebDAVClient._preparecopymove."""
         source = "/foo bar/baz"
         dest = "/dest/in/ation"
-        headers = {"X-Test": "Hello"}
+        headers = {"X-Test": "Hello", "X-Test-2": "Umlaut ä"}
         query = {"foo": "bär"}
         http = CoreWebDAVClient("127.0.0.1", 80)
         http.setbasicauth("me", "secret")
@@ -448,7 +449,8 @@ class CoreWebDAVClientTestCase(unittest.TestCase):
             "Destination": "http://127.0.0.1:80/dest/in/ation",
             "Overwrite": "F",
             "Authorization": "Basic bWU6c2VjcmV0",
-            "X-Test": "=?utf-8?q?Hello?=",
+            "X-Test": "Hello",
+            "X-Test-2": "=?utf-8?b?VW1sYXV0IMOk?=",
         }
         self.assertEqual(headers, exp_headers)
 
@@ -456,7 +458,7 @@ class CoreWebDAVClientTestCase(unittest.TestCase):
         """Test CoreWebDAVClient._preparecopymove with collection as source."""
         source = "/foo bar/baz/"
         dest = "/dest/in/ation"
-        headers = {"X-Test": "Hello"}
+        headers = {"X-Test": "Hello", "X-Test-2": "Umlaut ä"}
         query = {"foo": "bär"}
         http = CoreWebDAVClient("127.0.0.1", 80)
         http.setbasicauth("me", "secret")
@@ -468,7 +470,8 @@ class CoreWebDAVClientTestCase(unittest.TestCase):
             "Depth": "0",
             "Overwrite": "T",
             "Authorization": "Basic bWU6c2VjcmV0",
-            "X-Test": "=?utf-8?q?Hello?=",
+            "X-Test": "Hello",
+            "X-Test-2": "=?utf-8?b?VW1sYXV0IMOk?=",
         }
         self.assertEqual(headers, exp_headers)
 

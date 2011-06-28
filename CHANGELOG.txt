@@ -3,6 +3,13 @@ Tinydav - WebDAV client libaray
 ===============================
 
 -------------
+Version 0.7.1
+-------------
+FIXES
+* Only encode headers when non-ascii.
+
+
+-------------
 Version 0.7.0
 -------------
 FEATURES
