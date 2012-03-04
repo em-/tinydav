@@ -1167,7 +1167,7 @@ class CoreWebDAVClient(HTTPClient):
             # A client MUST NOT submit a Depth header with a DELETE on a
             # collection with any value but infinity.
             headers["Depth"] = "infinity"
-        return super(CoreWebDAVClient, self).delete(uri, headers)
+        return super(CoreWebDAVClient, self).delete(uri, headers=headers)
 
     def copy(self, source, destination, depth="infinity",
              overwrite=None, headers=None):
