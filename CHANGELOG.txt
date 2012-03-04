@@ -3,6 +3,16 @@ Tinydav - WebDAV client libaray
 ===============================
 
 -------------
+Version 0.7.2
+-------------
+FEATURES
+* Implement expand-property REPORT.
+
+FIXES
+* Fix response HTTP version parsing.
+
+
+-------------
 Version 0.7.1
 -------------
 FIXES

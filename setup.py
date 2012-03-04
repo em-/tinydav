@@ -18,7 +18,7 @@ This is a small library for contacting HTTP and WebDAV servers. Goal of this pro
 Features:
  - HTTP methods OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, CONNECT.
  - WebDAV methods MKCOL, PROPFIND, PROPPATCH, DELETE, COPY, MOVE, LOCK, UNLOCK
- - Support for REPORT method (report-tree requests only, RFC 3253)
+ - Support for REPORT method (verion-tree and expand-property, RFC 3253)
  - Cookies
  - SSL
  - Multipart/form-data and application/x-www-form-urlencoded POST requests
