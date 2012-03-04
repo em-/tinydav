@@ -10,6 +10,7 @@ FEATURES
 
 FIXES
 * Fix response HTTP version parsing.
+* Fix super-call of delete-method.
 
 
 -------------

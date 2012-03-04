@@ -53,6 +53,11 @@ else:
 
 import hashlib
 
+if PYTHON2:
+    import urlparse
+else:
+    import urllib.parse as urlparse
+
 from tinydav import creator, util
 from tinydav.exception import HTTPError, HTTPUserError, HTTPServerError
 
@@ -77,6 +82,13 @@ PROTOCOL = {
     443: "https",
     8080: "http",
     8081: "http",
+}
+
+SCHEME_MAP = {
+    "webdav": ("http", 80),
+    "webdavs": ("https", 443),
+    "http": ("http", 80),
+    "https": ("https", 443),
 }
 
 
@@ -636,6 +648,20 @@ class HTTPClient(object):
     """
 
     ResponseType = HTTPResponse
+
+    @classmethod
+    def fromurl(cls, uri, **kwargs):
+        """Construct HTTPClient instance from given uri."""
+        parsed = urlparse.urlparse(uri)
+
+        (protocol, port) = SCHEME_MAP[parsed.scheme]
+        if parsed.port:
+            port = parsed.port
+
+        self = cls(parsed.hostname, port=port, protocol=protocol, **kwargs)
+        if parsed.username:
+            self.setbasicauth(parsed.username, parsed.password)
+        return self
 
     def __init__(self, host, port=80, protocol=None, strict=False,
                  timeout=None, source_address=None):
