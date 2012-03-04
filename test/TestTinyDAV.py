@@ -275,7 +275,7 @@ class HTTPClientTestCase(unittest.TestCase):
 
     def test_prepare(self):
         """Test HTTPClient._prepare."""
-        headers = {"X-Test": "Hello", "X-Test-2": "Umlaut ä"}
+        headers = {"X-Test": "Hello"}
         query = {"foo": "bär"}
         http = HTTPClient("127.0.0.1", 80)
         http.setbasicauth("me", "secret")
@@ -284,7 +284,6 @@ class HTTPClientTestCase(unittest.TestCase):
         expect = {
             'Authorization': 'Basic bWU6c2VjcmV0',
             'X-Test': 'Hello',
-            'X-Test-2': '=?utf-8?b?VW1sYXV0IMOk?=',
         }
         self.assertEqual(headers, expect)
 
@@ -438,7 +437,7 @@ class CoreWebDAVClientTestCase(unittest.TestCase):
         """Test CoreWebDAVClient._preparecopymove."""
         source = "/foo bar/baz"
         dest = "/dest/in/ation"
-        headers = {"X-Test": "Hello", "X-Test-2": "Umlaut ä"}
+        headers = {"X-Test": "Hello"}
         query = {"foo": "bär"}
         http = CoreWebDAVClient("127.0.0.1", 80)
         http.setbasicauth("me", "secret")
@@ -450,7 +449,6 @@ class CoreWebDAVClientTestCase(unittest.TestCase):
             "Overwrite": "F",
             "Authorization": "Basic bWU6c2VjcmV0",
             "X-Test": "Hello",
-            "X-Test-2": "=?utf-8?b?VW1sYXV0IMOk?=",
         }
         self.assertEqual(headers, exp_headers)
 
@@ -458,7 +456,7 @@ class CoreWebDAVClientTestCase(unittest.TestCase):
         """Test CoreWebDAVClient._preparecopymove with collection as source."""
         source = "/foo bar/baz/"
         dest = "/dest/in/ation"
-        headers = {"X-Test": "Hello", "X-Test-2": "Umlaut ä"}
+        headers = {"X-Test": "Hello"}
         query = {"foo": "bär"}
         http = CoreWebDAVClient("127.0.0.1", 80)
         http.setbasicauth("me", "secret")
@@ -471,7 +469,6 @@ class CoreWebDAVClientTestCase(unittest.TestCase):
             "Overwrite": "T",
             "Authorization": "Basic bWU6c2VjcmV0",
             "X-Test": "Hello",
-            "X-Test-2": "=?utf-8?b?VW1sYXV0IMOk?=",
         }
         self.assertEqual(headers, exp_headers)
 
@@ -701,12 +698,16 @@ class ExtendedWebDAVClientTestCase(unittest.TestCase):
         self.con = Mock.HTTPConnection()
         self.dav._getconnection = lambda: self.con
 
-    def test_report(self):
+    def test_version_tree_report_is_report(self):
         """Test ExtendedWebDAVClient.report."""
+        self.assertEquals(self.dav.version_tree_report, self.dav.report)
+
+    def test_version_tree_report(self):
+        """Test ExtendedWebDAVClient.version_tree_report."""
         self.con.response.status = 207
         self.con.response.content = REPORT
         props = ["version-name", "creator-displayname", "successor-set"]
-        response = self.dav.report("/foo.html", properties=props)
+        response = self.dav.version_tree_report("/foo.html", properties=props)
         self.assertEqual(response, 207)
         self.assertEqual(self.con.method, "REPORT")
         self.assertEqual(self.con.path, "/foo.html")
@@ -714,12 +715,12 @@ class ExtendedWebDAVClientTestCase(unittest.TestCase):
         self.assertTrue(self.con.closed)
         self.assertTrue("Authorization" in self.con.headers)
 
-    def test_report_depth_1(self):
-        """Test ExtendedWebDAVClient.report with depth 1."""
+    def test_version_tree_report_depth_1(self):
+        """Test ExtendedWebDAVClient.version_tree_report with depth 1."""
         self.con.response.status = 207
         self.con.response.content = REPORT
         props = ["version-name", "creator-displayname", "successor-set"]
-        response = self.dav.report("/foo.html", "1", props)
+        response = self.dav.version_tree_report("/foo.html", "1", props)
         self.assertEqual(response, 207)
         self.assertEqual(self.con.method, "REPORT")
         self.assertEqual(self.con.path, "/foo.html")
@@ -727,10 +728,51 @@ class ExtendedWebDAVClientTestCase(unittest.TestCase):
         self.assertTrue(self.con.closed)
         self.assertTrue("Authorization" in self.con.headers)
 
-    def test_report_illegal_depth(self):
-        """Test ExtendedWebDAVClient.report with illegal depth."""
+    def test_version_tree_report_illegal_depth(self):
+        """Test ExtendedWebDAVClient.version_tree_report with illegal depth."""
         # prepare mock connection
-        self.assertRaises(ValueError, self.dav.report, "/foo.html", "ABC")
+        self.assertRaises(
+            ValueError,
+            self.dav.version_tree_report,
+            "/foo.html",
+            "ABC"
+        )
+
+    def test_expand_property_report(self):
+        """Test ExtendedWebDAVClient.expand_property_report."""
+        self.con.response.status = 207
+        self.con.response.content = REPORT
+        props = ["version-name", "creator-displayname", "successor-set"]
+        response = self.dav.expand_property_report("/foo.html", properties=props)
+        self.assertEqual(response, 207)
+        self.assertEqual(self.con.method, "REPORT")
+        self.assertEqual(self.con.path, "/foo.html")
+        self.assertEqual(self.con.headers["Depth"], "0")
+        self.assertTrue(self.con.closed)
+        self.assertTrue("Authorization" in self.con.headers)
+
+    def test_expand_property_report_depth_1(self):
+        """Test ExtendedWebDAVClient.expand_property_report with depth 1."""
+        self.con.response.status = 207
+        self.con.response.content = REPORT
+        props = ["version-name", "creator-displayname", "successor-set"]
+        response = self.dav.expand_property_report("/foo.html", "1", props)
+        self.assertEqual(response, 207)
+        self.assertEqual(self.con.method, "REPORT")
+        self.assertEqual(self.con.path, "/foo.html")
+        self.assertEqual(self.con.headers["Depth"], "1")
+        self.assertTrue(self.con.closed)
+        self.assertTrue("Authorization" in self.con.headers)
+
+    def test_expand_property_report_illegal_depth(self):
+        """Test ExtendedWebDAVClient.expand_property_report with illegal depth."""
+        # prepare mock connection
+        self.assertRaises(
+            ValueError,
+            self.dav.expand_property_report,
+            "/foo.html",
+            "ABC"
+        )
 
 
 class HTTPResponseTestCase(unittest.TestCase):

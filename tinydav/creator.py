@@ -16,10 +16,15 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Module with helper functions that generate XML requests."""
+try:
+    from collections import Mapping
+except ImportError:
+    Mapping = (dict, defaultdict)
 from xml.etree.ElementTree import Element, SubElement, tostring
 import sys
 
 PYTHON2 = ((2, 5) <= sys.version_info <= (3, 0))
+PYTHON2_6 = (sys.version_info >= (2, 6))
 STRING_TYPE = basestring if PYTHON2 else str
 _NS = {"xmlns": "DAV:"}
 
@@ -157,7 +162,7 @@ def create_lock(scope="exclusive", type_="write", owner=None):
     return tostring(lockinfo)
 
 
-def create_report(properties=None, elements=None, namespaces=None):
+def create_report_version_tree(properties=None, elements=None, namespaces=None):
     """Construct and return XML for REPORT."""
     namespaces = dict() if (namespaces is None) else namespaces
     ns = {"xmlns": "DAV:"}
@@ -171,6 +176,45 @@ def create_report(properties=None, elements=None, namespaces=None):
         prop = SubElement(report, "prop")
         for propname in properties:
             propelement = SubElement(prop, propname)
+    if elements:
+        for element in elements:
+            report.append(element)
+    return tostring(report, "UTF-8")
+
+
+def create_report_expand_property(properties=None, elements=None,
+                                  namespaces=None):
+    """Construct and return XML for expand-property-REPORT."""
+    namespaces = dict() if (namespaces is None) else namespaces
+    ns = {"xmlns": "DAV:"}
+    # RFC 3253, 3.8 DAV:expand-property Report
+    # <!ELEMENT expand-property (property*)>
+    # <!ELEMENT property (property*)>
+    # <!ATTLIST property name NMTOKEN #REQUIRED>
+    # name value: a property element type
+    report = Element("expand-property", ns)
+    _addnamespaces(report, namespaces)
+
+    def attach_properties(elem, properties):
+        """Attach property-Elements to given element recursivly.
+
+        elem -- ElementTree.Element to attach property-Elements to.
+        properties -- string, list or mapping with element-names to attach.
+
+        """
+        if isinstance(properties, basestring):
+            properties = {properties: None}
+        elif not isinstance(properties, Mapping):
+            properties = dict.fromkeys(properties, None)
+        # recursivly attach property-elements to elem
+        for (propname, subprops) in properties.items():
+            prop = SubElement(elem, "property")
+            prop.attrib["name"] = propname
+            if subprops:
+                attach_properties(prop, subprops)
+
+    if properties:
+        attach_properties(report, properties)
     if elements:
         for element in elements:
             report.append(element)

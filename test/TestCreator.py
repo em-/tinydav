@@ -161,20 +161,74 @@ class TestCreateLock(unittest.TestCase):
 
 class TestCreateReport(unittest.TestCase):
     """Test creator.create_report function."""
-    def test_create_report(self):
-        """Test creator.create_report.""" 
+    def test_create_version_tree_report(self):
+        """Test creator.create_report_version_tree.""" 
         # default report
-        xml = creator.create_report()
+        xml = creator.create_report_version_tree()
         self.assertEqual(xml, "<?xml version='1.0' encoding='UTF-8'?>\n"
                               '<version-tree xmlns="DAV:" />')
         # properties
-        xml = creator.create_report(["creator-displayname"])
+        xml = creator.create_report_version_tree(["creator-displayname"])
         self.assertEqual(xml, "<?xml version='1.0' encoding='UTF-8'?>\n"
                               '<version-tree xmlns="DAV:"><prop>'
                               '<creator-displayname />'
                               '</prop></version-tree>')
         # additional xml
-        xml = creator.create_report(elements=[Element("foo", {"bar": "1"})])
+        elements = [Element("foo", {"bar": "1"})]
+        xml = creator.create_report_version_tree(elements=elements)
         self.assertEqual(xml, "<?xml version='1.0' encoding='UTF-8'?>\n"
                               '<version-tree xmlns="DAV:">'
                               '<foo bar="1" /></version-tree>')
+
+    def test_create_expand_property_report(self):
+        """Test creator.create_report_version_tree.""" 
+        # default report
+        xml = creator.create_report_expand_property()
+        self.assertEqual(xml, "<?xml version='1.0' encoding='UTF-8'?>\n"
+                              '<expand-property xmlns="DAV:" />')
+        # properties
+        xml = creator.create_report_expand_property("creator-displayname")
+        self.assertEqual(xml, "<?xml version='1.0' encoding='UTF-8'?>\n"
+                              '<expand-property xmlns="DAV:">'
+                              '<property name="creator-displayname" />'
+                              '</expand-property>')
+        # property-list
+        p = ["foo", "bar"]
+        xml = creator.create_report_expand_property(p)
+        self.assertEqual(xml, "<?xml version='1.0' encoding='UTF-8'?>\n"
+                              '<expand-property xmlns="DAV:">'
+                              '<property name="foo" />'
+                              '<property name="bar" />'
+                              '</expand-property>')
+        # property-dict
+        p = {
+            "foo": "bar",
+            "bar": ["a", "b"],
+            "baz": {
+                "c": None,
+                "d": "e",
+            }
+        }
+        xml = creator.create_report_expand_property(p)
+        self.assertEqual(xml, "<?xml version='1.0' encoding='UTF-8'?>\n"
+                              '<expand-property xmlns="DAV:">'
+                              '<property name="baz">'
+                                '<property name="c" />'
+                                '<property name="d">'
+                                 '<property name="e" />'
+                                '</property>'
+                              '</property>'
+                              '<property name="foo">'
+                                '<property name="bar" />'
+                              '</property>'
+                              '<property name="bar">'
+                                '<property name="a" />'
+                                '<property name="b" />'
+                              '</property>'
+                              '</expand-property>')
+        # additional xml
+        elements = [Element("foo", {"bar": "1"})]
+        xml = creator.create_report_expand_property(elements=elements)
+        self.assertEqual(xml, "<?xml version='1.0' encoding='UTF-8'?>\n"
+                              '<expand-property xmlns="DAV:">'
+                              '<foo bar="1" /></expand-property>')

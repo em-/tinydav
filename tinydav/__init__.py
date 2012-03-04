@@ -1313,9 +1313,19 @@ class CoreWebDAVClient(HTTPClient):
 
 class ExtendedWebDAVClient(CoreWebDAVClient):
     """WebDAV client with versioning extensions (RFC 3253)."""
-    def report(self, uri, depth=0, properties=None,
-               elements=None, namespaces=None, headers=None):
-        """Make a REPORT request and return status.
+    def __report(self, uri, depth, content, headers):
+        depth = util.get_depth(depth)
+        (uri, headers) = self._prepare(uri, headers)
+        # RFC 3253, 3.6 REPORT Method
+        # The request MAY include a Depth header.  If no Depth header is
+        # included, Depth:0 is assumed.
+        headers["Depth"] = depth
+        headers["Content-Type"] = "application/xml"
+        return self._request("REPORT", uri, content, headers)
+
+    def version_tree_report(self, uri, depth=0, properties=None,
+                            elements=None, namespaces=None, headers=None):
+        """Make a version-tree-REPORT request and return status.
 
         uri -- Resource or collection to get report for.
         depth -- Either 0 or 1 or "infinity". Default is zero.
@@ -1331,15 +1341,34 @@ class ExtendedWebDAVClient(CoreWebDAVClient):
         Raise HTTPServerError on 5xx HTTP status codes.
 
         """
-        depth = util.get_depth(depth)
-        (uri, headers) = self._prepare(uri, headers)
-        content = creator.create_report(properties, elements, namespaces)
-        # RFC 3253, 3.6 REPORT Method
-        # The request MAY include a Depth header.  If no Depth header is
-        # included, Depth:0 is assumed.
-        headers["Depth"] = depth
-        headers["Content-Type"] = "application/xml"
-        return self._request("REPORT", uri, content, headers)
+        args = (properties, elements, namespaces)
+        content = creator.create_report_version_tree(*args)
+        return self.__report(uri, depth, content, headers)
+
+    # compatibility
+    report = version_tree_report
+
+    def expand_property_report(self, uri, depth=0, properties=None,
+                               elements=None, namespaces=None, headers=None):
+        """Make a expand-property-REPORT request and return status.
+
+        uri -- Resource or collection to get report for.
+        depth -- Either 0 or 1 or "infinity". Default is zero.
+        properties -- If given, an iterable with all requested properties is
+                      expected.
+        elements -- An iterable with additional XML (ElementTree) elements to
+                    append to the version-tree.
+        namespaces -- Mapping with namespaces for given properties, if needed.
+        headers -- If given, must be a mapping with headers to set.
+
+        Raise ValueError, if an illegal depth value was given.
+        Raise HTTPUserError on 4xx HTTP status codes.
+        Raise HTTPServerError on 5xx HTTP status codes.
+
+        """
+        args = (properties, elements, namespaces)
+        content = creator.create_report_expand_property(*args)
+        return self.__report(uri, depth, content, headers)
 
 
 class WebDAVClient(ExtendedWebDAVClient):
