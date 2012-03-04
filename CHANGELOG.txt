@@ -7,10 +7,11 @@ Version 0.7.2
 -------------
 FEATURES
 * Implement expand-property REPORT.
+* Add constructor to create an HTTPClient from URL. (Thanks you tiran79)
 
 FIXES
 * Fix response HTTP version parsing.
-* Fix super-call of delete-method.
+* Fix super-call of delete-method. (Thanks to flofrihandy)
 
 
 -------------
