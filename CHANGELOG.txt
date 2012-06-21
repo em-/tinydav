@@ -3,6 +3,13 @@ Tinydav - WebDAV client libaray
 ===============================
 
 -------------
+Version 0.7.3
+-------------
+FIXES
+* Fix missing import.
+
+
+-------------
 Version 0.7.2
 -------------
 FEATURES
