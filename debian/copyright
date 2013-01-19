@@ -1,0 +1,9 @@
+Format: http://dep.debian.net/deps/dep5
+Upstream-Name: tinydav
+Source: http://code.google.com/p/tinydav/
+
+Files: *
+Copyright: Copyright (C) 2009  Manuel Hermann <manuel-hermann@gmx.net>
+License: LGPL-3
+ On Debian systems, the complete text of the GNU Lesser General
+ Public License version 3 can be found in `/usr/share/common-licenses/LGPL-3'.

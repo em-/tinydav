@@ -1,0 +1,29 @@
+Source: python-tinydav
+Section: python
+Priority: extra
+Maintainer: Alex Dvoretsky (hh.ru project package signing) <alex@dvoretsky.name>
+Build-Depends:
+  debhelper (>= 7),
+  python (>= 2.6.6-3~)
+Standards-Version: 3.9.4
+
+Package: python-tinydav
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, python, ${python:Depends}
+Description: Easy-to-use HTTP and WebDAV client library
+ Small Python library for contacting HTTP and WebDAV servers with the
+ goal of supporting all WebDAV methods including the versioning
+ extensions from RFC 3253).
+ .
+ It features:
+ .
+  • Support for the HTTP methods OPTIONS, GET, HEAD, POST, PUT, DELETE,
+    TRACE, CONNECT.
+  • Support for the WebDAV methods MKCOL, PROPFIND, PROPPATCH, DELETE,
+    COPY, MOVE, LOCK, UNLOCK
+  • Support for REPORT method (version-tree and expand-property,
+    RFC 3253)
+  • Cookies
+  • SSL
+  • Multipart/form-data and application/x-www-form-urlencoded POST
+    requests
